@@ -91,6 +91,17 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/nextjs-site` (`@workspace/nextjs-site`)
+
+Next.js 15 (App Router) content site styled with Tailwind CSS 4.
+
+- Entry: `app/layout.tsx` — shared header/footer layout with navigation
+- Pages: `/` (homepage), `/questions/[slug]`, `/topics/[slug]`, `/guides/[slug]`, `/bible/[book]/[chapter]`
+- Styling: Tailwind CSS 4 with `@tailwindcss/postcss`
+- All pages use static placeholder content (no database/backend needed)
+- Dev server: `next dev --port $PORT --hostname 0.0.0.0` on port 18425
+- `pnpm --filter @workspace/nextjs-site run dev` — run the dev server
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

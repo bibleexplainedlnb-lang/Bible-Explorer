@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/nextjs-site",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port $PORT --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --port $PORT --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "typescript": "~5.9.2",
+    "postcss": "^8.5.0"
+  }
+}
