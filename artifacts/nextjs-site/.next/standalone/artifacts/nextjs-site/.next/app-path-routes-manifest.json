@@ -1,8 +1,0 @@
-{
-  "/_not-found/page": "/_not-found",
-  "/bible/[book]/[chapter]/page": "/bible/[book]/[chapter]",
-  "/guides/[slug]/page": "/guides/[slug]",
-  "/page": "/",
-  "/questions/[slug]/page": "/questions/[slug]",
-  "/topics/[slug]/page": "/topics/[slug]"
-}

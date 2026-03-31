@@ -1,60 +1,34 @@
 {
   "pages": {
-    "/_not-found/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/app/_not-found/page-f906418cb6ccd26d.js"
-    ],
-    "/layout": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/css/0770da293bf95d9c.css",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/layout-989fcff0b77b2124.js"
-    ],
-    "/bible/[book]/[chapter]/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/bible/[book]/[chapter]/page-c86f52af364477f0.js"
-    ],
-    "/guides/[slug]/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/guides/[slug]/page-c86f52af364477f0.js"
-    ],
     "/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/page-c86f52af364477f0.js"
-    ],
-    "/questions/[slug]/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/questions/[slug]/page-c86f52af364477f0.js"
+      "static/chunks/81977_next_dist_c40ad14c._.js",
+      "static/chunks/artifacts_nextjs-site_app_globals_abafb460.css",
+      "static/chunks/artifacts_nextjs-site_app_layout_tsx_b7fb0ea1._.js",
+      "static/chunks/81977_next_dist_client_components_builtin_global-error_a812f0a2.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_e11be149._.js",
+      "static/chunks/81977_next_dist_compiled_react-dom_301699fd._.js",
+      "static/chunks/81977_next_dist_compiled_next-devtools_index_5b768fbc.js",
+      "static/chunks/81977_next_dist_compiled_a1c54842._.js",
+      "static/chunks/81977_next_dist_client_674d13c3._.js",
+      "static/chunks/81977_next_dist_a2fc4053._.js",
+      "static/chunks/69652_@swc_helpers_cjs_77b72907._.js",
+      "static/chunks/artifacts_nextjs-site_a0ff3932._.js",
+      "static/chunks/turbopack-artifacts_nextjs-site_1b80b891._.js"
     ],
     "/topics/[slug]/page": [
-      "static/chunks/webpack-bd955aae52e3f62d.js",
-      "static/chunks/031a1ff6-566d733874a7ece3.js",
-      "static/chunks/684-53813b9075c77fa0.js",
-      "static/chunks/main-app-91c8793c4153569c.js",
-      "static/chunks/198-d015d9e3aa8b0361.js",
-      "static/chunks/app/topics/[slug]/page-c86f52af364477f0.js"
+      "static/chunks/81977_next_dist_c40ad14c._.js",
+      "static/chunks/artifacts_nextjs-site_app_globals_abafb460.css",
+      "static/chunks/artifacts_nextjs-site_app_layout_tsx_b7fb0ea1._.js",
+      "static/chunks/81977_next_dist_client_components_builtin_global-error_a812f0a2.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_e11be149._.js",
+      "static/chunks/81977_next_dist_compiled_react-dom_301699fd._.js",
+      "static/chunks/81977_next_dist_compiled_next-devtools_index_5b768fbc.js",
+      "static/chunks/81977_next_dist_compiled_a1c54842._.js",
+      "static/chunks/81977_next_dist_client_674d13c3._.js",
+      "static/chunks/81977_next_dist_a2fc4053._.js",
+      "static/chunks/69652_@swc_helpers_cjs_77b72907._.js",
+      "static/chunks/artifacts_nextjs-site_a0ff3932._.js",
+      "static/chunks/turbopack-artifacts_nextjs-site_1b80b891._.js"
     ]
   }
 }
