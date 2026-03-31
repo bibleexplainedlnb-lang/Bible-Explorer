@@ -11,11 +11,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/bible/[book]/[chapter]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/bible/[book]/[chapter]/page.js"
-    ],
     "/questions/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
