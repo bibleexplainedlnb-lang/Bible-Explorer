@@ -1728,6 +1728,10 @@
     padding-block: calc(var(--spacing) * 16);
   }
 
+  .py-20 {
+    padding-block: calc(var(--spacing) * 20);
+  }
+
   .pt-5 {
     padding-top: calc(var(--spacing) * 5);
   }
@@ -1871,6 +1875,10 @@
 
   .uppercase {
     text-transform: uppercase;
+  }
+
+  .italic {
+    font-style: italic;
   }
 
   .antialiased {
