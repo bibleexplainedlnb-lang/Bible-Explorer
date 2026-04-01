@@ -46,27 +46,59 @@
     }
   ],
   "topics": [
-    {
-      "slug": "jesus",
-      "name": "Jesus"
-    },
-    {
-      "slug": "salvation",
-      "name": "Salvation"
-    }
+    { "slug": "jesus", "name": "Jesus" },
+    { "slug": "salvation", "name": "Salvation" }
   ],
-  "bible": [
+  "bibleChapters": [
     {
-      "book": "John",
+      "book": "john",
+      "bookName": "John",
+      "testament": "New Testament",
       "chapter": 3,
-      "verse": 16,
-      "text": "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life."
+      "verses": [
+        { "number": 1,  "text": "Now there was a man of the Pharisees named Nicodemus, a ruler of the Jews." },
+        { "number": 2,  "text": "This man came to Jesus by night and said to him, \"Rabbi, we know that you are a teacher come from God, for no one can do these signs that you do unless God is with him.\"" },
+        { "number": 3,  "text": "Jesus answered him, \"Truly, truly, I say to you, unless one is born again he cannot see the kingdom of God.\"" },
+        { "number": 4,  "text": "Nicodemus said to him, \"How can a man be born when he is old? Can he enter a second time into his mother's womb and be born?\"" },
+        { "number": 5,  "text": "Jesus answered, \"Truly, truly, I say to you, unless one is born of water and the Spirit, he cannot enter the kingdom of God.\"" },
+        { "number": 6,  "text": "That which is born of the flesh is flesh, and that which is born of the Spirit is spirit." },
+        { "number": 7,  "text": "Do not marvel that I said to you, 'You must be born again.'" },
+        { "number": 14, "text": "And as Moses lifted up the serpent in the wilderness, so must the Son of Man be lifted up," },
+        { "number": 15, "text": "that whoever believes in him may have eternal life." },
+        { "number": 16, "text": "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life." },
+        { "number": 17, "text": "For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him." },
+        { "number": 18, "text": "Whoever believes in him is not condemned, but whoever does not believe is condemned already, because he has not believed in the name of the only Son of God." },
+        { "number": 36, "text": "Whoever believes in the Son has eternal life; whoever does not obey the Son shall not see life, but the wrath of God remains on him." }
+      ],
+      "explanation": {
+        "overview": "John 3 records a nighttime conversation between Jesus and Nicodemus, a respected Jewish leader. Nicodemus acknowledges Jesus as a teacher from God, but Jesus redirects him entirely — the issue is not knowledge but new birth. The chapter contains the most cited verse in all of Scripture (v. 16) and presents the gospel in its most concentrated form: God's love, the gift of his Son, and the free offer of eternal life to all who believe.",
+        "context": "Nicodemus was a Pharisee and member of the Sanhedrin — the ruling religious council. His coming \"by night\" may indicate secrecy or simply that it was the only quiet time to speak. Jesus' reference to being \"born of water and the Spirit\" recalls Ezekiel 36:25-27, where God promises to cleanse his people and give them a new heart by his Spirit. The image of Moses lifting up the serpent (v. 14) comes from Numbers 21:8-9, where Israelites who looked at the bronze serpent were healed — Jesus applies this as a foreshadowing of his own crucifixion.",
+        "application": "John 3 confronts the assumption that religious knowledge or effort is enough. Nicodemus knew the law thoroughly, yet Jesus told him he needed something he could not produce himself — new birth from above. The same is true today. Salvation is not the reward of the well-informed or the disciplined; it is given to those who believe in the Son (v. 16). This chapter invites readers to move from curiosity about Jesus to trust in him."
+      }
     },
     {
-      "book": "Romans",
+      "book": "romans",
+      "bookName": "Romans",
+      "testament": "New Testament",
       "chapter": 5,
-      "verse": 8,
-      "text": "But God shows his love for us in that while we were still sinners, Christ died for us."
+      "verses": [
+        { "number": 1,  "text": "Therefore, since we have been justified by faith, we have peace with God through our Lord Jesus Christ." },
+        { "number": 2,  "text": "Through him we have also obtained access by faith into this grace in which we stand, and we rejoice in hope of the glory of God." },
+        { "number": 3,  "text": "Not only that, but we rejoice in our sufferings, knowing that suffering produces endurance," },
+        { "number": 4,  "text": "and endurance produces character, and character produces hope," },
+        { "number": 5,  "text": "and hope does not put us to shame, because God's love has been poured into our hearts through the Holy Spirit who has been given to us." },
+        { "number": 6,  "text": "For while we were still weak, at the right time Christ died for the ungodly." },
+        { "number": 7,  "text": "For one will scarcely die for a righteous person — though perhaps for a good person one would dare even to die —" },
+        { "number": 8,  "text": "but God shows his love for us in that while we were still sinners, Christ died for us." },
+        { "number": 9,  "text": "Since, therefore, we have now been justified by his blood, much more shall we be saved by him from the wrath of God." },
+        { "number": 10, "text": "For if while we were enemies we were reconciled to God by the death of his Son, much more, now that we are reconciled, shall we be saved by his life." },
+        { "number": 11, "text": "More than that, we also rejoice in God through our Lord Jesus Christ, through whom we have now received reconciliation." }
+      ],
+      "explanation": {
+        "overview": "Romans 5 opens with one of the great \"therefore\" moments in Scripture. Having laid out in chapters 1–4 that all humanity stands guilty before God and that justification comes through faith alone, Paul now describes what that justification produces: peace with God, access to grace, hope in suffering, and the assurance of God's love. The chapter's centerpiece (v. 8) is a stunning statement — Christ died not for those who deserved it, but for enemies.",
+        "context": "Paul wrote Romans around 57 AD from Corinth, addressing a mixed church of Jewish and Gentile believers. Romans 5 builds on the argument of chapter 4, where Abraham's faith was credited as righteousness. The phrase \"justified by faith\" (v. 1) summarizes chapters 3–4: sinners are declared righteous not by their works but through trust in Christ's atoning death. Verse 8 stands as the climax: the proof of God's love is not that Christ died for the deserving, but for sinners — those actively opposed to God.",
+        "application": "Romans 5 speaks directly to suffering and uncertainty. Paul does not promise immunity from hardship but reframes it: suffering produces endurance, endurance produces character, character produces hope (vv. 3-4). This is not wishful thinking — it is grounded in the proven love of God demonstrated at the cross (v. 8). For anyone doubting whether God is for them, verse 8 is the answer: the timing of Christ's death — while we were still sinners — is the evidence that God's love precedes our goodness."
+      }
     }
   ]
 }
