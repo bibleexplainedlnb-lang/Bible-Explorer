@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import data from "@/data/content.json";
 
-type Topic = { slug: string; name: string };
+type Topic = { slug: string; name: string; questions?: string[] };
 type Question = { slug: string; title: string; topic: string; shortAnswer: string };
 
 const topics = data.topics as Topic[];
@@ -12,9 +12,14 @@ function getTopic(slug: string): Topic | undefined {
   return topics.find((t) => t.slug === slug);
 }
 
-function getRelatedQuestions(topicName: string): Question[] {
+function getTopicQuestions(topic: Topic): Question[] {
+  if (topic.questions && topic.questions.length > 0) {
+    return topic.questions
+      .map((s) => questions.find((q) => q.slug === s))
+      .filter((q): q is Question => q !== undefined);
+  }
   return questions.filter(
-    (q) => q.topic.toLowerCase() === topicName.toLowerCase()
+    (q) => q.topic.toLowerCase() === topic.name.toLowerCase()
   );
 }
 
@@ -35,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TopicPage({ params }: Props) {
   const { slug } = await params;
   const topic = getTopic(slug);
-  const relatedQuestions = topic ? getRelatedQuestions(topic.name) : [];
+  const relatedQuestions = topic ? getTopicQuestions(topic) : [];
 
   return (
     <div className="max-w-2xl">

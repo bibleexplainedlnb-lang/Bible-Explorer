@@ -7,6 +7,7 @@ type Question = {
   title: string;
   topic: string;
   shortAnswer: string;
+  content?: string;
   sections: {
     explanation: string;
     meaning: string;
@@ -72,20 +73,27 @@ export default async function QuestionPage({ params }: Props) {
             </div>
           </header>
 
-          <div className="space-y-8">
-            {(
-              Object.keys(sectionLabels) as Array<keyof Question["sections"]>
-            ).map((key) => (
-              <section key={key}>
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                  {sectionLabels[key]}
-                </h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {question.sections[key]}
-                </p>
-              </section>
-            ))}
-          </div>
+          {question.content ? (
+            <div
+              className="prose prose-gray max-w-none prose-h2:text-lg prose-h2:font-semibold prose-h2:text-gray-900 prose-h2:mt-8 prose-h2:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-900 prose-em:text-gray-700"
+              dangerouslySetInnerHTML={{ __html: question.content }}
+            />
+          ) : (
+            <div className="space-y-8">
+              {(
+                Object.keys(sectionLabels) as Array<keyof Question["sections"]>
+              ).map((key) => (
+                <section key={key}>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-3">
+                    {sectionLabels[key]}
+                  </h2>
+                  <p className="text-gray-700 leading-relaxed">
+                    {question.sections[key]}
+                  </p>
+                </section>
+              ))}
+            </div>
+          )}
         </article>
       ) : (
         <div className="text-center py-16">
