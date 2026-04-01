@@ -1,0 +1,38 @@
+{
+  "questions": [
+    {
+      "slug": "why-did-jesus-die",
+      "title": "Why did Jesus die?",
+      "topic": "Jesus"
+    },
+    {
+      "slug": "what-is-salvation",
+      "title": "What is salvation?",
+      "topic": "Salvation"
+    }
+  ],
+  "topics": [
+    {
+      "slug": "jesus",
+      "name": "Jesus"
+    },
+    {
+      "slug": "salvation",
+      "name": "Salvation"
+    }
+  ],
+  "bible": [
+    {
+      "book": "John",
+      "chapter": 3,
+      "verse": 16,
+      "text": "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life."
+    },
+    {
+      "book": "Romans",
+      "chapter": 5,
+      "verse": 8,
+      "text": "But God shows his love for us in that while we were still sinners, Christ died for us."
+    }
+  ]
+}
