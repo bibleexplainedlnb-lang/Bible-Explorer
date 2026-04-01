@@ -1,4 +1,5 @@
 {
+  "/admin/page": "app/admin/page.js",
   "/bible/[book]/[chapter]/page": "app/bible/[book]/[chapter]/page.js",
   "/guides/[slug]/page": "app/guides/[slug]/page.js",
   "/page": "app/page.js",

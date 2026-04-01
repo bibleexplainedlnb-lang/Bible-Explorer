@@ -12,10 +12,9 @@
       "layer": {
         "app/admin/page": "rsc"
       },
-      "filename": "artifacts/nextjs-site/app/admin/actions.ts",
-      "exportedName": "addQuestion"
+      "exportedName": "addQuestion",
+      "filename": "artifacts/nextjs-site/app/admin/actions.ts"
     }
   },
-  "edge": {},
-  "encryptionKey": "ZvE0Rkvcly7kECS1KCsLzx11JH+YySJnrf9DlYAs6tY="
+  "edge": {}
 }
