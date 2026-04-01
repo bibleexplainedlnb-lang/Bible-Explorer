@@ -3,7 +3,7 @@
 
 type AppRoutes = "/" | "/bible/[book]/[chapter]" | "/bible/[book]/[chapter]/[verse]" | "/guides/[slug]" | "/questions/[slug]" | "/topics/[slug]"
 type PageRoutes = never
-type LayoutRoutes = "/"
+type LayoutRoutes = "/" | "/bible"
 type RedirectRoutes = never
 type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
@@ -11,6 +11,7 @@ type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRo
 
 interface ParamMap {
   "/": {}
+  "/bible": {}
   "/bible/[book]/[chapter]": { "book": string; "chapter": string; }
   "/bible/[book]/[chapter]/[verse]": { "book": string; "chapter": string; "verse": string; }
   "/guides/[slug]": { "slug": string; }
@@ -23,6 +24,7 @@ export type ParamsOf<Route extends Routes> = ParamMap[Route]
 
 interface LayoutSlotMap {
   "/": never
+  "/bible": never
 }
 
 
