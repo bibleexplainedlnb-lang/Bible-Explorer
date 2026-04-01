@@ -1,0 +1,313 @@
+module.exports = [
+"[project]/artifacts/nextjs-site/.next-internal/server/app/bible/[book]/[chapter]/[verse]/page/actions.js [app-rsc] (server actions loader, ecmascript)", ((__turbopack_context__, module, exports) => {
+
+}),
+"[project]/artifacts/nextjs-site/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", ((__turbopack_context__) => {
+
+__turbopack_context__.n(__turbopack_context__.i("[project]/artifacts/nextjs-site/app/layout.tsx [app-rsc] (ecmascript)"));
+}),
+"[project]/artifacts/nextjs-site/lib/bible.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "formatVerse",
+    ()=>formatVerse,
+    "getChapter",
+    ()=>getChapter,
+    "getVerse",
+    ()=>getVerse
+]);
+const verses = __turbopack_context__.r("[project]/node_modules/.pnpm/kjv@1.0.0/node_modules/kjv/json/verses-1769.json (json)");
+// Strip KJV data artefacts: leading "#" markers and bracketed editorial notes
+function cleanText(text) {
+    return text.replace(/^#\s*/, '') // leading "#" footnote marker
+    .replace(/\[([^\]]*)\]/g, '') // square-bracket content, e.g. [of]
+    .replace(/\s{2,}/g, ' ') // collapse any double-spaces left behind
+    .trim();
+}
+function getVerse(reference) {
+    const raw = verses[reference];
+    return raw ? cleanText(raw) : null;
+}
+function getChapter(book, chapter) {
+    const results = [];
+    Object.keys(verses).forEach((ref)=>{
+        if (ref.startsWith(`${book} ${chapter}:`)) {
+            results.push({
+                reference: ref,
+                text: cleanText(verses[ref])
+            });
+        }
+    });
+    return results;
+}
+function formatVerse(reference, text) {
+    return `${reference} — ${cleanText(text)}`;
+}
+}),
+"[project]/artifacts/nextjs-site/data/content.json (json)", ((__turbopack_context__) => {
+
+__turbopack_context__.v(JSON.parse("{\"questions\":[{\"slug\":\"why-did-jesus-die\",\"title\":\"Why did Jesus die?\",\"topic\":\"Jesus\",\"shortAnswer\":\"Jesus died as a substitute for sinners — taking the punishment we deserved so that we could be forgiven and restored to God.\",\"content\":\"<h2>Explanation</h2><p>Jesus was crucified under the Roman governor Pontius Pilate around 30 AD. But his death was not merely a political or historical event. The New Testament teaches that it was the fulfillment of God's plan to deal with human sin. Isaiah 53 foretold a servant who would be &ldquo;pierced for our transgressions&rdquo; and &ldquo;crushed for our iniquities.&rdquo; Jesus himself said he came &ldquo;to give his life as a ransom for many&rdquo; (Mark 10:45).</p><h2>What It Means</h2><p>At the heart of Jesus&rsquo; death is the concept of substitutionary atonement &mdash; the idea that Jesus stood in our place and bore the penalty for sin that justice required. Romans 3:25 says God presented Jesus as a &ldquo;propitiation&rdquo; (a sacrifice that satisfies God&rsquo;s wrath) through faith in his blood. His death satisfied God&rsquo;s justice while opening the door for mercy. It also demonstrated the depth of God&rsquo;s love: &ldquo;God shows his love for us in that while we were still sinners, Christ died for us&rdquo; (Romans 5:8).</p><h2>How to Apply It</h2><p>Understanding why Jesus died changes everything. It means our forgiveness was costly &mdash; it required the death of God&rsquo;s own Son. This should produce gratitude, humility, and a desire to live for the one who died for us. As Paul writes in 2 Corinthians 5:15, &ldquo;he died for all, that those who live might no longer live for themselves but for him who for their sake died and was raised.&rdquo;</p>\",\"sections\":{\"explanation\":\"Jesus was crucified under the Roman governor Pontius Pilate around 30 AD. But his death was not merely a political or historical event. The New Testament teaches that it was the fulfillment of God's plan to deal with human sin. Isaiah 53 foretold a servant who would be \\\"pierced for our transgressions\\\" and \\\"crushed for our iniquities.\\\" Jesus himself said he came \\\"to give his life as a ransom for many\\\" (Mark 10:45).\",\"meaning\":\"At the heart of Jesus' death is the concept of substitutionary atonement — the idea that Jesus stood in our place and bore the penalty for sin that justice required. Romans 3:25 says God presented Jesus as a \\\"propitiation\\\" (a sacrifice that satisfies God's wrath) through faith in his blood. His death satisfied God's justice while opening the door for mercy. It also demonstrated the depth of God's love: \\\"God shows his love for us in that while we were still sinners, Christ died for us\\\" (Romans 5:8).\",\"application\":\"Understanding why Jesus died changes everything. It means our forgiveness was costly — it required the death of God's own Son. This should produce gratitude, humility, and a desire to live for the one who died for us. As Paul writes in 2 Corinthians 5:15, \\\"he died for all, that those who live might no longer live for themselves but for him who for their sake died and was raised.\\\"\"}},{\"slug\":\"what-is-salvation\",\"title\":\"What is salvation?\",\"topic\":\"Salvation\",\"shortAnswer\":\"Salvation is God's rescue of sinners from the penalty, power, and presence of sin — accomplished through Jesus Christ and received by faith.\",\"content\":\"<h2>Explanation</h2><p>The word <em>salvation</em> comes from the Latin <em>salus</em>, meaning health or wholeness. In the Bible, it describes God&rsquo;s comprehensive rescue of humanity. The Old Testament uses the idea in physical terms &mdash; deliverance from enemies, danger, or death &mdash; but these point forward to a deeper spiritual reality. In the New Testament, salvation is God&rsquo;s answer to humanity&rsquo;s greatest problem: sin and its consequences of guilt, brokenness, and separation from God.</p><h2>What It Means</h2><p>Salvation has three tenses in Scripture. <strong>Past:</strong> believers have been saved from the penalty of sin (justification &mdash; Romans 5:1). <strong>Present:</strong> believers are being saved from the power of sin (sanctification &mdash; Philippians 2:12-13). <strong>Future:</strong> believers will be saved from the presence of sin entirely (glorification &mdash; Romans 8:23). Salvation is entirely the work of God &mdash; Ephesians 2:8-9 makes clear it is a gift received through faith, not something earned. Jesus declared himself &ldquo;the way, the truth, and the life&rdquo; and the only path to the Father (John 14:6).</p><h2>How to Apply It</h2><p>If salvation is truly God&rsquo;s gift through Christ, then it calls for a response of faith and repentance &mdash; turning from self-directed living toward God. It also reshapes how we see ourselves (as the forgiven, not the self-sufficient), how we treat others (with the same grace we have received), and what we hope for (a restored creation where God dwells with his people forever).</p>\",\"sections\":{\"explanation\":\"The word salvation comes from the Latin salus, meaning health or wholeness. In the Bible, it describes God's comprehensive rescue of humanity. The Old Testament uses the idea in physical terms — deliverance from enemies, danger, or death — but these point forward to a deeper spiritual reality. In the New Testament, salvation is God's answer to humanity's greatest problem: sin and its consequences of guilt, brokenness, and separation from God.\",\"meaning\":\"Salvation has three tenses in Scripture. Past: believers have been saved from the penalty of sin (justification — Romans 5:1). Present: believers are being saved from the power of sin (sanctification — Philippians 2:12-13). Future: believers will be saved from the presence of sin entirely (glorification — Romans 8:23). Salvation is entirely the work of God — Ephesians 2:8-9 makes clear it is a gift received through faith, not something earned. Jesus declared himself \\\"the way, the truth, and the life\\\" and the only path to the Father (John 14:6).\",\"application\":\"If salvation is truly God's gift through Christ, then it calls for a response of faith and repentance — turning from self-directed living toward God. It also reshapes how we see ourselves (as the forgiven, not the self-sufficient), how we treat others (with the same grace we have received), and what we hope for (a restored creation where God dwells with his people forever).\"}},{\"slug\":\"what-is-faith\",\"title\":\"What is faith and why does it matter?\",\"topic\":\"Faith\",\"shortAnswer\":\"Faith is confident trust in God based on what He has revealed — it is the foundation of the Christian life and the means by which we are saved.\",\"sections\":{\"explanation\":\"Hebrews 11:1 defines faith as \\\"the substance of things hoped for, the evidence of things not seen.\\\" This is not blind belief — it is trust grounded in evidence: the witness of Scripture, the resurrection of Jesus, and the testimony of changed lives throughout history. The chapter goes on to list figures like Abraham, Moses, and Rahab as examples of those who acted on God's promises before seeing them fulfilled.\",\"meaning\":\"Faith matters because it is the only way to enter into a right relationship with God. Romans 5:1 says \\\"since we have been justified by faith, we have peace with God through our Lord Jesus Christ.\\\" Hebrews 11:6 adds that \\\"without faith it is impossible to please God.\\\" Faith is not a meritorious work that earns salvation — it is the empty hand that receives God's gift. Genuine faith is also not static; James 2:17 reminds us that faith without works is dead, meaning true faith produces real-world transformation.\",\"application\":\"Growing in faith is a lifelong process. It comes through hearing God's Word (Romans 10:17), prayer, community with other believers, and trusting God through difficulty. When doubt arises — and it will — the answer is not to suppress it but to bring it honestly to God and to the Scriptures. Faith does not require certainty about everything; it requires trust in the One who is certain.\"}},{\"slug\":\"how-to-pray\",\"title\":\"How should I pray?\",\"topic\":\"Prayer\",\"shortAnswer\":\"Prayer is honest, ongoing conversation with God — it can be structured or spontaneous, and it grows naturally through practice.\",\"sections\":{\"explanation\":\"Jesus gave his disciples a model prayer in Matthew 6:9-13 — the Lord's Prayer — that covers adoration (\\\"hallowed be your name\\\"), submission (\\\"your kingdom come\\\"), dependence (\\\"give us this day our daily bread\\\"), confession (\\\"forgive us our debts\\\"), and protection (\\\"deliver us from evil\\\"). This is not a script to recite but a pattern that shapes how we approach God.\",\"meaning\":\"Prayer is the primary means by which believers maintain their relationship with God. 1 Thessalonians 5:17 calls for praying \\\"without ceasing\\\" — not hours on your knees, but a continual awareness of God's presence throughout the day. Philippians 4:6-7 promises that bringing every anxiety to God in prayer produces a peace that surpasses understanding. Prayer also aligns our will with God's: as we ask, listen, and wait, our desires gradually conform to his purposes.\",\"application\":\"Start where you are. Even brief, honest prayers are heard. Many find it helpful to set aside a regular time and place, use a prayer journal, or follow a simple structure like ACTS (Adoration, Confession, Thanksgiving, Supplication). If prayer feels dry or mechanical, tell God that too — honesty is always the right posture before him.\"}}],\"topics\":[{\"slug\":\"jesus\",\"name\":\"Jesus\",\"questions\":[\"why-did-jesus-die\"]},{\"slug\":\"salvation\",\"name\":\"Salvation\",\"questions\":[\"what-is-salvation\"]}],\"bibleExplanations\":[{\"book\":\"john\",\"chapter\":3,\"testament\":\"New Testament\",\"explanation\":{\"overview\":\"John 3 records a nighttime conversation between Jesus and Nicodemus, a respected Jewish leader. Nicodemus acknowledges Jesus as a teacher from God, but Jesus redirects him entirely — the issue is not knowledge but new birth. The chapter contains the most cited verse in all of Scripture (v. 16) and presents the gospel in its most concentrated form: God's love, the gift of his Son, and the free offer of eternal life to all who believe.\",\"context\":\"Nicodemus was a Pharisee and member of the Sanhedrin — the ruling religious council. His coming \\\"by night\\\" may indicate secrecy or simply that it was the only quiet time to speak. Jesus' reference to being \\\"born of water and the Spirit\\\" recalls Ezekiel 36:25-27, where God promises to cleanse his people and give them a new heart by his Spirit. The image of Moses lifting up the serpent (v. 14) comes from Numbers 21:8-9, where Israelites who looked at the bronze serpent were healed — Jesus applies this as a foreshadowing of his own crucifixion.\",\"application\":\"John 3 confronts the assumption that religious knowledge or effort is enough. Nicodemus knew the law thoroughly, yet Jesus told him he needed something he could not produce himself — new birth from above. The same is true today. Salvation is not the reward of the well-informed or the disciplined; it is given to those who believe in the Son (v. 16). This chapter invites readers to move from curiosity about Jesus to trust in him.\"}},{\"book\":\"romans\",\"chapter\":5,\"testament\":\"New Testament\",\"explanation\":{\"overview\":\"Romans 5 opens with one of the great \\\"therefore\\\" moments in Scripture. Having laid out in chapters 1–4 that all humanity stands guilty before God and that justification comes through faith alone, Paul now describes what that justification produces: peace with God, access to grace, hope in suffering, and the assurance of God's love. The chapter's centerpiece (v. 8) is a stunning statement — Christ died not for those who deserved it, but for enemies.\",\"context\":\"Paul wrote Romans around 57 AD from Corinth, addressing a mixed church of Jewish and Gentile believers. Romans 5 builds on the argument of chapter 4, where Abraham's faith was credited as righteousness. The phrase \\\"justified by faith\\\" (v. 1) summarizes chapters 3–4: sinners are declared righteous not by their works but through trust in Christ's atoning death. Verse 8 stands as the climax: the proof of God's love is not that Christ died for the deserving, but for sinners — those actively opposed to God.\",\"application\":\"Romans 5 speaks directly to suffering and uncertainty. Paul does not promise immunity from hardship but reframes it: suffering produces endurance, endurance produces character, character produces hope (vv. 3-4). This is not wishful thinking — it is grounded in the proven love of God demonstrated at the cross (v. 8). For anyone doubting whether God is for them, verse 8 is the answer: the timing of Christ's death — while we were still sinners — is the evidence that God's love precedes our goodness.\"}}]}"));}),
+"[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>VersePage,
+    "generateMetadata",
+    ()=>generateMetadata
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-dir/link.js [app-rsc] (ecmascript)");
+// @ts-ignore — JS module without type declarations
+var __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$lib$2f$bible$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/artifacts/nextjs-site/lib/bible.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__ = __turbopack_context__.i("[project]/artifacts/nextjs-site/data/content.json (json)");
+;
+;
+;
+;
+const questions = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].questions;
+function slugToBookName(slug) {
+    return slug.replace(/-/g, " ").split(" ").map((w)=>w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+function stripHtml(html) {
+    return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+function findRelatedQuestions(reference, bookName, max = 4) {
+    const refLower = reference.toLowerCase();
+    const bookLower = bookName.toLowerCase();
+    // Score each question: 2 pts for exact reference match, 1 pt for book name mention
+    const scored = questions.map((q)=>{
+        const haystack = [
+            q.title,
+            q.shortAnswer,
+            q.content ? stripHtml(q.content) : ""
+        ].join(" ").toLowerCase();
+        let score = 0;
+        if (haystack.includes(refLower)) score += 2;
+        else if (haystack.includes(bookLower)) score += 1;
+        return {
+            q,
+            score
+        };
+    });
+    return scored.filter(({ score })=>score > 0).sort((a, b)=>b.score - a.score).slice(0, max).map(({ q })=>q);
+}
+async function generateMetadata({ params }) {
+    const { book, chapter, verse } = await params;
+    const bookName = slugToBookName(book);
+    return {
+        title: `${bookName} ${chapter}:${verse} (KJV) | Bible | Faith & Scripture`
+    };
+}
+async function VersePage({ params }) {
+    const { book, chapter, verse } = await params;
+    const bookName = slugToBookName(book);
+    const reference = `${bookName} ${chapter}:${verse}`;
+    const text = (0, __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$lib$2f$bible$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getVerse"])(reference);
+    if (!text) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "max-w-2xl text-center py-16",
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                    className: "text-2xl font-semibold text-gray-900 mb-2",
+                    children: "Verse not found"
+                }, void 0, false, {
+                    fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                    lineNumber: 81,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                    className: "text-gray-500 mb-6",
+                    children: [
+                        reference,
+                        " could not be found."
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                    lineNumber: 84,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                    href: `/bible/${book}/${chapter}`,
+                    className: "text-blue-600 hover:underline",
+                    children: [
+                        "Back to ",
+                        bookName,
+                        " ",
+                        chapter
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                    lineNumber: 85,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+            lineNumber: 80,
+            columnNumber: 7
+        }, this);
+    }
+    const related = findRelatedQuestions(reference, bookName);
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "max-w-2xl",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-8",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                    href: `/bible/${book}/${chapter}`,
+                    className: "text-sm text-gray-500 hover:text-gray-700 transition-colors",
+                    children: [
+                        "← ",
+                        bookName,
+                        " ",
+                        chapter
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                    lineNumber: 98,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                lineNumber: 97,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: "text-xs font-semibold text-amber-600 uppercase tracking-widest mb-4",
+                children: [
+                    reference,
+                    " — KJV"
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                lineNumber: 107,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "relative rounded-xl bg-amber-50 border border-amber-200 px-6 py-5 mb-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "absolute left-0 top-4 bottom-4 w-1 rounded-full bg-amber-400 ml-0 -ml-px"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 113,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-xl text-gray-900 leading-relaxed font-serif pl-1",
+                        children: text
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 114,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                lineNumber: 112,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "rounded-lg border border-gray-200 bg-gray-50 px-5 py-4 mb-10",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2",
+                        children: "Simple Explanation"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 121,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-sm text-gray-500 leading-relaxed italic",
+                        children: "A plain-language explanation of this verse will appear here — covering what it means in context and how it applies to everyday faith."
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 124,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                lineNumber: 120,
+                columnNumber: 7
+            }, this),
+            related.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
+                className: "pt-8 border-t border-gray-200",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                        className: "text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4",
+                        children: "Related Questions"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 133,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                        className: "space-y-3",
+                        children: related.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                                    href: `/questions/${q.slug}`,
+                                    className: "group flex flex-col gap-0.5",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-gray-900 font-medium group-hover:text-blue-600 transition-colors",
+                                            children: q.title
+                                        }, void 0, false, {
+                                            fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                                            lineNumber: 143,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-sm text-gray-500 line-clamp-1",
+                                            children: q.shortAnswer
+                                        }, void 0, false, {
+                                            fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                                            lineNumber: 146,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                                    lineNumber: 139,
+                                    columnNumber: 17
+                                }, this)
+                            }, q.slug, false, {
+                                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                                lineNumber: 138,
+                                columnNumber: 15
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                        lineNumber: 136,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+                lineNumber: 132,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx",
+        lineNumber: 95,
+        columnNumber: 5
+    }, this);
+}
+}),
+"[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx [app-rsc] (ecmascript, Next.js Server Component)", ((__turbopack_context__) => {
+
+__turbopack_context__.n(__turbopack_context__.i("[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/[verse]/page.tsx [app-rsc] (ecmascript)"));
+}),
+"[externals]/next/dist/shared/lib/no-fallback-error.external.js [external] (next/dist/shared/lib/no-fallback-error.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/shared/lib/no-fallback-error.external.js", () => require("next/dist/shared/lib/no-fallback-error.external.js"));
+
+module.exports = mod;
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__d85ecdaa._.js.map
