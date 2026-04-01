@@ -18,8 +18,16 @@ __turbopack_context__.s([
     ()=>getVerse
 ]);
 const verses = __turbopack_context__.r("[project]/node_modules/.pnpm/kjv@1.0.0/node_modules/kjv/json/verses-1769.json (json)");
+// Strip KJV data artefacts: leading "#" markers and bracketed editorial notes
+function cleanText(text) {
+    return text.replace(/^#\s*/, '') // leading "#" footnote marker
+    .replace(/\[([^\]]*)\]/g, '') // square-bracket content, e.g. [of]
+    .replace(/\s{2,}/g, ' ') // collapse any double-spaces left behind
+    .trim();
+}
 function getVerse(reference) {
-    return verses[reference] || null;
+    const raw = verses[reference];
+    return raw ? cleanText(raw) : null;
 }
 function getChapter(book, chapter) {
     const results = [];
@@ -27,14 +35,14 @@ function getChapter(book, chapter) {
         if (ref.startsWith(`${book} ${chapter}:`)) {
             results.push({
                 reference: ref,
-                text: verses[ref]
+                text: cleanText(verses[ref])
             });
         }
     });
     return results;
 }
 function formatVerse(reference, text) {
-    return `${reference} — ${text}`;
+    return `${reference} — ${cleanText(text)}`;
 }
 }),
 "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {

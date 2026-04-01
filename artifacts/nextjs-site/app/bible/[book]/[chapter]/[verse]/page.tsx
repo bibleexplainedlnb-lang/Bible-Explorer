@@ -27,8 +27,7 @@ export default async function VersePage({ params }: Props) {
   const { book, chapter, verse } = await params;
   const bookName = slugToBookName(book);
   const reference = `${bookName} ${chapter}:${verse}`;
-  const raw: string | null = getVerse(reference);
-  const text = raw ? raw.replace(/^#\s*/, "") : null;
+  const text: string | null = getVerse(reference);
 
   return (
     <div className="max-w-2xl">

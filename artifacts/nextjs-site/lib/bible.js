@@ -1,11 +1,21 @@
 const verses = require('kjv/json/verses-1769.json')
 
-// Get single verse
-export function getVerse(reference) {
-  return verses[reference] || null
+// Strip KJV data artefacts: leading "#" markers and bracketed editorial notes
+function cleanText(text) {
+  return text
+    .replace(/^#\s*/, '')          // leading "#" footnote marker
+    .replace(/\[([^\]]*)\]/g, '')  // square-bracket content, e.g. [of]
+    .replace(/\s{2,}/g, ' ')       // collapse any double-spaces left behind
+    .trim()
 }
 
-// Get full chapter
+// Get single verse — returns clean text or null
+export function getVerse(reference) {
+  const raw = verses[reference]
+  return raw ? cleanText(raw) : null
+}
+
+// Get full chapter — returns array of { reference, text } with clean text
 export function getChapter(book, chapter) {
   const results = []
 
@@ -13,7 +23,7 @@ export function getChapter(book, chapter) {
     if (ref.startsWith(`${book} ${chapter}:`)) {
       results.push({
         reference: ref,
-        text: verses[ref]
+        text: cleanText(verses[ref])
       })
     }
   })
@@ -21,7 +31,7 @@ export function getChapter(book, chapter) {
   return results
 }
 
-// Format verse display
+// Format verse for display
 export function formatVerse(reference, text) {
-  return `${reference} — ${text}`
+  return `${reference} — ${cleanText(text)}`
 }
