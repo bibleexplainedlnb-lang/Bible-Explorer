@@ -89,6 +89,7 @@
     --color-amber-900: #7b3306;
     --color-blue-50: #eff6ff;
     --color-blue-100: #dbeafe;
+    --color-blue-200: #bedbff;
     --color-blue-300: #90c5ff;
     --color-blue-400: #54a2ff;
     --color-blue-500: #3080ff;
@@ -98,6 +99,8 @@
     --color-blue-900: #1c398e;
     --color-violet-50: #f5f3ff;
     --color-violet-100: #ede9fe;
+    --color-violet-200: #ddd6ff;
+    --color-violet-400: #a685ff;
     --color-violet-600: #7f22fe;
     --color-violet-700: #7008e7;
     --color-gray-50: #f9fafb;
@@ -164,6 +167,7 @@
       --color-amber-900: color(display-p3 .445958 .216422 .0823321);
       --color-blue-50: color(display-p3 .941826 .963151 .995385);
       --color-blue-100: color(display-p3 .869214 .915931 .989622);
+      --color-blue-200: color(display-p3 .76688 .855207 .987483);
       --color-blue-300: color(display-p3 .602559 .767214 .993938);
       --color-blue-400: color(display-p3 .397443 .62813 .992116);
       --color-blue-500: color(display-p3 .266422 .491219 .988624);
@@ -173,6 +177,8 @@
       --color-blue-900: color(display-p3 .136395 .219428 .537145);
       --color-violet-50: color(display-p3 .959212 .95304 .995713);
       --color-violet-100: color(display-p3 .926222 .913546 .990178);
+      --color-violet-200: color(display-p3 .861543 .838846 .988006);
+      --color-violet-400: color(display-p3 .631215 .522175 .990008);
       --color-violet-600: color(display-p3 .459951 .162666 .957985);
       --color-violet-700: color(display-p3 .40161 .0841901 .871151);
       --color-gray-50: color(display-p3 .977213 .98084 .985102);
@@ -201,6 +207,7 @@
       --color-amber-900: lab(31.2288% 30.2627 40.0378);
       --color-blue-50: lab(96.492% -1.14644 -5.11479);
       --color-blue-100: lab(92.0301% -2.24757 -11.6453);
+      --color-blue-200: lab(86.15% -4.04379 -21.0797);
       --color-blue-300: lab(77.5052% -6.4629 -36.42);
       --color-blue-400: lab(65.0361% -1.42065 -56.9802);
       --color-blue-500: lab(54.1736% 13.3369 -74.6839);
@@ -210,6 +217,8 @@
       --color-blue-900: lab(26.1542% 15.7545 -51.5504);
       --color-violet-50: lab(96.2416% 2.28849 -5.51657);
       --color-violet-100: lab(93.0838% 4.35197 -9.88284);
+      --color-violet-200: lab(87.0888% 8.53688 -19.4189);
+      --color-violet-400: lab(62.8239% 34.9159 -60.0512);
       --color-violet-600: lab(41.088% 68.9966 -91.995);
       --color-violet-700: lab(35.2783% 67.9912 -88.793);
       --color-gray-50: lab(98.2596% -.247031 -.706708);
@@ -2661,6 +2670,12 @@
   }
 
   @media (hover: hover) {
+    .group-hover\:text-blue-400:is(:where(.group):hover *) {
+      color: var(--color-blue-400);
+    }
+  }
+
+  @media (hover: hover) {
     .group-hover\:text-blue-500:is(:where(.group):hover *) {
       color: var(--color-blue-500);
     }
@@ -2684,8 +2699,26 @@
     }
   }
 
+  @media (hover: hover) {
+    .group-hover\:text-violet-400:is(:where(.group):hover *) {
+      color: var(--color-violet-400);
+    }
+  }
+
+  @media (hover: hover) {
+    .group-hover\:text-violet-700:is(:where(.group):hover *) {
+      color: var(--color-violet-700);
+    }
+  }
+
   .placeholder\:text-gray-400::placeholder {
     color: var(--color-gray-400);
+  }
+
+  @media (hover: hover) {
+    .hover\:border-blue-200:hover {
+      border-color: var(--color-blue-200);
+    }
   }
 
   @media (hover: hover) {
@@ -2697,6 +2730,12 @@
   @media (hover: hover) {
     .hover\:border-gray-300:hover {
       border-color: var(--color-gray-300);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:border-violet-200:hover {
+      border-color: var(--color-violet-200);
     }
   }
 

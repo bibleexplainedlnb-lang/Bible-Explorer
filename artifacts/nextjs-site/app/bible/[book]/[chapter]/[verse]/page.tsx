@@ -130,7 +130,7 @@ export default async function VersePage({ params }: Props) {
       {/* Related questions */}
       {related.length > 0 && (
         <section className="pt-8 border-t border-gray-200">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
             Related Questions
           </h2>
           <ul className="space-y-3">
@@ -138,14 +138,19 @@ export default async function VersePage({ params }: Props) {
               <li key={q.slug}>
                 <Link
                   href={`/questions/${q.slug}`}
-                  className="group flex flex-col gap-0.5"
+                  className="group flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 hover:border-blue-200 hover:shadow-sm transition-all"
                 >
-                  <span className="text-gray-900 font-medium group-hover:text-blue-600 transition-colors">
-                    {q.title}
-                  </span>
-                  <span className="text-sm text-gray-500 line-clamp-1">
-                    {q.shortAnswer}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors leading-snug mb-1">
+                      {q.title}
+                    </p>
+                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
+                      {q.shortAnswer}
+                    </p>
+                  </div>
+                  <svg className="flex-shrink-0 mt-0.5 w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </li>
             ))}
