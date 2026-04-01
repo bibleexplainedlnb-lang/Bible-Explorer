@@ -1,9 +1,7 @@
 (globalThis.TURBOPACK_CHUNK_LISTS || (globalThis.TURBOPACK_CHUNK_LISTS = [])).push({
     script: typeof document === "object" ? document.currentScript : undefined,
     chunks: [
-  "static/chunks/81977_next_fc3ee745._.js",
-  "static/chunks/artifacts_nextjs-site_412d477b._.js",
-  "static/chunks/artifacts_nextjs-site_app_globals_abafb460.css"
+  "static/chunks/artifacts_nextjs-site_app_bible_BibleNavSidebar_tsx_83d2559b._.js"
 ],
     source: "dynamic"
 });

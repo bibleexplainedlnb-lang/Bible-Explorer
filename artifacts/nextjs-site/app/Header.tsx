@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import SearchBar from "./SearchBar";
 
 const NAV_LINKS = [
   { label: "Questions", href: "/questions/what-is-salvation" },
@@ -12,7 +13,7 @@ const NAV_LINKS = [
 ];
 
 function isActive(pathname: string, href: string): boolean {
-  const section = href.split("/")[1]; // "questions", "topics", "guides", "bible"
+  const section = href.split("/")[1];
   return pathname.startsWith(`/${section}`);
 }
 
@@ -23,7 +24,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-16 items-center gap-4">
 
           {/* Logo */}
           <Link
@@ -34,8 +35,13 @@ export default function Header() {
             Faith &amp; Scripture
           </Link>
 
+          {/* Desktop search — grows to fill space */}
+          <div className="hidden sm:block flex-1 max-w-xs">
+            <SearchBar onNavigate={() => setMenuOpen(false)} />
+          </div>
+
           {/* Desktop nav */}
-          <nav className="hidden sm:flex items-center gap-1">
+          <nav className="hidden sm:flex items-center gap-1 flex-shrink-0 ml-auto">
             {NAV_LINKS.map(({ label, href }) => {
               const active = isActive(pathname, href);
               return (
@@ -58,30 +64,22 @@ export default function Header() {
           <button
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Toggle menu"
-            className="sm:hidden flex flex-col items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100 transition-colors gap-[5px]"
+            className="sm:hidden ml-auto flex flex-col items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100 transition-colors gap-[5px]"
           >
-            <span
-              className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 origin-center ${
-                menuOpen ? "rotate-45 translate-y-[7px]" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 ${
-                menuOpen ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 origin-center ${
-                menuOpen ? "-rotate-45 -translate-y-[7px]" : ""
-              }`}
-            />
+            <span className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 origin-center ${menuOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
+            <span className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 ${menuOpen ? "opacity-0" : ""}`} />
+            <span className={`block h-0.5 w-5 bg-gray-700 rounded-full transition-all duration-200 origin-center ${menuOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="sm:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2">
+        <div className="sm:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-3 space-y-3">
+          {/* Search inside mobile menu */}
+          <SearchBar onNavigate={() => setMenuOpen(false)} />
+
+          {/* Nav links */}
           <nav className="flex flex-col gap-1">
             {NAV_LINKS.map(({ label, href }) => {
               const active = isActive(pathname, href);
