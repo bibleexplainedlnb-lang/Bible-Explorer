@@ -93,6 +93,14 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/nextjs-site` (`@workspace/nextjs-site`)
 
+**SQLite database** (`lib/db.ts`):
+- `better-sqlite3` (synchronous, server-only — works with Next.js server components and Route Handlers)
+- DB file: `data/content.db` (relative to `artifacts/nextjs-site/`, created automatically on first import)
+- WAL mode + foreign keys enabled
+- Tables: `questions`, `topics`, `guides`, `bible_notes`
+- Exports typed CRUD helpers: `questions.{list,findById,findBySlug,listByTopic,create,update,delete}`, same pattern for `topics`, `guides`, `bibleNotes` (plus `bibleNotes.upsert` and `bibleNotes.findByReference`)
+- Singleton pattern via `globalThis.__sqlite_db` to survive HMR reloads in dev
+
 Next.js 15 (App Router) content site styled with Tailwind CSS 4.
 
 - Entry: `app/layout.tsx` — shared header/footer layout with navigation

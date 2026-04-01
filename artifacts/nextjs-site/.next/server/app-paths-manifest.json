@@ -1,8 +1,4 @@
 {
-  "/bible/[book]/[chapter]/[verse]/page": "app/bible/[book]/[chapter]/[verse]/page.js",
   "/bible/[book]/[chapter]/page": "app/bible/[book]/[chapter]/page.js",
-  "/guides/[slug]/page": "app/guides/[slug]/page.js",
-  "/page": "app/page.js",
-  "/questions/[slug]/page": "app/questions/[slug]/page.js",
-  "/topics/[slug]/page": "app/topics/[slug]/page.js"
+  "/page": "app/page.js"
 }
