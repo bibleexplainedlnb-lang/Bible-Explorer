@@ -1,111 +1,49 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import data from "@/data/content.json";
+import { linkifyHtml } from "@/lib/bible-references";
 
-const guideData: Record<
-  string,
-  { title: string; topic: string; readTime: string; sections: { heading: string; body: string }[] }
-> = {
-  "growing-in-faith": {
-    title: "A Beginner's Guide to Growing in Faith",
-    topic: "Faith",
-    readTime: "8 min read",
-    sections: [
-      {
-        heading: "Start with Scripture",
-        body: "The most direct way to grow in faith is to read the Bible regularly. Romans 10:17 says faith comes from hearing, and hearing through the word of Christ. Set aside a specific time each day — even 10-15 minutes is a meaningful start.",
-      },
-      {
-        heading: "Pray Consistently",
-        body: "Prayer is not a spiritual performance — it is honest communication with God. Tell Him what you are grateful for, where you are struggling, and what you need. Over time, prayer shapes your heart to align with God's purposes.",
-      },
-      {
-        heading: "Find a Community",
-        body: "Hebrews 10:24-25 urges believers not to neglect meeting together. A church community provides accountability, encouragement, and growth opportunities that are difficult to find alone. Look for a community where Scripture is taught faithfully.",
-      },
-      {
-        heading: "Serve Others",
-        body: "Faith grows when it is put into action. Look for opportunities to serve in your church, neighborhood, or workplace. Serving others shifts the focus from self to God and neighbor — which is exactly where Jesus calls us to live.",
-      },
-      {
-        heading: "Be Patient with the Process",
-        body: "Growth in faith rarely feels dramatic. It is usually slow, steady, and punctuated by difficult seasons that shape character. Trust that God is at work even in times of dryness or doubt.",
-      },
-    ],
-  },
-  "daily-prayer": {
-    title: "Building a Daily Prayer Habit",
-    topic: "Prayer",
-    readTime: "6 min read",
-    sections: [
-      {
-        heading: "Choose a Time and Place",
-        body: "Consistency is built on routine. Choose a specific time — morning, lunch, or evening — and a quiet place where you will not be easily interrupted. Even a corner of your room can become a sacred space.",
-      },
-      {
-        heading: "Use a Simple Framework",
-        body: "The acronym ACTS can help structure your prayer: Adoration (praise God for who He is), Confession (acknowledge your sins honestly), Thanksgiving (express gratitude), and Supplication (bring your requests and the needs of others).",
-      },
-      {
-        heading: "Keep a Prayer Journal",
-        body: "Writing down your prayers helps you focus and creates a record of how God has answered over time. Even brief notes — a one-sentence prayer and a one-sentence answer — build faith as you look back.",
-      },
-      {
-        heading: "Start Small",
-        body: "Five minutes of sincere prayer is better than thirty minutes of distracted prayer. Start with what you can sustain and let it grow naturally. The goal is a relationship, not a performance metric.",
-      },
-    ],
-  },
-  "bible-study-basics": {
-    title: "Bible Study Basics for Beginners",
-    topic: "Scripture",
-    readTime: "7 min read",
-    sections: [
-      {
-        heading: "Observe What the Text Says",
-        body: "Before interpreting a passage, observe it carefully. Ask: Who is speaking? To whom? What is happening? When and where? Look for repeated words, contrasts, and connections. Good observation prevents common misunderstandings.",
-      },
-      {
-        heading: "Interpret What It Means",
-        body: "Ask what the passage meant to its original audience before asking what it means for you. Use context — what comes before and after the passage. If a verse is unclear, read it in several translations.",
-      },
-      {
-        heading: "Apply What You Learn",
-        body: "Bible study is incomplete without application. Ask: Is there a command to obey? A promise to trust? A warning to heed? A truth to believe? Write down one specific way to apply what you have read.",
-      },
-      {
-        heading: "Recommended Starting Points",
-        body: "New readers often benefit from starting with the Gospel of John for an introduction to Jesus, then Romans for a systematic understanding of the gospel, then Psalms for devotional and emotional connection with God.",
-      },
-    ],
-  },
-  "plan-of-salvation": {
-    title: "Understanding the Plan of Salvation",
-    topic: "Salvation",
-    readTime: "9 min read",
-    sections: [
-      {
-        heading: "God's Design and Humanity's Dilemma",
-        body: "God created humanity in His image for relationship with Him. But sin — choosing our own way over God's — broke that relationship. Romans 3:23 states that all have sinned and fall short of God's glory.",
-      },
-      {
-        heading: "The Consequence of Sin",
-        body: "Sin carries a consequence: separation from God both in this life and eternally. Romans 6:23 says the wages of sin is death. This is not merely physical death but spiritual separation from the source of all life.",
-      },
-      {
-        heading: "God's Rescue Plan",
-        body: "Rather than leaving humanity in this condition, God acted. He sent His Son Jesus Christ to live the perfect life we could not live, die in our place as a substitute, and rise from the dead — defeating sin and death.",
-      },
-      {
-        heading: "Our Response",
-        body: "Romans 10:9 says if you confess with your mouth that Jesus is Lord and believe in your heart that God raised him from the dead, you will be saved. Salvation is received through faith — trusting Jesus alone, not our own efforts.",
-      },
-      {
-        heading: "What Comes Next",
-        body: "Salvation begins a new life. The believer is forgiven, adopted into God's family, and given the Holy Spirit. This life is marked by growing love for God, Scripture, community, and the ongoing work of becoming more like Jesus.",
-      },
-    ],
-  },
+type Guide = {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  relatedQuestions: string[];
+  relatedTopics: string[];
 };
+
+type Question = {
+  slug: string;
+  title: string;
+  shortAnswer: string;
+  topic: string;
+};
+
+type Topic = {
+  slug: string;
+  name: string;
+  questions: string[];
+};
+
+const guides = data.guides as Guide[];
+const questions = data.questions as Question[];
+const topics = data.topics as Topic[];
+
+function getGuide(slug: string): Guide | undefined {
+  return guides.find((g) => g.slug === slug);
+}
+
+function resolveQuestions(slugs: string[]): Question[] {
+  return slugs
+    .map((s) => questions.find((q) => q.slug === s))
+    .filter((q): q is Question => q !== undefined);
+}
+
+function resolveTopics(slugs: string[]): Topic[] {
+  return slugs
+    .map((s) => topics.find((t) => t.slug === s))
+    .filter((t): t is Topic => t !== undefined);
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -113,20 +51,40 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const guide = guideData[slug];
+  const guide = getGuide(slug);
   return {
     title: guide
       ? `${guide.title} | Guides | Faith & Scripture`
-      : "Guide | Faith & Scripture",
+      : "Guide not found | Faith & Scripture",
   };
 }
 
 export default async function GuidePage({ params }: Props) {
   const { slug } = await params;
-  const guide = guideData[slug];
+  const guide = getGuide(slug);
+
+  if (!guide) {
+    return (
+      <div className="max-w-2xl text-center py-16">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+          Guide not found
+        </h1>
+        <p className="text-gray-500 mb-6">
+          The guide &ldquo;{slug.replace(/-/g, " ")}&rdquo; could not be found.
+        </p>
+        <Link href="/" className="text-blue-600 hover:underline">
+          Return to home
+        </Link>
+      </div>
+    );
+  }
+
+  const relatedQuestions = resolveQuestions(guide.relatedQuestions);
+  const relatedTopics = resolveTopics(guide.relatedTopics);
 
   return (
-    <div>
+    <div className="max-w-2xl">
+      {/* Back */}
       <div className="mb-8">
         <Link
           href="/"
@@ -136,43 +94,76 @@ export default async function GuidePage({ params }: Props) {
         </Link>
       </div>
 
-      {guide ? (
-        <article className="max-w-2xl">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="inline-block text-xs font-medium text-blue-600 bg-blue-50 rounded-full px-2.5 py-0.5">
-                {guide.topic}
-              </span>
-              <span className="text-xs text-gray-400">{guide.readTime}</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 leading-tight">
-              {guide.title}
-            </h1>
-          </div>
+      {/* Header */}
+      <div className="mb-8">
+        <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
+          Guide
+        </p>
+        <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-4">
+          {guide.title}
+        </h1>
+        {guide.shortDescription && (
+          <p className="text-base text-gray-500 leading-relaxed">
+            {guide.shortDescription}
+          </p>
+        )}
+      </div>
 
-          <div className="space-y-8">
-            {guide.sections.map((section, i) => (
-              <div key={i}>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                  {section.heading}
-                </h2>
-                <p className="text-gray-700 leading-relaxed">{section.body}</p>
-              </div>
+      {/* Content */}
+      <div
+        className="prose prose-gray max-w-none prose-h2:text-xl prose-h2:font-semibold prose-h2:text-gray-900 prose-h2:mt-10 prose-h2:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-900 prose-em:text-gray-600"
+        dangerouslySetInnerHTML={{ __html: linkifyHtml(guide.content) }}
+      />
+
+      {/* Related Questions */}
+      {relatedQuestions.length > 0 && (
+        <section className="mt-14 pt-8 border-t border-gray-200">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+            Related Questions
+          </h2>
+          <ul className="space-y-3">
+            {relatedQuestions.map((q) => (
+              <li key={q.slug}>
+                <Link
+                  href={`/questions/${q.slug}`}
+                  className="group flex flex-col gap-0.5"
+                >
+                  <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                    {q.title}
+                  </span>
+                  <span className="text-sm text-gray-500 line-clamp-1">
+                    {q.shortAnswer}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Related Topics */}
+      {relatedTopics.length > 0 && (
+        <section className="mt-10 pt-8 border-t border-gray-200">
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">
+            Related Topics
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {relatedTopics.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/topics/${t.slug}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
+              >
+                <span className="text-sm font-medium text-gray-800 group-hover:text-blue-700 transition-colors">
+                  {t.name}
+                </span>
+                <span className="text-xs text-gray-400 group-hover:text-blue-500 transition-colors">
+                  {t.questions.length} {t.questions.length === 1 ? "question" : "questions"} &rarr;
+                </span>
+              </Link>
             ))}
           </div>
-        </article>
-      ) : (
-        <div className="text-center py-16">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Guide not found
-          </h1>
-          <p className="text-gray-500 mb-6">
-            The guide &ldquo;{slug.replace(/-/g, " ")}&rdquo; could not be found.
-          </p>
-          <Link href="/" className="text-blue-600 hover:underline">
-            Return to home
-          </Link>
-        </div>
+        </section>
       )}
     </div>
   );
