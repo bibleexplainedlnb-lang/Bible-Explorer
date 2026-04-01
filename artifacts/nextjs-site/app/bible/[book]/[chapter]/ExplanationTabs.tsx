@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseBibleReferences } from "@/lib/bible-references";
 
 type Tab = "overview" | "context" | "application";
 
@@ -41,7 +42,7 @@ export default function ExplanationTabs({ explanation }: Props) {
 
       <div className="pt-5 flex-1">
         <p className="text-gray-700 leading-relaxed text-sm">
-          {explanation[active]}
+          {parseBibleReferences(explanation[active])}
         </p>
       </div>
     </div>

@@ -25,6 +25,10 @@ type ApiResponse = {
   translation_id: string;
 };
 
+function slugToApiName(slug: string): string {
+  return slug.replace(/-/g, " ");
+}
+
 async function apiFetch(path: string): Promise<ApiResponse | null> {
   try {
     const res = await fetch(`${API_BASE}/${path}?translation=kjv`, {
@@ -41,7 +45,8 @@ export async function fetchChapter(
   book: string,
   chapter: number
 ): Promise<BibleChapter | null> {
-  const data = await apiFetch(`${encodeURIComponent(book)}+${chapter}`);
+  const apiBook = slugToApiName(book);
+  const data = await apiFetch(`${encodeURIComponent(apiBook)}+${chapter}`);
   if (!data || data.verses.length === 0) return null;
 
   return {
@@ -61,8 +66,9 @@ export async function fetchVerse(
   chapter: number,
   verse: number
 ): Promise<BibleVerse | null> {
+  const apiBook = slugToApiName(book);
   const data = await apiFetch(
-    `${encodeURIComponent(book)}+${chapter}:${verse}`
+    `${encodeURIComponent(apiBook)}+${chapter}:${verse}`
   );
   if (!data || data.verses.length === 0) return null;
 

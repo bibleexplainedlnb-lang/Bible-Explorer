@@ -19,6 +19,9 @@ __turbopack_context__.s([
     ()=>fetchVerse
 ]);
 const API_BASE = "https://bible-api.com";
+function slugToApiName(slug) {
+    return slug.replace(/-/g, " ");
+}
 async function apiFetch(path) {
     try {
         const res = await fetch(`${API_BASE}/${path}?translation=kjv`, {
@@ -33,7 +36,8 @@ async function apiFetch(path) {
     }
 }
 async function fetchChapter(book, chapter) {
-    const data = await apiFetch(`${encodeURIComponent(book)}+${chapter}`);
+    const apiBook = slugToApiName(book);
+    const data = await apiFetch(`${encodeURIComponent(apiBook)}+${chapter}`);
     if (!data || data.verses.length === 0) return null;
     return {
         book: data.verses[0].book_name,
@@ -47,7 +51,8 @@ async function fetchChapter(book, chapter) {
     };
 }
 async function fetchVerse(book, chapter, verse) {
-    const data = await apiFetch(`${encodeURIComponent(book)}+${chapter}:${verse}`);
+    const apiBook = slugToApiName(book);
+    const data = await apiFetch(`${encodeURIComponent(apiBook)}+${chapter}:${verse}`);
     if (!data || data.verses.length === 0) return null;
     const v = data.verses[0];
     return {
