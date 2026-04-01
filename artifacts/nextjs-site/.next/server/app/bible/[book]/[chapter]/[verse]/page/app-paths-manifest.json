@@ -1,0 +1,3 @@
+{
+  "/bible/[book]/[chapter]/[verse]/page": "app/bible/[book]/[chapter]/[verse]/page.js"
+}
