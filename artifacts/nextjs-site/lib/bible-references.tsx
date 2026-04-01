@@ -91,6 +91,10 @@ function buildHref(book: string, chapter: string, verse?: string): string {
     : `/bible/${slug}/${chapter}`;
 }
 
+// Single source of truth for link styling — used in both React and HTML variants
+const LINK_CLASS =
+  "text-amber-700 bg-amber-50 underline underline-offset-2 decoration-amber-400 rounded-sm px-0.5 font-medium hover:text-amber-900 hover:bg-amber-100 transition-colors";
+
 export function parseBibleReferences(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -109,7 +113,7 @@ export function parseBibleReferences(text: string): React.ReactNode[] {
       <Link
         key={start}
         href={buildHref(bookName, chapter, verse)}
-        className="text-blue-600 hover:underline font-medium"
+        className={LINK_CLASS}
       >
         {fullMatch}
       </Link>
@@ -134,7 +138,7 @@ export function linkifyHtml(html: string): string {
       if (i % 2 === 1) return seg; // HTML tag — pass through unchanged
       return seg.replace(re, (match, book, chapter, verse) => {
         const href = buildHref(book, chapter, verse);
-        return `<a href="${href}" class="text-blue-600 hover:underline font-medium">${match}</a>`;
+        return `<a href="${href}" class="${LINK_CLASS}">${match}</a>`;
       });
     })
     .join("");

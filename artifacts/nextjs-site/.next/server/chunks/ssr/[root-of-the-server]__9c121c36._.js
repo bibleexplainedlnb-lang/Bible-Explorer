@@ -297,6 +297,8 @@ function buildHref(book, chapter, verse) {
     const slug = bookSlug(book);
     return verse ? `/bible/${slug}/${chapter}/${verse}` : `/bible/${slug}/${chapter}`;
 }
+// Single source of truth for link styling — used in both React and HTML variants
+const LINK_CLASS = "text-amber-700 bg-amber-50 underline underline-offset-2 decoration-amber-400 rounded-sm px-0.5 font-medium hover:text-amber-900 hover:bg-amber-100 transition-colors";
 function parseBibleReferences(text) {
     const parts = [];
     let lastIndex = 0;
@@ -309,11 +311,11 @@ function parseBibleReferences(text) {
         }
         parts.push(/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
             href: buildHref(bookName, chapter, verse),
-            className: "text-blue-600 hover:underline font-medium",
+            className: LINK_CLASS,
             children: fullMatch
         }, start, false, {
             fileName: "[project]/artifacts/nextjs-site/lib/bible-references.tsx",
-            lineNumber: 109,
+            lineNumber: 113,
             columnNumber: 7
         }, this));
         lastIndex = start + fullMatch.length;
@@ -331,7 +333,7 @@ function linkifyHtml(html) {
         if (i % 2 === 1) return seg; // HTML tag — pass through unchanged
         return seg.replace(re, (match, book, chapter, verse)=>{
             const href = buildHref(book, chapter, verse);
-            return `<a href="${href}" class="text-blue-600 hover:underline font-medium">${match}</a>`;
+            return `<a href="${href}" class="${LINK_CLASS}">${match}</a>`;
         });
     }).join("");
 }

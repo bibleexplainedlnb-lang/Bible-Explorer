@@ -52,6 +52,11 @@
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --color-amber-50: #fffbeb;
+    --color-amber-100: #fef3c6;
+    --color-amber-400: #fcbb00;
+    --color-amber-700: #b75000;
+    --color-amber-900: #7b3306;
     --color-blue-50: #eff6ff;
     --color-blue-300: #90c5ff;
     --color-blue-500: #3080ff;
@@ -99,6 +104,7 @@
     --leading-tight: 1.25;
     --leading-snug: 1.375;
     --leading-relaxed: 1.625;
+    --radius-sm: .25rem;
     --radius-lg: .5rem;
     --default-transition-duration: .15s;
     --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
@@ -108,6 +114,11 @@
 
   @supports (color: color(display-p3 0 0 0)) {
     :root, :host {
+      --color-amber-50: color(display-p3 .997804 .985047 .926312);
+      --color-amber-100: color(display-p3 .989391 .954583 .796328);
+      --color-amber-400: color(display-p3 .959186 .738519 .118268);
+      --color-amber-700: color(display-p3 .67989 .32771 .0520514);
+      --color-amber-900: color(display-p3 .445958 .216422 .0823321);
       --color-blue-50: color(display-p3 .941826 .963151 .995385);
       --color-blue-300: color(display-p3 .602559 .767214 .993938);
       --color-blue-500: color(display-p3 .266422 .491219 .988624);
@@ -129,6 +140,11 @@
 
   @supports (color: lab(0% 0 0)) {
     :root, :host {
+      --color-amber-50: lab(98.6252% -.635922 8.42309);
+      --color-amber-100: lab(95.916% -1.21653 23.111);
+      --color-amber-400: lab(80.1641% 16.6016 99.2089);
+      --color-amber-700: lab(47.2709% 42.9082 69.2966);
+      --color-amber-900: lab(31.2288% 30.2627 40.0378);
       --color-blue-50: lab(96.492% -1.14644 -5.11479);
       --color-blue-300: lab(77.5052% -6.4629 -36.42);
       --color-blue-500: lab(54.1736% 13.3369 -74.6839);
@@ -1676,6 +1692,10 @@
     border-radius: var(--radius-lg);
   }
 
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
@@ -1717,6 +1737,10 @@
     border-color: rgba(0, 0, 0, 0);
   }
 
+  .bg-amber-50 {
+    background-color: var(--color-amber-50);
+  }
+
   .bg-blue-50 {
     background-color: var(--color-blue-50);
   }
@@ -1735,6 +1759,10 @@
 
   .p-6 {
     padding: calc(var(--spacing) * 6);
+  }
+
+  .px-0\.5 {
+    padding-inline: calc(var(--spacing) * .5);
   }
 
   .px-2\.5 {
@@ -1906,6 +1934,10 @@
     letter-spacing: var(--tracking-wide);
   }
 
+  .text-amber-700 {
+    color: var(--color-amber-700);
+  }
+
   .text-blue-600 {
     color: var(--color-blue-600);
   }
@@ -1948,6 +1980,20 @@
 
   .italic {
     font-style: italic;
+  }
+
+  .underline {
+    -webkit-text-decoration-line: underline;
+    text-decoration-line: underline;
+  }
+
+  .decoration-amber-400 {
+    -webkit-text-decoration-color: var(--color-amber-400);
+    text-decoration-color: var(--color-amber-400);
+  }
+
+  .underline-offset-2 {
+    text-underline-offset: 2px;
   }
 
   .antialiased {
@@ -2111,6 +2157,12 @@
   }
 
   @media (hover: hover) {
+    .hover\:bg-amber-100:hover {
+      background-color: var(--color-amber-100);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:bg-blue-50:hover {
       background-color: var(--color-blue-50);
     }
@@ -2119,6 +2171,12 @@
   @media (hover: hover) {
     .hover\:bg-gray-100:hover {
       background-color: var(--color-gray-100);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-amber-900:hover {
+      color: var(--color-amber-900);
     }
   }
 
