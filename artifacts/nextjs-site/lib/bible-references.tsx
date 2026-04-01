@@ -20,7 +20,6 @@ const BOOKS: { name: string; slug: string }[] = [
   { name: "Ephesians",       slug: "ephesians" },
   { name: "Nehemiah",        slug: "nehemiah" },
   { name: "Zechariah",       slug: "zechariah" },
-  { name: "Philippians",     slug: "philippians" },
   { name: "1 Timothy",       slug: "1-timothy" },
   { name: "2 Timothy",       slug: "2-timothy" },
   { name: "1 Samuel",        slug: "1-samuel" },
@@ -85,6 +84,13 @@ function bookSlug(name: string): string {
   )?.slug ?? name.toLowerCase().replace(/\s+/g, "-");
 }
 
+function buildHref(book: string, chapter: string, verse?: string): string {
+  const slug = bookSlug(book);
+  return verse
+    ? `/bible/${slug}/${chapter}/${verse}`
+    : `/bible/${slug}/${chapter}`;
+}
+
 export function parseBibleReferences(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -92,18 +98,17 @@ export function parseBibleReferences(text: string): React.ReactNode[] {
   REFERENCE_RE.lastIndex = 0;
 
   for (const match of text.matchAll(REFERENCE_RE)) {
-    const [fullMatch, bookName, chapter] = match;
+    const [fullMatch, bookName, chapter, verse] = match;
     const start = match.index ?? 0;
 
     if (start > lastIndex) {
       parts.push(text.slice(lastIndex, start));
     }
 
-    const slug = bookSlug(bookName);
     parts.push(
       <Link
         key={start}
-        href={`/bible/${slug}/${chapter}`}
+        href={buildHref(bookName, chapter, verse)}
         className="text-blue-600 hover:underline font-medium"
       >
         {fullMatch}
@@ -118,4 +123,19 @@ export function parseBibleReferences(text: string): React.ReactNode[] {
   }
 
   return parts;
+}
+
+export function linkifyHtml(html: string): string {
+  const re = new RegExp(REFERENCE_RE.source, "g");
+  // Split on HTML tags so we never touch text inside tag attributes
+  const segments = html.split(/(<[^>]*>)/);
+  return segments
+    .map((seg, i) => {
+      if (i % 2 === 1) return seg; // HTML tag — pass through unchanged
+      return seg.replace(re, (match, book, chapter, verse) => {
+        const href = buildHref(book, chapter, verse);
+        return `<a href="${href}" class="text-blue-600 hover:underline font-medium">${match}</a>`;
+      });
+    })
+    .join("");
 }

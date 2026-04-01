@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import data from "@/data/content.json";
+import { linkifyHtml } from "@/lib/bible-references";
 
 type Question = {
   slug: string;
@@ -72,7 +73,7 @@ export default async function QuestionPage({ params }: Props) {
         {q.content ? (
           <div
             className="prose prose-gray max-w-none prose-h2:text-lg prose-h2:font-semibold prose-h2:text-gray-900 prose-h2:mt-8 prose-h2:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-900 prose-em:text-gray-700"
-            dangerouslySetInnerHTML={{ __html: q.content }}
+            dangerouslySetInnerHTML={{ __html: linkifyHtml(q.content) }}
           />
         ) : (
           <p className="text-gray-500 italic">No content available for this question.</p>
