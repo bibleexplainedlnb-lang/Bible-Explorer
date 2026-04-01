@@ -98,9 +98,17 @@ Next.js 15 (App Router) content site styled with Tailwind CSS 4.
 - Entry: `app/layout.tsx` — shared header/footer layout with navigation
 - Pages: `/` (homepage), `/questions/[slug]`, `/topics/[slug]`, `/guides/[slug]`, `/bible/[book]/[chapter]`
 - Styling: Tailwind CSS 4 with `@tailwindcss/postcss`
-- All pages use static placeholder content (no database/backend needed)
-- Dev server: `next dev --port $PORT --hostname 0.0.0.0` on port 18425
+- Dev server: `next dev --turbo --port $PORT --hostname 0.0.0.0` on port 18425
 - `pnpm --filter @workspace/nextjs-site run dev` — run the dev server
+
+**Data architecture:**
+- `data/content.json` — single source of truth for questions, topics, and Bible chapter explanations (`bibleExplanations`)
+  - `bibleExplanations` stores explanation metadata (overview, context, application) keyed by `book` + `chapter`; no verse data stored here
+- `lib/bible.ts` — utility module for live KJV Bible data
+  - `fetchChapter(book, chapter)` — fetches a full chapter from `bible-api.com` KJV endpoint; responses cached 24 h via Next.js `fetch` caching
+  - `fetchVerse(book, chapter, verse)` — fetches a single verse from the same API
+- Bible pages display all KJV verses from the live API; when a `bibleExplanation` entry exists for the chapter, a sticky explanation panel (Overview / Context / Application tabs) is shown alongside the verses
+- Any chapter in the entire Bible is accessible at `/bible/[book]/[chapter]` even without an explanation entry — only the verse column renders in that case
 
 ### `scripts` (`@workspace/scripts`)
 

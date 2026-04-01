@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import data from "@/data/content.json";
+import { fetchChapter } from "@/lib/bible";
 import ExplanationTabs from "./ExplanationTabs";
 
-type BibleChapter = {
+type BibleExplanation = {
   book: string;
-  bookName: string;
-  testament: string;
   chapter: number;
-  verses: { number: number; text: string }[];
+  testament: string;
   explanation: {
     overview: string;
     context: string;
@@ -16,11 +15,11 @@ type BibleChapter = {
   };
 };
 
-const chapters = data.bibleChapters as BibleChapter[];
+const explanations = data.bibleExplanations as BibleExplanation[];
 
-function getChapter(book: string, chapter: number): BibleChapter | undefined {
-  return chapters.find(
-    (c) => c.book === book.toLowerCase() && c.chapter === chapter
+function getExplanation(book: string, chapter: number): BibleExplanation | undefined {
+  return explanations.find(
+    (e) => e.book === book.toLowerCase() && e.chapter === chapter
   );
 }
 
@@ -31,18 +30,26 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { book, chapter } = await params;
   const chapterNum = parseInt(chapter, 10);
-  const found = getChapter(book, chapterNum);
+  const explanation = getExplanation(book, chapterNum);
+  const bookDisplay = explanation
+    ? book.charAt(0).toUpperCase() + book.slice(1)
+    : book;
   return {
-    title: found
-      ? `${found.bookName} ${chapterNum} | Bible | Faith & Scripture`
-      : "Bible | Faith & Scripture",
+    title: `${bookDisplay} ${chapterNum} (KJV) | Bible | Faith & Scripture`,
   };
 }
 
 export default async function BibleChapterPage({ params }: Props) {
   const { book, chapter } = await params;
   const chapterNum = parseInt(chapter, 10);
-  const found = getChapter(book, chapterNum);
+
+  const [kjvChapter, explanation] = await Promise.all([
+    fetchChapter(book, chapterNum),
+    Promise.resolve(getExplanation(book, chapterNum)),
+  ]);
+
+  const bookDisplay = kjvChapter?.book ?? (book.charAt(0).toUpperCase() + book.slice(1));
+  const testament = explanation?.testament ?? null;
 
   return (
     <div>
@@ -55,32 +62,37 @@ export default async function BibleChapterPage({ params }: Props) {
         </Link>
       </div>
 
-      {found ? (
+      {kjvChapter ? (
         <>
           <div className="mb-6">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-              {found.testament}
-            </p>
+            {testament && (
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                {testament}
+              </p>
+            )}
             <h1 className="text-2xl font-bold text-gray-900">
-              {found.bookName} {found.chapter}
+              {bookDisplay} {chapterNum}{" "}
+              <span className="text-sm font-normal text-gray-400 ml-1">KJV</span>
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className={`grid grid-cols-1 gap-8 items-start ${explanation ? "lg:grid-cols-2" : ""}`}>
             <div className="space-y-4">
-              {found.verses.map((verse) => (
-                <div key={verse.number} className="flex gap-3">
+              {kjvChapter.verses.map((verse) => (
+                <div key={verse.verse} className="flex gap-3">
                   <span className="flex-shrink-0 text-xs font-semibold text-gray-300 w-6 mt-1 text-right select-none">
-                    {verse.number}
+                    {verse.verse}
                   </span>
                   <p className="text-gray-800 leading-relaxed">{verse.text}</p>
                 </div>
               ))}
             </div>
 
-            <div className="lg:sticky lg:top-8 rounded-lg border border-gray-200 bg-gray-50 p-5">
-              <ExplanationTabs explanation={found.explanation} />
-            </div>
+            {explanation && (
+              <div className="lg:sticky lg:top-8 rounded-lg border border-gray-200 bg-gray-50 p-5">
+                <ExplanationTabs explanation={explanation.explanation} />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between mt-12 pt-6 border-t border-gray-200">
@@ -89,7 +101,7 @@ export default async function BibleChapterPage({ params }: Props) {
                 href={`/bible/${book}/${chapterNum - 1}`}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
               >
-                &larr; {found.bookName} {chapterNum - 1}
+                &larr; {bookDisplay} {chapterNum - 1}
               </Link>
             ) : (
               <span />
@@ -98,7 +110,7 @@ export default async function BibleChapterPage({ params }: Props) {
               href={`/bible/${book}/${chapterNum + 1}`}
               className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
             >
-              {found.bookName} {chapterNum + 1} &rarr;
+              {bookDisplay} {chapterNum + 1} &rarr;
             </Link>
           </div>
         </>
@@ -108,7 +120,7 @@ export default async function BibleChapterPage({ params }: Props) {
             Chapter not found
           </h1>
           <p className="text-gray-500 mb-6">
-            {book} chapter {chapterNum} is not available yet.
+            {book} chapter {chapterNum} could not be loaded.
           </p>
           <Link href="/" className="text-blue-600 hover:underline">
             Return to home
