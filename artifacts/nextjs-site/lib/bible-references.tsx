@@ -73,26 +73,26 @@ const escapedNames = BOOKS.map(({ name }) =>
   name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 );
 
-const REFERENCE_RE = new RegExp(
+export const REFERENCE_RE = new RegExp(
   `(${escapedNames.join("|")})\\s+(\\d+)(?::(\\d+)(?:-\\d+)?)?`,
   "g"
 );
 
-function bookSlug(name: string): string {
+export function bookSlug(name: string): string {
   return BOOKS.find(
     (b) => b.name.toLowerCase() === name.toLowerCase()
   )?.slug ?? name.toLowerCase().replace(/\s+/g, "-");
 }
 
-function buildHref(book: string, chapter: string, verse?: string): string {
+export function buildBibleHref(book: string, chapter: string, verse?: string): string {
   const slug = bookSlug(book);
   return verse
     ? `/bible/${slug}/${chapter}/${verse}`
     : `/bible/${slug}/${chapter}`;
 }
 
-// Single source of truth for link styling — used in both React and HTML variants
-const LINK_CLASS =
+// Single source of truth for Bible link styling
+export const BIBLE_LINK_CLASS =
   "text-amber-700 bg-amber-50 underline underline-offset-2 decoration-amber-400 rounded-sm px-0.5 font-medium hover:text-amber-900 hover:bg-amber-100 transition-colors";
 
 export function parseBibleReferences(text: string): React.ReactNode[] {
@@ -112,8 +112,8 @@ export function parseBibleReferences(text: string): React.ReactNode[] {
     parts.push(
       <Link
         key={start}
-        href={buildHref(bookName, chapter, verse)}
-        className={LINK_CLASS}
+        href={buildBibleHref(bookName, chapter, verse)}
+        className={BIBLE_LINK_CLASS}
       >
         {fullMatch}
       </Link>
@@ -129,17 +129,42 @@ export function parseBibleReferences(text: string): React.ReactNode[] {
   return parts;
 }
 
-export function linkifyHtml(html: string): string {
-  const re = new RegExp(REFERENCE_RE.source, "g");
-  // Split on HTML tags so we never touch text inside tag attributes
+/**
+ * Run a text replacer on all text nodes in an HTML string,
+ * skipping text that is already inside an <a> tag.
+ * Also skips the content of HTML tag attributes.
+ */
+export function processTextNodes(
+  html: string,
+  replacer: (text: string) => string
+): string {
   const segments = html.split(/(<[^>]*>)/);
+  let anchorDepth = 0;
   return segments
     .map((seg, i) => {
-      if (i % 2 === 1) return seg; // HTML tag — pass through unchanged
-      return seg.replace(re, (match, book, chapter, verse) => {
-        const href = buildHref(book, chapter, verse);
-        return `<a href="${href}" class="${LINK_CLASS}">${match}</a>`;
-      });
+      if (i % 2 === 1) {
+        // HTML tag
+        if (/^<a[\s>]/i.test(seg)) anchorDepth++;
+        else if (/^<\/a\s*>/i.test(seg)) anchorDepth = Math.max(0, anchorDepth - 1);
+        return seg;
+      }
+      // Text node — skip if inside an anchor
+      return anchorDepth > 0 ? seg : replacer(seg);
     })
     .join("");
+}
+
+/**
+ * Linkify Bible references in an HTML string at render time.
+ * Anchor-aware: never processes text already inside an <a> tag,
+ * so it is safe to call on content that was already enriched at save time.
+ */
+export function linkifyHtml(html: string): string {
+  const re = new RegExp(REFERENCE_RE.source, "g");
+  return processTextNodes(html, (text) =>
+    text.replace(re, (match, book, chapter, verse) => {
+      const href = buildBibleHref(book, chapter, verse);
+      return `<a href="${href}" class="${BIBLE_LINK_CLASS}">${match}</a>`;
+    })
+  );
 }

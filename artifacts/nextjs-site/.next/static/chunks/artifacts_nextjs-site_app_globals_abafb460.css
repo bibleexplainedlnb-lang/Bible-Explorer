@@ -109,9 +109,11 @@
     --color-violet-50: #f5f3ff;
     --color-violet-100: #ede9fe;
     --color-violet-200: #ddd6ff;
+    --color-violet-300: #c4b4ff;
     --color-violet-400: #a685ff;
     --color-violet-600: #7f22fe;
     --color-violet-700: #7008e7;
+    --color-violet-900: #4d179a;
     --color-gray-50: #f9fafb;
     --color-gray-100: #f3f4f6;
     --color-gray-200: #e5e7eb;
@@ -197,9 +199,11 @@
       --color-violet-50: color(display-p3 .959212 .95304 .995713);
       --color-violet-100: color(display-p3 .926222 .913546 .990178);
       --color-violet-200: color(display-p3 .861543 .838846 .988006);
+      --color-violet-300: color(display-p3 .758872 .706261 .991729);
       --color-violet-400: color(display-p3 .631215 .522175 .990008);
       --color-violet-600: color(display-p3 .459951 .162666 .957985);
       --color-violet-700: color(display-p3 .40161 .0841901 .871151);
+      --color-violet-900: color(display-p3 .277841 .103712 .580169);
       --color-gray-50: color(display-p3 .977213 .98084 .985102);
       --color-gray-100: color(display-p3 .953567 .956796 .964321);
       --color-gray-200: color(display-p3 .899787 .906171 .92106);
@@ -246,9 +250,11 @@
       --color-violet-50: lab(96.2416% 2.28849 -5.51657);
       --color-violet-100: lab(93.0838% 4.35197 -9.88284);
       --color-violet-200: lab(87.0888% 8.53688 -19.4189);
+      --color-violet-300: lab(76.7419% 18.3911 -37.0706);
       --color-violet-400: lab(62.8239% 34.9159 -60.0512);
       --color-violet-600: lab(41.088% 68.9966 -91.995);
       --color-violet-700: lab(35.2783% 67.9912 -88.793);
+      --color-violet-900: lab(24.3783% 45.7525 -61.4902);
       --color-gray-50: lab(98.2596% -.247031 -.706708);
       --color-gray-100: lab(96.1596% -.0823438 -1.13575);
       --color-gray-200: lab(91.6229% -.159115 -2.26791);
@@ -2517,6 +2523,16 @@
     text-decoration-color: var(--color-amber-400);
   }
 
+  .decoration-blue-300 {
+    -webkit-text-decoration-color: var(--color-blue-300);
+    text-decoration-color: var(--color-blue-300);
+  }
+
+  .decoration-violet-300 {
+    -webkit-text-decoration-color: var(--color-violet-300);
+    text-decoration-color: var(--color-violet-300);
+  }
+
   .underline-offset-2 {
     text-underline-offset: 2px;
   }
@@ -2837,6 +2853,12 @@
   }
 
   @media (hover: hover) {
+    .hover\:text-blue-900:hover {
+      color: var(--color-blue-900);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:text-gray-600:hover {
       color: var(--color-gray-600);
     }
@@ -2857,6 +2879,12 @@
   @media (hover: hover) {
     .hover\:text-gray-900:hover {
       color: var(--color-gray-900);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-violet-900:hover {
+      color: var(--color-violet-900);
     }
   }
 
