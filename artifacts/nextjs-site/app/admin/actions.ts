@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { questions } from "@/lib/db";
 
+/** Called by the form — saves and redirects */
 export async function addQuestion(formData: FormData) {
   const title = (formData.get("title") as string | null)?.trim() ?? "";
   const slug = (formData.get("slug") as string | null)?.trim() ?? "";
@@ -14,18 +15,20 @@ export async function addQuestion(formData: FormData) {
     redirect("/admin?error=Title+and+slug+are+required");
   }
 
-  // Validate slug format
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     redirect("/admin?error=Slug+must+be+lowercase+letters%2C+numbers%2C+and+hyphens+only");
   }
 
-  // Check for duplicate slug
-  const existing = questions.findBySlug(slug);
-  if (existing) {
+  if (questions.findBySlug(slug)) {
     redirect(`/admin?error=A+question+with+slug+%22${encodeURIComponent(slug)}%22+already+exists`);
   }
 
   questions.create({ title, slug, topic, shortAnswer, content });
-
   redirect(`/questions/${slug}?created=1`);
+}
+
+/** Real-time slug availability check — callable from client components */
+export async function checkSlugAvailable(slug: string): Promise<boolean> {
+  if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return false;
+  return !questions.findBySlug(slug);
 }

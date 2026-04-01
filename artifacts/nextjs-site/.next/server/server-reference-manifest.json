@@ -10,10 +10,25 @@
         }
       },
       "layer": {
-        "app/admin/page": "rsc"
+        "app/admin/page": "action-browser"
       },
       "filename": "artifacts/nextjs-site/app/admin/actions.ts",
       "exportedName": "addQuestion"
+    },
+    "4008e18f9c8a94310f657f274af137b44f1c4f3544": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": "[project]/artifacts/nextjs-site/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/artifacts/nextjs-site/app/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "checkSlugAvailable",
+          "filename": "artifacts/nextjs-site/app/admin/actions.ts"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser"
+      },
+      "filename": "artifacts/nextjs-site/app/admin/actions.ts",
+      "exportedName": "checkSlugAvailable"
     }
   },
   "edge": {},
