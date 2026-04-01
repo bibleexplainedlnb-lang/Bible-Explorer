@@ -1,0 +1,201 @@
+module.exports = [
+"[project]/artifacts/nextjs-site/.next-internal/server/app/topics/[slug]/page/actions.js [app-rsc] (server actions loader, ecmascript)", ((__turbopack_context__, module, exports) => {
+
+}),
+"[project]/artifacts/nextjs-site/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", ((__turbopack_context__) => {
+
+__turbopack_context__.n(__turbopack_context__.i("[project]/artifacts/nextjs-site/app/layout.tsx [app-rsc] (ecmascript)"));
+}),
+"[project]/artifacts/nextjs-site/data/content.json (json)", ((__turbopack_context__) => {
+
+__turbopack_context__.v(JSON.parse("{\"questions\":[{\"slug\":\"why-did-jesus-die\",\"title\":\"Why did Jesus die?\",\"topic\":\"Jesus\",\"shortAnswer\":\"Jesus died as a substitute for sinners — taking the punishment we deserved so that we could be forgiven and restored to God.\",\"sections\":{\"explanation\":\"Jesus was crucified under the Roman governor Pontius Pilate around 30 AD. But his death was not merely a political or historical event. The New Testament teaches that it was the fulfillment of God's plan to deal with human sin. Isaiah 53 foretold a servant who would be \\\"pierced for our transgressions\\\" and \\\"crushed for our iniquities.\\\" Jesus himself said he came \\\"to give his life as a ransom for many\\\" (Mark 10:45).\",\"meaning\":\"At the heart of Jesus' death is the concept of substitutionary atonement — the idea that Jesus stood in our place and bore the penalty for sin that justice required. Romans 3:25 says God presented Jesus as a \\\"propitiation\\\" (a sacrifice that satisfies God's wrath) through faith in his blood. His death satisfied God's justice while opening the door for mercy. It also demonstrated the depth of God's love: \\\"God shows his love for us in that while we were still sinners, Christ died for us\\\" (Romans 5:8).\",\"application\":\"Understanding why Jesus died changes everything. It means our forgiveness was costly — it required the death of God's own Son. This should produce gratitude, humility, and a desire to live for the one who died for us. As Paul writes in 2 Corinthians 5:15, \\\"he died for all, that those who live might no longer live for themselves but for him who for their sake died and was raised.\\\"\"}},{\"slug\":\"what-is-salvation\",\"title\":\"What is salvation?\",\"topic\":\"Salvation\",\"shortAnswer\":\"Salvation is God's rescue of sinners from the penalty, power, and presence of sin — accomplished through Jesus Christ and received by faith.\",\"sections\":{\"explanation\":\"The word salvation comes from the Latin salus, meaning health or wholeness. In the Bible, it describes God's comprehensive rescue of humanity. The Old Testament uses the idea in physical terms — deliverance from enemies, danger, or death — but these point forward to a deeper spiritual reality. In the New Testament, salvation is God's answer to humanity's greatest problem: sin and its consequences of guilt, brokenness, and separation from God.\",\"meaning\":\"Salvation has three tenses in Scripture. Past: believers have been saved from the penalty of sin (justification — Romans 5:1). Present: believers are being saved from the power of sin (sanctification — Philippians 2:12-13). Future: believers will be saved from the presence of sin entirely (glorification — Romans 8:23). Salvation is entirely the work of God — Ephesians 2:8-9 makes clear it is a gift received through faith, not something earned. Jesus declared himself \\\"the way, the truth, and the life\\\" and the only path to the Father (John 14:6).\",\"application\":\"If salvation is truly God's gift through Christ, then it calls for a response of faith and repentance — turning from self-directed living toward God. It also reshapes how we see ourselves (as the forgiven, not the self-sufficient), how we treat others (with the same grace we have received), and what we hope for (a restored creation where God dwells with his people forever).\"}},{\"slug\":\"what-is-faith\",\"title\":\"What is faith and why does it matter?\",\"topic\":\"Faith\",\"shortAnswer\":\"Faith is confident trust in God based on what He has revealed — it is the foundation of the Christian life and the means by which we are saved.\",\"sections\":{\"explanation\":\"Hebrews 11:1 defines faith as \\\"the substance of things hoped for, the evidence of things not seen.\\\" This is not blind belief — it is trust grounded in evidence: the witness of Scripture, the resurrection of Jesus, and the testimony of changed lives throughout history. The chapter goes on to list figures like Abraham, Moses, and Rahab as examples of those who acted on God's promises before seeing them fulfilled.\",\"meaning\":\"Faith matters because it is the only way to enter into a right relationship with God. Romans 5:1 says \\\"since we have been justified by faith, we have peace with God through our Lord Jesus Christ.\\\" Hebrews 11:6 adds that \\\"without faith it is impossible to please God.\\\" Faith is not a meritorious work that earns salvation — it is the empty hand that receives God's gift. Genuine faith is also not static; James 2:17 reminds us that faith without works is dead, meaning true faith produces real-world transformation.\",\"application\":\"Growing in faith is a lifelong process. It comes through hearing God's Word (Romans 10:17), prayer, community with other believers, and trusting God through difficulty. When doubt arises — and it will — the answer is not to suppress it but to bring it honestly to God and to the Scriptures. Faith does not require certainty about everything; it requires trust in the One who is certain.\"}},{\"slug\":\"how-to-pray\",\"title\":\"How should I pray?\",\"topic\":\"Prayer\",\"shortAnswer\":\"Prayer is honest, ongoing conversation with God — it can be structured or spontaneous, and it grows naturally through practice.\",\"sections\":{\"explanation\":\"Jesus gave his disciples a model prayer in Matthew 6:9-13 — the Lord's Prayer — that covers adoration (\\\"hallowed be your name\\\"), submission (\\\"your kingdom come\\\"), dependence (\\\"give us this day our daily bread\\\"), confession (\\\"forgive us our debts\\\"), and protection (\\\"deliver us from evil\\\"). This is not a script to recite but a pattern that shapes how we approach God.\",\"meaning\":\"Prayer is the primary means by which believers maintain their relationship with God. 1 Thessalonians 5:17 calls for praying \\\"without ceasing\\\" — not hours on your knees, but a continual awareness of God's presence throughout the day. Philippians 4:6-7 promises that bringing every anxiety to God in prayer produces a peace that surpasses understanding. Prayer also aligns our will with God's: as we ask, listen, and wait, our desires gradually conform to his purposes.\",\"application\":\"Start where you are. Even brief, honest prayers are heard. Many find it helpful to set aside a regular time and place, use a prayer journal, or follow a simple structure like ACTS (Adoration, Confession, Thanksgiving, Supplication). If prayer feels dry or mechanical, tell God that too — honesty is always the right posture before him.\"}}],\"topics\":[{\"slug\":\"jesus\",\"name\":\"Jesus\"},{\"slug\":\"salvation\",\"name\":\"Salvation\"}],\"bible\":[{\"book\":\"John\",\"chapter\":3,\"verse\":16,\"text\":\"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.\"},{\"book\":\"Romans\",\"chapter\":5,\"verse\":8,\"text\":\"But God shows his love for us in that while we were still sinners, Christ died for us.\"}]}"));}),
+"[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>TopicPage,
+    "generateMetadata",
+    ()=>generateMetadata
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-dir/link.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__ = __turbopack_context__.i("[project]/artifacts/nextjs-site/data/content.json (json)");
+;
+;
+;
+const topics = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].topics;
+const questions = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].questions;
+function getTopic(slug) {
+    return topics.find((t)=>t.slug === slug);
+}
+function getRelatedQuestions(topicName) {
+    return questions.filter((q)=>q.topic.toLowerCase() === topicName.toLowerCase());
+}
+async function generateMetadata({ params }) {
+    const { slug } = await params;
+    const topic = getTopic(slug);
+    return {
+        title: topic ? `${topic.name} | Topics | Faith & Scripture` : "Topic | Faith & Scripture"
+    };
+}
+async function TopicPage({ params }) {
+    const { slug } = await params;
+    const topic = getTopic(slug);
+    const relatedQuestions = topic ? getRelatedQuestions(topic.name) : [];
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "max-w-2xl",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mb-8",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                    href: "/",
+                    className: "text-sm text-gray-500 hover:text-gray-700 transition-colors",
+                    children: "← Back to home"
+                }, void 0, false, {
+                    fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                    lineNumber: 43,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                lineNumber: 42,
+                columnNumber: 7
+            }, this),
+            topic ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "space-y-8",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                        className: "text-3xl font-bold text-gray-900",
+                        children: topic.name
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                        lineNumber: 53,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                className: "text-base font-semibold text-gray-500 uppercase tracking-wide mb-4",
+                                children: "Questions"
+                            }, void 0, false, {
+                                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                lineNumber: 56,
+                                columnNumber: 13
+                            }, this),
+                            relatedQuestions.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                className: "space-y-3",
+                                children: relatedQuestions.map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                                            href: `/questions/${q.slug}`,
+                                            className: "block rounded-lg border border-gray-200 px-5 py-4 hover:border-gray-300 hover:shadow-sm transition-all group",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "font-medium text-gray-900 group-hover:text-blue-700 transition-colors",
+                                                    children: q.title
+                                                }, void 0, false, {
+                                                    fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                                    lineNumber: 67,
+                                                    columnNumber: 23
+                                                }, this),
+                                                q.shortAnswer && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2",
+                                                    children: q.shortAnswer
+                                                }, void 0, false, {
+                                                    fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                                    lineNumber: 71,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                            lineNumber: 63,
+                                            columnNumber: 21
+                                        }, this)
+                                    }, q.slug, false, {
+                                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                        lineNumber: 62,
+                                        columnNumber: 19
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                lineNumber: 60,
+                                columnNumber: 15
+                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-gray-500",
+                                children: "No questions found for this topic yet."
+                            }, void 0, false, {
+                                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                                lineNumber: 80,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                        lineNumber: 55,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                lineNumber: 52,
+                columnNumber: 9
+            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-center py-16",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                        className: "text-2xl font-semibold text-gray-900 mb-2",
+                        children: "Topic not found"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                        lineNumber: 86,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-gray-500 mb-6",
+                        children: [
+                            "The topic “",
+                            slug.replace(/-/g, " "),
+                            "” could not be found."
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                        lineNumber: 89,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                        href: "/",
+                        className: "text-blue-600 hover:underline",
+                        children: "Return to home"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                        lineNumber: 92,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+                lineNumber: 85,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx",
+        lineNumber: 41,
+        columnNumber: 5
+    }, this);
+}
+}),
+"[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx [app-rsc] (ecmascript, Next.js Server Component)", ((__turbopack_context__) => {
+
+__turbopack_context__.n(__turbopack_context__.i("[project]/artifacts/nextjs-site/app/topics/[slug]/page.tsx [app-rsc] (ecmascript)"));
+}),
+"[externals]/next/dist/shared/lib/no-fallback-error.external.js [external] (next/dist/shared/lib/no-fallback-error.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/shared/lib/no-fallback-error.external.js", () => require("next/dist/shared/lib/no-fallback-error.external.js"));
+
+module.exports = mod;
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__63ddff07._.js.map
