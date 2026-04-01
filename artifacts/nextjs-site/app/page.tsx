@@ -1,15 +1,11 @@
 import Link from "next/link";
-import data from "@/data/content.json";
-
-type Question = { slug: string; title: string; shortAnswer: string };
-type Topic = { slug: string; name: string };
-type Guide = { slug: string; title: string; shortDescription: string };
-
-const questions = data.questions as Question[];
-const topics = data.topics as Topic[];
-const guides = (data.guides as Guide[]).slice(0, 3);
+import { questions as qdb, topics as tdb, guides as gdb } from "@/lib/db";
 
 export default function HomePage() {
+  const allQuestions = qdb.list();
+  const allTopics = tdb.list();
+  const featuredGuides = gdb.list().slice(0, 3);
+
   return (
     <div className="max-w-2xl space-y-14">
       <section className="py-6">
@@ -24,7 +20,7 @@ export default function HomePage() {
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Questions</h2>
         <ul className="space-y-3">
-          {questions.map((q) => (
+          {allQuestions.map((q) => (
             <li key={q.slug}>
               <Link
                 href={`/questions/${q.slug}`}
@@ -47,7 +43,7 @@ export default function HomePage() {
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Topics</h2>
         <ul className="space-y-2">
-          {topics.map((t) => (
+          {allTopics.map((t) => (
             <li key={t.slug}>
               <Link
                 href={`/topics/${t.slug}`}
@@ -60,13 +56,13 @@ export default function HomePage() {
         </ul>
       </section>
 
-      {guides.length > 0 && (
+      {featuredGuides.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Featured Guides
           </h2>
           <ul className="space-y-3">
-            {guides.map((g) => (
+            {featuredGuides.map((g) => (
               <li key={g.slug}>
                 <Link
                   href={`/guides/${g.slug}`}

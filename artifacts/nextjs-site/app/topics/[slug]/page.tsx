@@ -1,33 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import data from "@/data/content.json";
-
-type Topic = { slug: string; name: string; questions?: string[] };
-type Question = { slug: string; title: string; shortAnswer: string; topic: string };
-type Guide = { slug: string; title: string; shortDescription: string; relatedTopics: string[] };
-
-const topics = data.topics as Topic[];
-const questions = data.questions as Question[];
-const guides = data.guides as Guide[];
-
-function getTopic(slug: string): Topic | undefined {
-  return topics.find((t) => t.slug === slug);
-}
-
-function getTopicQuestions(topic: Topic): Question[] {
-  if (topic.questions && topic.questions.length > 0) {
-    return topic.questions
-      .map((s) => questions.find((q) => q.slug === s))
-      .filter((q): q is Question => q !== undefined);
-  }
-  return questions.filter(
-    (q) => q.topic.toLowerCase() === topic.name.toLowerCase()
-  );
-}
-
-function getGuideForTopic(topicSlug: string): Guide | undefined {
-  return guides.find((g) => g.relatedTopics.includes(topicSlug));
-}
+import {
+  questions as qdb,
+  topics as tdb,
+  guides as gdb,
+  parseJsonArray,
+} from "@/lib/db";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -35,7 +13,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const topic = getTopic(slug);
+  const topic = tdb.findBySlug(slug);
   return {
     title: topic
       ? `${topic.name} | Topics | Faith & Scripture`
@@ -45,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TopicPage({ params }: Props) {
   const { slug } = await params;
-  const topic = getTopic(slug);
+  const topic = tdb.findBySlug(slug);
 
   if (!topic) {
     return (
@@ -61,8 +39,14 @@ export default async function TopicPage({ params }: Props) {
     );
   }
 
-  const topicQuestions = getTopicQuestions(topic);
-  const guide = getGuideForTopic(slug);
+  // Resolve questions — prefer explicit slug list, fall back to topic name match
+  const slugList = parseJsonArray(topic.questionSlugs);
+  const topicQuestions =
+    slugList.length > 0
+      ? qdb.listBySlugs(slugList)
+      : qdb.listByTopic(topic.name);
+
+  const guide = gdb.findByRelatedTopic(slug);
 
   return (
     <div className="max-w-2xl">

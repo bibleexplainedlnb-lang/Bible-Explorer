@@ -1,49 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import data from "@/data/content.json";
+import {
+  questions as qdb,
+  topics as tdb,
+  guides as gdb,
+  parseJsonArray,
+} from "@/lib/db";
 import { linkifyHtml } from "@/lib/bible-references";
-
-type Guide = {
-  slug: string;
-  title: string;
-  shortDescription: string;
-  content: string;
-  relatedQuestions: string[];
-  relatedTopics: string[];
-};
-
-type Question = {
-  slug: string;
-  title: string;
-  shortAnswer: string;
-  topic: string;
-};
-
-type Topic = {
-  slug: string;
-  name: string;
-  questions: string[];
-};
-
-const guides = data.guides as Guide[];
-const questions = data.questions as Question[];
-const topics = data.topics as Topic[];
-
-function getGuide(slug: string): Guide | undefined {
-  return guides.find((g) => g.slug === slug);
-}
-
-function resolveQuestions(slugs: string[]): Question[] {
-  return slugs
-    .map((s) => questions.find((q) => q.slug === s))
-    .filter((q): q is Question => q !== undefined);
-}
-
-function resolveTopics(slugs: string[]): Topic[] {
-  return slugs
-    .map((s) => topics.find((t) => t.slug === s))
-    .filter((t): t is Topic => t !== undefined);
-}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -51,7 +14,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const guide = gdb.findBySlug(slug);
   return {
     title: guide
       ? `${guide.title} | Guides | Faith & Scripture`
@@ -61,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function GuidePage({ params }: Props) {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const guide = gdb.findBySlug(slug);
 
   if (!guide) {
     return (
@@ -79,8 +42,11 @@ export default async function GuidePage({ params }: Props) {
     );
   }
 
-  const relatedQuestions = resolveQuestions(guide.relatedQuestions);
-  const relatedTopics = resolveTopics(guide.relatedTopics);
+  const relatedQuestions = qdb.listBySlugs(parseJsonArray(guide.relatedQuestions));
+  const relatedTopicSlugs = parseJsonArray(guide.relatedTopics);
+  const relatedTopics = relatedTopicSlugs
+    .map((s) => tdb.findBySlug(s))
+    .filter((t): t is NonNullable<typeof t> => t !== undefined);
 
   return (
     <div className="max-w-2xl">
@@ -153,26 +119,29 @@ export default async function GuidePage({ params }: Props) {
             Related Topics
           </h2>
           <ul className="space-y-3">
-            {relatedTopics.map((t) => (
-              <li key={t.slug}>
-                <Link
-                  href={`/topics/${t.slug}`}
-                  className="group flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 hover:border-violet-200 hover:shadow-sm transition-all"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors leading-snug">
-                      {t.name}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-0.5">
-                      {t.questions.length} {t.questions.length === 1 ? "question" : "questions"}
-                    </p>
-                  </div>
-                  <svg className="flex-shrink-0 mt-0.5 w-4 h-4 text-gray-300 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </li>
-            ))}
+            {relatedTopics.map((t) => {
+              const questionCount = parseJsonArray(t.questionSlugs).length;
+              return (
+                <li key={t.slug}>
+                  <Link
+                    href={`/topics/${t.slug}`}
+                    className="group flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 hover:border-violet-200 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors leading-snug">
+                        {t.name}
+                      </p>
+                      <p className="text-sm text-gray-400 mt-0.5">
+                        {questionCount} {questionCount === 1 ? "question" : "questions"}
+                      </p>
+                    </div>
+                    <svg className="flex-shrink-0 mt-0.5 w-4 h-4 text-gray-300 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

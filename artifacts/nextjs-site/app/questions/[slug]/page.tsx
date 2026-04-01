@@ -1,55 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import data from "@/data/content.json";
+import {
+  questions as qdb,
+  topics as tdb,
+  guides as gdb,
+  parseJsonArray,
+} from "@/lib/db";
 import { linkifyHtml } from "@/lib/bible-references";
-
-type Question = {
-  slug: string;
-  title: string;
-  shortAnswer: string;
-  content?: string;
-  topic: string;
-  sections: { explanation: string; meaning: string; application: string };
-};
-
-type Topic = {
-  slug: string;
-  name: string;
-  questions: string[];
-};
-
-type Guide = {
-  slug: string;
-  title: string;
-  shortDescription: string;
-  relatedQuestions: string[];
-};
-
-const questions = data.questions as Question[];
-const topics = data.topics as Topic[];
-const guides = data.guides as Guide[];
-
-function getTopic(name: string): Topic | undefined {
-  return topics.find((t) => t.name.toLowerCase() === name.toLowerCase());
-}
-
-function getGuideForQuestion(questionSlug: string): Guide | undefined {
-  return guides.find((g) => g.relatedQuestions.includes(questionSlug));
-}
-
-function getQuestion(slug: string): Question | undefined {
-  return questions.find((q) => q.slug === slug);
-}
-
-function getRelated(current: Question, min = 3, max = 5): Question[] {
-  const others = questions.filter((q) => q.slug !== current.slug);
-  const sameTopic = others.filter((q) => q.topic === current.topic);
-  const rest = others.filter((q) => q.topic !== current.topic);
-
-  const combined = [...sameTopic, ...rest];
-  const count = Math.min(Math.max(sameTopic.length || min, min), max);
-  return combined.slice(0, count);
-}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -57,15 +14,22 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const q = getQuestion(slug);
+  const q = qdb.findBySlug(slug);
   return {
     title: q ? `${q.title} | Faith & Scripture` : "Not found | Faith & Scripture",
   };
 }
 
+function getRelated(currentSlug: string, currentTopic: string, min = 3, max = 5) {
+  const sameTopic = qdb.listByTopic(currentTopic).filter((q) => q.slug !== currentSlug);
+  const rest = qdb.list().filter((q) => q.slug !== currentSlug && q.topic !== currentTopic);
+  const count = Math.min(Math.max(sameTopic.length || min, min), max);
+  return [...sameTopic, ...rest].slice(0, count);
+}
+
 export default async function QuestionPage({ params }: Props) {
   const { slug } = await params;
-  const q = getQuestion(slug);
+  const q = qdb.findBySlug(slug);
 
   if (!q) {
     return (
@@ -81,9 +45,10 @@ export default async function QuestionPage({ params }: Props) {
     );
   }
 
-  const related = getRelated(q);
-  const topic = getTopic(q.topic);
-  const guide = getGuideForQuestion(q.slug);
+  const related = getRelated(q.slug, q.topic);
+  const topic = tdb.findByName(q.topic);
+  const guide = gdb.findByRelatedQuestion(q.slug);
+  const topicQuestionCount = topic ? parseJsonArray(topic.questionSlugs).length : 0;
 
   return (
     <div className="max-w-2xl">
@@ -160,7 +125,7 @@ export default async function QuestionPage({ params }: Props) {
               {topic.name}
             </span>
             <span className="text-gray-400 group-hover:text-blue-500 transition-colors text-sm">
-              {topic.questions.length} {topic.questions.length === 1 ? "question" : "questions"} &rarr;
+              {topicQuestionCount} {topicQuestionCount === 1 ? "question" : "questions"} &rarr;
             </span>
           </Link>
         </div>
