@@ -18,6 +18,16 @@ function getQuestion(slug: string): Question | undefined {
   return questions.find((q) => q.slug === slug);
 }
 
+function getRelated(current: Question, min = 3, max = 5): Question[] {
+  const others = questions.filter((q) => q.slug !== current.slug);
+  const sameTopic = others.filter((q) => q.topic === current.topic);
+  const rest = others.filter((q) => q.topic !== current.topic);
+
+  const combined = [...sameTopic, ...rest];
+  const count = Math.min(Math.max(sameTopic.length || min, min), max);
+  return combined.slice(0, count);
+}
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -47,6 +57,8 @@ export default async function QuestionPage({ params }: Props) {
       </div>
     );
   }
+
+  const related = getRelated(q);
 
   return (
     <div className="max-w-2xl">
@@ -79,6 +91,31 @@ export default async function QuestionPage({ params }: Props) {
           <p className="text-gray-500 italic">No content available for this question.</p>
         )}
       </article>
+
+      {related.length > 0 && (
+        <section className="mt-14 pt-8 border-t border-gray-200">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Related Questions
+          </h2>
+          <ul className="space-y-3">
+            {related.map((r) => (
+              <li key={r.slug}>
+                <Link
+                  href={`/questions/${r.slug}`}
+                  className="group flex flex-col gap-0.5"
+                >
+                  <span className="text-gray-900 font-medium group-hover:text-blue-600 transition-colors">
+                    {r.title}
+                  </span>
+                  <span className="text-sm text-gray-500 line-clamp-1">
+                    {r.shortAnswer}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
