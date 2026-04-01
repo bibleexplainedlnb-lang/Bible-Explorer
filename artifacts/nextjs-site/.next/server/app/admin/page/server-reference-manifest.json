@@ -1,6 +1,6 @@
 {
   "node": {
-    "400509833d06ea8233c49b0c6cb21db9d61a7dda88": {
+    "40844f80a0c3f75d43e65d8aafdae066cb79fdd68b": {
       "workers": {
         "app/admin/page": {
           "moduleId": "[project]/artifacts/nextjs-site/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/artifacts/nextjs-site/app/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
@@ -15,7 +15,7 @@
       "exportedName": "addQuestion",
       "filename": "artifacts/nextjs-site/app/admin/actions.ts"
     },
-    "4008e18f9c8a94310f657f274af137b44f1c4f3544": {
+    "40aea363e9cc2f14dd2530a8d768212b10bd35925a": {
       "workers": {
         "app/admin/page": {
           "moduleId": "[project]/artifacts/nextjs-site/.next-internal/server/app/admin/page/actions.js { ACTIONS_MODULE0 => \"[project]/artifacts/nextjs-site/app/admin/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",

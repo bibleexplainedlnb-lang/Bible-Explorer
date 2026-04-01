@@ -3,15 +3,28 @@
  *
  * generateContent(keyword, topic) → { shortAnswer, content }
  *
- * Uses Replit AI Integrations (OpenAI-compatible proxy).
- * No API key needed — billed to Replit credits.
+ * Calls the OpenAI Chat Completions API and returns structured HTML
+ * with five sections: Short Answer, Biblical Explanation, Meaning,
+ * Application, and Related Verses.
+ *
+ * Environment variables (see .env.example):
+ *   - On Replit: AI_INTEGRATIONS_OPENAI_BASE_URL + AI_INTEGRATIONS_OPENAI_API_KEY
+ *                are set automatically via Replit AI Integrations.
+ *   - Elsewhere: set OPENAI_API_KEY (and optionally OPENAI_BASE_URL).
  */
 
 import OpenAI from "openai";
 
+// Support both Replit AI Integrations and standard OpenAI credentials.
 const client = new OpenAI({
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseURL:
+    process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ??
+    process.env.OPENAI_BASE_URL ??
+    "https://api.openai.com/v1",
+  apiKey:
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ??
+    process.env.OPENAI_API_KEY ??
+    "missing-api-key",
 });
 
 export interface GeneratedContent {

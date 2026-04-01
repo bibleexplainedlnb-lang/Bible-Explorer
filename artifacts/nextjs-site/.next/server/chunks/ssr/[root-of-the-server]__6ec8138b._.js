@@ -13,7 +13,17 @@ __turbopack_context__.n(__turbopack_context__.i("[project]/artifacts/nextjs-site
 "[project]/artifacts/nextjs-site/lib/bible.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-__turbopack_context__.s([
+/**
+ * Bible data layer — reads verses from the bundled `kjv` npm package.
+ *
+ * All 31,102 KJV verses are available offline with no external API calls.
+ * References use the format "Book Chapter:Verse", e.g. "John 3:16".
+ *
+ * Exports:
+ *   getVerse(reference)         → string | null
+ *   getChapter(book, chapter)   → Array<{ reference, text }>
+ *   formatVerse(reference, text) → string
+ */ __turbopack_context__.s([
     "formatVerse",
     ()=>formatVerse,
     "getChapter",

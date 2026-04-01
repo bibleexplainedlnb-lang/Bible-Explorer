@@ -400,10 +400,20 @@ ensureSeeded();
 "use strict";
 
 __turbopack_context__.s([
+    "BIBLE_LINK_CLASS",
+    ()=>BIBLE_LINK_CLASS,
+    "REFERENCE_RE",
+    ()=>REFERENCE_RE,
+    "bookSlug",
+    ()=>bookSlug,
+    "buildBibleHref",
+    ()=>buildBibleHref,
     "linkifyHtml",
     ()=>linkifyHtml,
     "parseBibleReferences",
-    ()=>parseBibleReferences
+    ()=>parseBibleReferences,
+    "processTextNodes",
+    ()=>processTextNodes
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/.pnpm/next@15.5.14_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-dir/link.js [app-rsc] (ecmascript)");
@@ -680,12 +690,11 @@ const REFERENCE_RE = new RegExp(`(${escapedNames.join("|")})\\s+(\\d+)(?::(\\d+)
 function bookSlug(name) {
     return BOOKS.find((b)=>b.name.toLowerCase() === name.toLowerCase())?.slug ?? name.toLowerCase().replace(/\s+/g, "-");
 }
-function buildHref(book, chapter, verse) {
+function buildBibleHref(book, chapter, verse) {
     const slug = bookSlug(book);
     return verse ? `/bible/${slug}/${chapter}/${verse}` : `/bible/${slug}/${chapter}`;
 }
-// Single source of truth for link styling — used in both React and HTML variants
-const LINK_CLASS = "text-amber-700 bg-amber-50 underline underline-offset-2 decoration-amber-400 rounded-sm px-0.5 font-medium hover:text-amber-900 hover:bg-amber-100 transition-colors";
+const BIBLE_LINK_CLASS = "text-amber-700 bg-amber-50 underline underline-offset-2 decoration-amber-400 rounded-sm px-0.5 font-medium hover:text-amber-900 hover:bg-amber-100 transition-colors";
 function parseBibleReferences(text) {
     const parts = [];
     let lastIndex = 0;
@@ -697,8 +706,8 @@ function parseBibleReferences(text) {
             parts.push(text.slice(lastIndex, start));
         }
         parts.push(/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
-            href: buildHref(bookName, chapter, verse),
-            className: LINK_CLASS,
+            href: buildBibleHref(bookName, chapter, verse),
+            className: BIBLE_LINK_CLASS,
             children: fullMatch
         }, start, false, {
             fileName: "[project]/artifacts/nextjs-site/lib/bible-references.tsx",
@@ -712,17 +721,26 @@ function parseBibleReferences(text) {
     }
     return parts;
 }
+function processTextNodes(html, replacer) {
+    const segments = html.split(/(<[^>]*>)/);
+    let anchorDepth = 0;
+    return segments.map((seg, i)=>{
+        if (i % 2 === 1) {
+            // HTML tag
+            if (/^<a[\s>]/i.test(seg)) anchorDepth++;
+            else if (/^<\/a\s*>/i.test(seg)) anchorDepth = Math.max(0, anchorDepth - 1);
+            return seg;
+        }
+        // Text node — skip if inside an anchor
+        return anchorDepth > 0 ? seg : replacer(seg);
+    }).join("");
+}
 function linkifyHtml(html) {
     const re = new RegExp(REFERENCE_RE.source, "g");
-    // Split on HTML tags so we never touch text inside tag attributes
-    const segments = html.split(/(<[^>]*>)/);
-    return segments.map((seg, i)=>{
-        if (i % 2 === 1) return seg; // HTML tag — pass through unchanged
-        return seg.replace(re, (match, book, chapter, verse)=>{
-            const href = buildHref(book, chapter, verse);
-            return `<a href="${href}" class="${LINK_CLASS}">${match}</a>`;
-        });
-    }).join("");
+    return processTextNodes(html, (text)=>text.replace(re, (match, book, chapter, verse)=>{
+            const href = buildBibleHref(book, chapter, verse);
+            return `<a href="${href}" class="${BIBLE_LINK_CLASS}">${match}</a>`;
+        }));
 }
 }),
 "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {

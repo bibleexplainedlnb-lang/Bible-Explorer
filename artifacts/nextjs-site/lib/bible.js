@@ -1,3 +1,15 @@
+/**
+ * Bible data layer — reads verses from the bundled `kjv` npm package.
+ *
+ * All 31,102 KJV verses are available offline with no external API calls.
+ * References use the format "Book Chapter:Verse", e.g. "John 3:16".
+ *
+ * Exports:
+ *   getVerse(reference)         → string | null
+ *   getChapter(book, chapter)   → Array<{ reference, text }>
+ *   formatVerse(reference, text) → string
+ */
+
 const verses = require('kjv/json/verses-1769.json')
 
 // Strip KJV data artefacts: leading "#" markers and bracketed editorial notes
