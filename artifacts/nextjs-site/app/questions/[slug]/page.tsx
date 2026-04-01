@@ -12,7 +12,18 @@ type Question = {
   sections: { explanation: string; meaning: string; application: string };
 };
 
+type Topic = {
+  slug: string;
+  name: string;
+  questions: string[];
+};
+
 const questions = data.questions as Question[];
+const topics = data.topics as Topic[];
+
+function getTopic(name: string): Topic | undefined {
+  return topics.find((t) => t.name.toLowerCase() === name.toLowerCase());
+}
 
 function getQuestion(slug: string): Question | undefined {
   return questions.find((q) => q.slug === slug);
@@ -59,6 +70,7 @@ export default async function QuestionPage({ params }: Props) {
   }
 
   const related = getRelated(q);
+  const topic = getTopic(q.topic);
 
   return (
     <div className="max-w-2xl">
@@ -91,6 +103,25 @@ export default async function QuestionPage({ params }: Props) {
           <p className="text-gray-500 italic">No content available for this question.</p>
         )}
       </article>
+
+      {topic && (
+        <div className="mt-10 pt-8 border-t border-gray-200">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            Explore this topic
+          </p>
+          <Link
+            href={`/topics/${topic.slug}`}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
+          >
+            <span className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+              {topic.name}
+            </span>
+            <span className="text-gray-400 group-hover:text-blue-500 transition-colors text-sm">
+              {topic.questions.length} {topic.questions.length === 1 ? "question" : "questions"} &rarr;
+            </span>
+          </Link>
+        </div>
+      )}
 
       {related.length > 0 && (
         <section className="mt-14 pt-8 border-t border-gray-200">
