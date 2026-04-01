@@ -401,6 +401,9 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.2.1)
+      kjv:
+        specifier: ^1.0.0
+        version: 1.0.0
       next:
         specifier: ^15.3.2
         version: 15.5.14(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2481,6 +2484,10 @@ packages:
   jsonpointer@5.0.1:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
+
+  kjv@1.0.0:
+    resolution: {integrity: sha512-YIHFSpcXqlZ8YcOZMG7MgCKOj3MMICuHg5fZ9z9ovPYkhPQgtci2ppcO8FMUroRh48hwdsxPBa+Xdfop98/2yA==}
+    deprecated: This package is no longer maintained.
 
   leven@4.1.0:
     resolution: {integrity: sha512-KZ9W9nWDT7rF7Dazg8xyLHGLrmpgq2nVNFUckhqdW3szVP6YhCpp/RAnpmVExA9JvrMynjwSLVrEj3AepHR6ew==}
@@ -5268,6 +5275,8 @@ snapshots:
       graceful-fs: 4.2.11
 
   jsonpointer@5.0.1: {}
+
+  kjv@1.0.0: {}
 
   leven@4.1.0: {}
 
