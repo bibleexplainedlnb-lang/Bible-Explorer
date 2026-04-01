@@ -57,6 +57,7 @@
     --color-amber-50: #fffbeb;
     --color-amber-100: #fef3c6;
     --color-amber-200: #fee685;
+    --color-amber-300: #ffd236;
     --color-amber-400: #fcbb00;
     --color-amber-600: #dd7400;
     --color-amber-700: #b75000;
@@ -127,6 +128,7 @@
       --color-amber-50: color(display-p3 .997804 .985047 .926312);
       --color-amber-100: color(display-p3 .989391 .954583 .796328);
       --color-amber-200: color(display-p3 .979824 .904554 .57325);
+      --color-amber-300: color(display-p3 .974327 .83063 .33298);
       --color-amber-400: color(display-p3 .959186 .738519 .118268);
       --color-amber-600: color(display-p3 .827144 .467166 .0336006);
       --color-amber-700: color(display-p3 .67989 .32771 .0520514);
@@ -161,6 +163,7 @@
       --color-amber-50: lab(98.6252% -.635922 8.42309);
       --color-amber-100: lab(95.916% -1.21653 23.111);
       --color-amber-200: lab(91.7203% -.505269 49.9084);
+      --color-amber-300: lab(86.4156% 6.13147 78.3961);
       --color-amber-400: lab(80.1641% 16.6016 99.2089);
       --color-amber-600: lab(60.3514% 40.5624 87.1228);
       --color-amber-700: lab(47.2709% 42.9082 69.2966);
@@ -599,6 +602,10 @@
 
   .left-0 {
     left: calc(var(--spacing) * 0);
+  }
+
+  .-mx-2 {
+    margin-inline: calc(var(--spacing) * -2);
   }
 
   .mx-auto {
@@ -1927,6 +1934,10 @@
     padding-block: calc(var(--spacing) * .5);
   }
 
+  .py-1 {
+    padding-block: calc(var(--spacing) * 1);
+  }
+
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
   }
@@ -2361,6 +2372,18 @@
   }
 
   @media (hover: hover) {
+    .group-hover\:border-amber-300:is(:where(.group):hover *) {
+      border-color: var(--color-amber-300);
+    }
+  }
+
+  @media (hover: hover) {
+    .group-hover\:bg-amber-200:is(:where(.group):hover *) {
+      background-color: var(--color-amber-200);
+    }
+  }
+
+  @media (hover: hover) {
     .group-hover\:text-blue-500:is(:where(.group):hover *) {
       color: var(--color-blue-500);
     }
@@ -2379,6 +2402,12 @@
   }
 
   @media (hover: hover) {
+    .group-hover\:text-gray-900:is(:where(.group):hover *) {
+      color: var(--color-gray-900);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:border-blue-300:hover {
       border-color: var(--color-blue-300);
     }
@@ -2387,6 +2416,12 @@
   @media (hover: hover) {
     .hover\:border-gray-300:hover {
       border-color: var(--color-gray-300);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-amber-50:hover {
+      background-color: var(--color-amber-50);
     }
   }
 

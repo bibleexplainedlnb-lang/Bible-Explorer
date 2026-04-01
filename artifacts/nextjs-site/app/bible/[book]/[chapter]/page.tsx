@@ -65,24 +65,28 @@ export default async function BibleChapterPage({ params }: Props) {
               style={{ scrollbarWidth: "thin", scrollbarColor: "#e5e7eb transparent" }}
             >
               <div className="space-y-5 pb-6">
-                {verses.map((v) => (
-                  <div
-                    key={v.reference}
-                    id={`v${verseNumber(v.reference)}`}
-                    className="flex gap-3 group"
-                  >
-                    {/* Verse number badge */}
-                    <span className="flex-shrink-0 mt-[3px] w-7 text-right select-none">
-                      <span className="inline-block text-[11px] font-bold leading-none text-amber-600 bg-amber-50 border border-amber-200 rounded px-1 py-0.5">
-                        {verseNumber(v.reference)}
+                {verses.map((v) => {
+                  const vNum = verseNumber(v.reference);
+                  return (
+                    <Link
+                      key={v.reference}
+                      id={`v${vNum}`}
+                      href={`/bible/${book}/${chapterNum}/${vNum}`}
+                      className="flex gap-3 group rounded-lg px-2 py-1 -mx-2 hover:bg-amber-50 transition-colors"
+                    >
+                      {/* Verse number badge */}
+                      <span className="flex-shrink-0 mt-[3px] w-7 text-right select-none">
+                        <span className="inline-block text-[11px] font-bold leading-none text-amber-600 bg-amber-50 border border-amber-200 rounded px-1 py-0.5 group-hover:bg-amber-200 group-hover:border-amber-300 transition-colors">
+                          {vNum}
+                        </span>
                       </span>
-                    </span>
-                    {/* Verse text */}
-                    <p className="text-[1.0625rem] leading-[1.8] text-gray-800">
-                      {v.text}
-                    </p>
-                  </div>
-                ))}
+                      {/* Verse text */}
+                      <p className="text-[1.0625rem] leading-[1.8] text-gray-800 group-hover:text-gray-900 transition-colors">
+                        {v.text}
+                      </p>
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* Prev / next navigation inside the scroll area */}

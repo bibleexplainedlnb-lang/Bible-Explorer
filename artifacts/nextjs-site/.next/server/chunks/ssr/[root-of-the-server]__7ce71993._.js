@@ -177,39 +177,43 @@ async function BibleChapterPage({ params }) {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "space-y-5 pb-6",
-                                        children: verses.map((v)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                id: `v${verseNumber(v.reference)}`,
-                                                className: "flex gap-3 group",
+                                        children: verses.map((v)=>{
+                                            const vNum = verseNumber(v.reference);
+                                            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                                                id: `v${vNum}`,
+                                                href: `/bible/${book}/${chapterNum}/${vNum}`,
+                                                className: "flex gap-3 group rounded-lg px-2 py-1 -mx-2 hover:bg-amber-50 transition-colors",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         className: "flex-shrink-0 mt-[3px] w-7 text-right select-none",
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                            className: "inline-block text-[11px] font-bold leading-none text-amber-600 bg-amber-50 border border-amber-200 rounded px-1 py-0.5",
-                                                            children: verseNumber(v.reference)
+                                                            className: "inline-block text-[11px] font-bold leading-none text-amber-600 bg-amber-50 border border-amber-200 rounded px-1 py-0.5 group-hover:bg-amber-200 group-hover:border-amber-300 transition-colors",
+                                                            children: vNum
                                                         }, void 0, false, {
                                                             fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                            lineNumber: 76,
-                                                            columnNumber: 23
+                                                            lineNumber: 79,
+                                                            columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                        lineNumber: 75,
-                                                        columnNumber: 21
+                                                        lineNumber: 78,
+                                                        columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-[1.0625rem] leading-[1.8] text-gray-800",
+                                                        className: "text-[1.0625rem] leading-[1.8] text-gray-800 group-hover:text-gray-900 transition-colors",
                                                         children: v.text
                                                     }, void 0, false, {
                                                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                        lineNumber: 81,
-                                                        columnNumber: 21
+                                                        lineNumber: 84,
+                                                        columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, v.reference, true, {
                                                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                lineNumber: 69,
-                                                columnNumber: 19
-                                            }, this))
+                                                lineNumber: 71,
+                                                columnNumber: 21
+                                            }, this);
+                                        })
                                     }, void 0, false, {
                                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
                                         lineNumber: 67,
@@ -229,11 +233,11 @@ async function BibleChapterPage({ params }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                lineNumber: 91,
+                                                lineNumber: 95,
                                                 columnNumber: 19
                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {}, void 0, false, {
                                                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                lineNumber: 98,
+                                                lineNumber: 102,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
@@ -247,13 +251,13 @@ async function BibleChapterPage({ params }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                                lineNumber: 100,
+                                                lineNumber: 104,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                        lineNumber: 89,
+                                        lineNumber: 93,
                                         columnNumber: 15
                                     }, this)
                                 ]
@@ -266,7 +270,7 @@ async function BibleChapterPage({ params }) {
                                 verseCount: verses.length
                             }, void 0, false, {
                                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                                lineNumber: 110,
+                                lineNumber: 114,
                                 columnNumber: 13
                             }, this)
                         ]
@@ -284,7 +288,7 @@ async function BibleChapterPage({ params }) {
                         children: "Chapter not found"
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                        lineNumber: 115,
+                        lineNumber: 119,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -297,7 +301,7 @@ async function BibleChapterPage({ params }) {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                        lineNumber: 118,
+                        lineNumber: 122,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
@@ -306,13 +310,13 @@ async function BibleChapterPage({ params }) {
                         children: "Return to home"
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                        lineNumber: 121,
+                        lineNumber: 125,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/artifacts/nextjs-site/app/bible/[book]/[chapter]/page.tsx",
-                lineNumber: 114,
+                lineNumber: 118,
                 columnNumber: 9
             }, this)
         ]
