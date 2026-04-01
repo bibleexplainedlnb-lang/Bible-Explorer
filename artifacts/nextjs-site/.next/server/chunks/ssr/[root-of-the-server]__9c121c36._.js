@@ -357,8 +357,12 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$
 ;
 const questions = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].questions;
 const topics = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].topics;
+const guides = __TURBOPACK__imported__module__$5b$project$5d2f$artifacts$2f$nextjs$2d$site$2f$data$2f$content$2e$json__$28$json$29$__["default"].guides;
 function getTopic(name) {
     return topics.find((t)=>t.name.toLowerCase() === name.toLowerCase());
+}
+function getGuideForQuestion(questionSlug) {
+    return guides.find((g)=>g.relatedQuestions.includes(questionSlug));
 }
 function getQuestion(slug) {
     return questions.find((q)=>q.slug === slug);
@@ -393,7 +397,7 @@ async function QuestionPage({ params }) {
                     children: "Not found"
                 }, void 0, false, {
                     fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                    lineNumber: 61,
+                    lineNumber: 73,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -405,7 +409,7 @@ async function QuestionPage({ params }) {
                     ]
                 }, void 0, true, {
                     fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                    lineNumber: 62,
+                    lineNumber: 74,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
@@ -414,18 +418,19 @@ async function QuestionPage({ params }) {
                     children: "Return to home"
                 }, void 0, false, {
                     fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                    lineNumber: 65,
+                    lineNumber: 77,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-            lineNumber: 60,
+            lineNumber: 72,
             columnNumber: 7
         }, this);
     }
     const related = getRelated(q);
     const topic = getTopic(q.topic);
+    const guide = getGuideForQuestion(q.slug);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "max-w-2xl",
         children: [
@@ -437,12 +442,12 @@ async function QuestionPage({ params }) {
                     children: "← Back to home"
                 }, void 0, false, {
                     fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                    lineNumber: 78,
+                    lineNumber: 91,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                lineNumber: 77,
+                lineNumber: 90,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("article", {
@@ -452,7 +457,7 @@ async function QuestionPage({ params }) {
                         children: q.title
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 87,
+                        lineNumber: 100,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -462,12 +467,12 @@ async function QuestionPage({ params }) {
                             children: q.shortAnswer
                         }, void 0, false, {
                             fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                            lineNumber: 92,
+                            lineNumber: 105,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 91,
+                        lineNumber: 104,
                         columnNumber: 9
                     }, this),
                     q.content ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -477,21 +482,93 @@ async function QuestionPage({ params }) {
                         }
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 98,
+                        lineNumber: 111,
                         columnNumber: 11
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         className: "text-gray-500 italic",
                         children: "No content available for this question."
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 103,
+                        lineNumber: 116,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                lineNumber: 86,
+                lineNumber: 99,
                 columnNumber: 7
+            }, this),
+            guide && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "mt-10 pt-8 border-t border-gray-200",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3",
+                        children: "Read Full Guide"
+                    }, void 0, false, {
+                        fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                        lineNumber: 122,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                        href: `/guides/${guide.slug}`,
+                        className: "group flex items-start gap-4 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4 hover:border-blue-300 hover:bg-blue-100 transition-colors",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex-1 min-w-0",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "font-semibold text-blue-900 group-hover:text-blue-700 transition-colors leading-snug mb-1",
+                                        children: guide.title
+                                    }, void 0, false, {
+                                        fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                                        lineNumber: 130,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-sm text-blue-600/80 line-clamp-2 leading-relaxed",
+                                        children: guide.shortDescription
+                                    }, void 0, false, {
+                                        fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                                        lineNumber: 133,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                                lineNumber: 129,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                className: "flex-shrink-0 mt-0.5 w-4 h-4 text-blue-400 group-hover:text-blue-600 transition-colors",
+                                fill: "none",
+                                viewBox: "0 0 24 24",
+                                stroke: "currentColor",
+                                strokeWidth: 2,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                    strokeLinecap: "round",
+                                    strokeLinejoin: "round",
+                                    d: "M9 5l7 7-7 7"
+                                }, void 0, false, {
+                                    fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                                    lineNumber: 144,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                                lineNumber: 137,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                        lineNumber: 125,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
+                lineNumber: 121,
+                columnNumber: 9
             }, this),
             topic && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "mt-10 pt-8 border-t border-gray-200",
@@ -501,7 +578,7 @@ async function QuestionPage({ params }) {
                         children: "Explore this topic"
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 109,
+                        lineNumber: 152,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
@@ -513,7 +590,7 @@ async function QuestionPage({ params }) {
                                 children: topic.name
                             }, void 0, false, {
                                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                lineNumber: 116,
+                                lineNumber: 159,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -526,19 +603,19 @@ async function QuestionPage({ params }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                lineNumber: 119,
+                                lineNumber: 162,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 112,
+                        lineNumber: 155,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                lineNumber: 108,
+                lineNumber: 151,
                 columnNumber: 9
             }, this),
             related.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -549,7 +626,7 @@ async function QuestionPage({ params }) {
                         children: "Related Questions"
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 128,
+                        lineNumber: 171,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -564,7 +641,7 @@ async function QuestionPage({ params }) {
                                             children: r.title
                                         }, void 0, false, {
                                             fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                            lineNumber: 138,
+                                            lineNumber: 181,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$5$2e$14_react$2d$dom$40$19$2e$1$2e$0_react$40$19$2e$1$2e$0_$5f$react$40$19$2e$1$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -572,35 +649,35 @@ async function QuestionPage({ params }) {
                                             children: r.shortAnswer
                                         }, void 0, false, {
                                             fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                            lineNumber: 141,
+                                            lineNumber: 184,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                    lineNumber: 134,
+                                    lineNumber: 177,
                                     columnNumber: 17
                                 }, this)
                             }, r.slug, false, {
                                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                                lineNumber: 133,
+                                lineNumber: 176,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                        lineNumber: 131,
+                        lineNumber: 174,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-                lineNumber: 127,
+                lineNumber: 170,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/artifacts/nextjs-site/app/questions/[slug]/page.tsx",
-        lineNumber: 76,
+        lineNumber: 89,
         columnNumber: 5
     }, this);
 }

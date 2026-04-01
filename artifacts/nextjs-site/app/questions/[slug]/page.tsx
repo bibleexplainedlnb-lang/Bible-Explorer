@@ -18,11 +18,23 @@ type Topic = {
   questions: string[];
 };
 
+type Guide = {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  relatedQuestions: string[];
+};
+
 const questions = data.questions as Question[];
 const topics = data.topics as Topic[];
+const guides = data.guides as Guide[];
 
 function getTopic(name: string): Topic | undefined {
   return topics.find((t) => t.name.toLowerCase() === name.toLowerCase());
+}
+
+function getGuideForQuestion(questionSlug: string): Guide | undefined {
+  return guides.find((g) => g.relatedQuestions.includes(questionSlug));
 }
 
 function getQuestion(slug: string): Question | undefined {
@@ -71,6 +83,7 @@ export default async function QuestionPage({ params }: Props) {
 
   const related = getRelated(q);
   const topic = getTopic(q.topic);
+  const guide = getGuideForQuestion(q.slug);
 
   return (
     <div className="max-w-2xl">
@@ -103,6 +116,36 @@ export default async function QuestionPage({ params }: Props) {
           <p className="text-gray-500 italic">No content available for this question.</p>
         )}
       </article>
+
+      {guide && (
+        <div className="mt-10 pt-8 border-t border-gray-200">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+            Read Full Guide
+          </p>
+          <Link
+            href={`/guides/${guide.slug}`}
+            className="group flex items-start gap-4 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4 hover:border-blue-300 hover:bg-blue-100 transition-colors"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-blue-900 group-hover:text-blue-700 transition-colors leading-snug mb-1">
+                {guide.title}
+              </p>
+              <p className="text-sm text-blue-600/80 line-clamp-2 leading-relaxed">
+                {guide.shortDescription}
+              </p>
+            </div>
+            <svg
+              className="flex-shrink-0 mt-0.5 w-4 h-4 text-blue-400 group-hover:text-blue-600 transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      )}
 
       {topic && (
         <div className="mt-10 pt-8 border-t border-gray-200">
