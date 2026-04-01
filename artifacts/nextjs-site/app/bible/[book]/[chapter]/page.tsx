@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 // @ts-ignore — JS module without type declarations
 import { getChapter } from "@/lib/bible.js";
+import ChapterSidebar from "./ChapterSidebar";
 
 function slugToBookName(slug: string): string {
   return slug
@@ -66,11 +67,7 @@ export default async function BibleChapterPage({ params }: Props) {
               ))}
             </div>
 
-            <div className="lg:sticky lg:top-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
-              <p className="text-sm font-medium text-gray-400 italic">
-                Explanation coming soon
-              </p>
-            </div>
+            <ChapterSidebar />
           </div>
 
           <div className="flex items-center justify-between mt-12 pt-6 border-t border-gray-200">
