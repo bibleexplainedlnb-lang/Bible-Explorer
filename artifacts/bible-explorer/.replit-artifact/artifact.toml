@@ -17,6 +17,9 @@ localPort = 3000
 [services.development]
 run = "npm run dev"
 
+[services.production]
+build = [ "sh", "-c", "cd /home/runner/workspace && npm run build" ]
+run = "cd /home/runner/workspace && npm run start"
+
 [services.env]
-PORT = "3000"
 BASE_PATH = "/"
