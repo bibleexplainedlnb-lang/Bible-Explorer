@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --color-parchment: #faf7f2;
+  --color-ink: #1a1208;
+  --color-gold: #b8860b;
+  --color-gold-light: #d4a017;
+  --color-navy: #1e2d4a;
+  --color-navy-light: #2c4270;
+  --color-stone: #8b7355;
+  --color-cream: #f5f0e8;
+  --color-muted: #6b5c45;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
+
+body {
+  background-color: var(--color-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+}
+
+.prose-bible p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.prose-bible strong {
+  color: var(--color-navy);
+}
+
+.verse-text {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.9;
+}
+
+.passage-card div {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.passage-card:hover div {
+  box-shadow: 0 4px 16px rgba(30, 45, 74, 0.12);
+  transform: translateY(-2px);
+}
+
+.bible-sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .bible-sidebar {
+    display: block;
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.bible-mobile-nav {
+  display: block;
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .bible-mobile-nav {
+    display: none;
+  }
+}
