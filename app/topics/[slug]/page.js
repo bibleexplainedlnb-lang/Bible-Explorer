@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { topics, questions } from '../../../lib/db.js';
+import { topics, questions, verses } from '../../../lib/db.js';
 
 export function generateMetadata({ params }) {
   const topic = topics.findBySlug(params.slug);
@@ -13,6 +13,7 @@ export default function TopicPage({ params }) {
   if (!topic) notFound();
 
   const relatedQuestions = questions.listByTopic(topic.id);
+  const topicVerses = verses.listByTopic(topic.id);
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
@@ -28,6 +29,37 @@ export default function TopicPage({ params }) {
           {topic.description}
         </p>
       </div>
+
+      {topicVerses.length > 0 && (
+        <section style={{ marginBottom: '2rem' }}>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1.25rem' }}>
+            Key Verses
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {topicVerses.map((verse) => (
+              <div key={verse.id} style={{
+                backgroundColor: '#fffdf7',
+                border: '1px solid #e8dfc8',
+                borderLeft: '4px solid #b8860b',
+                borderRadius: '0.625rem',
+                padding: '1.25rem 1.5rem',
+              }}>
+                <p style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#2c4270', fontSize: '1rem', lineHeight: 1.8, margin: '0 0 0.75rem 0' }}>
+                  &ldquo;{verse.text}&rdquo;
+                </p>
+                <p style={{ fontWeight: '600', color: '#b8860b', fontSize: '0.875rem', margin: '0 0 0.5rem 0' }}>
+                  — {verse.reference}
+                </p>
+                {verse.explanation && (
+                  <p style={{ color: '#6b5c45', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+                    {verse.explanation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {relatedQuestions.length > 0 && (
         <section>

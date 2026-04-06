@@ -98,7 +98,7 @@ export default function RootLayout({ children }) {
                 fontSize: "1rem",
               }}
             >
-              ✝ Bible Explorer
+              ✝ Bible Verse Insights
             </p>
             <p>
               KJV Scripture text via{" "}
