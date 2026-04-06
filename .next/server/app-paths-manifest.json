@@ -1,5 +1,6 @@
 {
   "/page": "app/page.js",
-  "/questions/[slug]/page": "app/questions/[slug]/page.js",
-  "/topics/[slug]/page": "app/topics/[slug]/page.js"
+  "/questions/page": "app/questions/page.js",
+  "/bible-verse-about-patience/page": "app/bible-verse-about-patience/page.js",
+  "/questions/[slug]/page": "app/questions/[slug]/page.js"
 }
