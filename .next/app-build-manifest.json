@@ -35,6 +35,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/topics/page.js"
+    ],
+    "/bible-verse/[keyword]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/bible-verse/[keyword]/page.js"
     ]
   }
 }
