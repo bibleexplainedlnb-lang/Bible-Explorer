@@ -1,8 +1,6 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/topics/page": "app/topics/page.js",
-  "/questions/[slug]/page": "app/questions/[slug]/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
+  "/page": "app/page.js",
   "/topics/[slug]/page": "app/topics/[slug]/page.js",
-  "/bible-verse-about-patience/page": "app/bible-verse-about-patience/page.js",
-  "/[slug]/page": "app/[slug]/page.js"
+  "/questions/[slug]/page": "app/questions/[slug]/page.js"
 }
