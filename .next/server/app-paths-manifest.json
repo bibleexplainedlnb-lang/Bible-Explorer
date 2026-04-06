@@ -1,8 +1,8 @@
 {
-  "/questions/[slug]/page": "app/questions/[slug]/page.js",
-  "/questions/page": "app/questions/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/topics/page": "app/topics/page.js",
+  "/questions/[slug]/page": "app/questions/[slug]/page.js",
   "/topics/[slug]/page": "app/topics/[slug]/page.js",
-  "/bible-verse/[keyword]/page": "app/bible-verse/[keyword]/page.js",
-  "/bible-verse-about-patience/page": "app/bible-verse-about-patience/page.js"
+  "/bible-verse-about-patience/page": "app/bible-verse-about-patience/page.js",
+  "/[slug]/page": "app/[slug]/page.js"
 }
