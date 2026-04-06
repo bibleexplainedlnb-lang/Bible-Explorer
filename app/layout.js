@@ -1,10 +1,16 @@
 import "./globals.css";
 import Link from "next/link";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bible-verse-insights.vercel.app';
+
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Bible Verse Insight",
   description:
     "Explore Bible verses with deep insights, meanings, explanations, and study guides to understand scripture better.",
+  alternates: {
+    canonical: '/',
+  },
 };
 export default function RootLayout({ children }) {
   return (

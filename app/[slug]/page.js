@@ -14,6 +14,7 @@ export function generateMetadata({ params }) {
   return {
     title: `Bible Verses About ${keyword} (Meaning & Explanation)`,
     description: `Discover powerful Bible verses about ${keyword} with meaning and explanation for daily life.`,
+    alternates: { canonical: `/${params.slug}/` },
   };
 }
 

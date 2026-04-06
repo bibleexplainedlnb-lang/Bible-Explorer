@@ -7,7 +7,10 @@ import { bibleNotes } from '../../../../lib/db.js';
 export function generateMetadata({ params }) {
   const book = findBook(params.book);
   if (!book) return { title: 'Not Found' };
-  return { title: `${book.name} ${params.chapter}` };
+  return {
+    title: `${book.name} ${params.chapter}`,
+    alternates: { canonical: `/bible/${params.book}/${params.chapter}/` },
+  };
 }
 
 function ChapterNav({ book, chapter, totalChapters }) {

@@ -5,7 +5,10 @@ import { guides } from '../../../lib/db.js';
 export function generateMetadata({ params }) {
   const guide = guides.findBySlug(params.slug);
   if (!guide) return { title: 'Not Found' };
-  return { title: guide.title };
+  return {
+    title: guide.title,
+    alternates: { canonical: `/guides/${params.slug}/` },
+  };
 }
 
 function renderMarkdown(text) {

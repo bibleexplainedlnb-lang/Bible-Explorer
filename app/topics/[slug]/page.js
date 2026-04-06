@@ -5,7 +5,10 @@ import { topics, questions, verses } from '../../../lib/db.js';
 export function generateMetadata({ params }) {
   const topic = topics.findBySlug(params.slug);
   if (!topic) return { title: 'Not Found' };
-  return { title: topic.title };
+  return {
+    title: topic.title,
+    alternates: { canonical: `/topics/${params.slug}/` },
+  };
 }
 
 export default function TopicPage({ params }) {

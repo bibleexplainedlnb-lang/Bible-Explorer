@@ -5,7 +5,10 @@ import { questions } from '../../../lib/db.js';
 export function generateMetadata({ params }) {
   const q = questions.findBySlug(params.slug);
   if (!q) return { title: 'Not Found' };
-  return { title: q.title };
+  return {
+    title: q.title,
+    alternates: { canonical: `/questions/${params.slug}/` },
+  };
 }
 
 function renderContent(text) {
