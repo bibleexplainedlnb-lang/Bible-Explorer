@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { topics, questions, verses } from '../../../lib/db.js';
+import { markdownToHtml } from '../../../lib/markdownToHtml.js';
 
 export function generateMetadata({ params }) {
   const topic = topics.findBySlug(params.slug);
@@ -11,54 +12,14 @@ export function generateMetadata({ params }) {
   };
 }
 
-function renderTopicContent(content) {
-  if (!content) return null;
-  const lines = content.split('\n');
-  const elements = [];
-  let key = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (line.startsWith('## ')) {
-      elements.push(
-        <h2 key={key++} style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 'bold', color: '#1e2d4a', margin: '2rem 0 0.875rem 0' }}>
-          {line.slice(3)}
-        </h2>
-      );
-    } else if (line.startsWith('### ')) {
-      elements.push(
-        <h3 key={key++} style={{ fontFamily: 'Georgia, serif', fontSize: '1.125rem', fontWeight: '600', color: '#2c4270', margin: '1.5rem 0 0.5rem 0' }}>
-          {line.slice(4)}
-        </h3>
-      );
-    } else if (line.trim() === '') {
-      // skip blank lines
-    } else {
-      const parts = line.split(/(\*\*[^*]+\*\*)/g);
-      const rendered = parts.map((part, idx) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={idx} style={{ color: '#1e2d4a' }}>{part.slice(2, -2)}</strong>;
-        }
-        return part;
-      });
-      elements.push(
-        <p key={key++} style={{ color: '#4a4035', lineHeight: 1.85, fontSize: '1rem', margin: '0 0 1rem 0' }}>
-          {rendered}
-        </p>
-      );
-    }
-  }
-
-  return elements;
-}
-
 export default function TopicPage({ params }) {
   const topic = topics.findBySlug(params.slug);
   if (!topic) notFound();
 
   const relatedQuestions = questions.listByTopic(topic.id);
   const topicVerses = verses.listByTopic(topic.id);
+
+  const contentHtml = markdownToHtml(topic.content);
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
@@ -75,9 +36,12 @@ export default function TopicPage({ params }) {
         </p>
       </div>
 
-      {topic.content && (
-        <div style={{ backgroundColor: 'white', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '2.5rem', marginBottom: '2rem' }}>
-          {renderTopicContent(topic.content)}
+      {contentHtml && (
+        <div style={{ backgroundColor: 'white', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '2.5rem', marginBottom: '2rem', fontFamily: 'Georgia, serif' }}>
+          <div
+            className="prose-content"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
         </div>
       )}
 

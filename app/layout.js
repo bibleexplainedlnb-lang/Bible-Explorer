@@ -83,7 +83,7 @@ export default function RootLayout({ children }) {
           style={{
             backgroundColor: "#1e2d4a",
             color: "#8b9bb4",
-            padding: "2rem 0",
+            padding: "2.5rem 0",
             marginTop: "4rem",
           }}
         >
@@ -93,20 +93,41 @@ export default function RootLayout({ children }) {
               margin: "0 auto",
               padding: "0 1rem",
               textAlign: "center",
-              fontSize: "0.875rem",
             }}
           >
             <p
               style={{
                 color: "#d4a017",
-                marginBottom: "0.5rem",
+                marginBottom: "1rem",
                 fontFamily: "Georgia, serif",
-                fontSize: "1rem",
+                fontSize: "1.1rem",
               }}
             >
               ✝ Bible Verse Insights
             </p>
-            <p>
+            <nav style={{ display: "flex", gap: "0.25rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+              {[
+                { href: "/topics/", label: "Topics" },
+                { href: "/questions/", label: "Questions" },
+                { href: "/guides/", label: "Guides" },
+                { href: "/bible/john/1/", label: "Read Bible" },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{
+                    color: "#a0b0c8",
+                    padding: "0.3rem 0.75rem",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.875rem",
+                    textDecoration: "none",
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <p style={{ fontSize: "0.8rem", color: "#6b7a90" }}>
               KJV Scripture text via{" "}
               <a
                 href="https://bible-api.com"

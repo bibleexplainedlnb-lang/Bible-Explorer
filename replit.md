@@ -132,11 +132,15 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 **Topics table** has a `content TEXT` column (added via ALTER TABLE migration) that stores full markdown content rendered by `renderTopicContent()` in `app/topics/[slug]/page.js`.
 
 **Key files:**
-- `app/layout.js` — metadataBase, global canonical, nav with trailing slashes
-- `app/page.js` — homepage with John 3:16 highlight
-- `app/topics/[slug]/page.js` — topic detail with renderTopicContent (markdown → JSX)
-- `app/questions/[slug]/page.js` — question detail with renderContent
-- `app/guides/[slug]/page.js` — guide detail with renderMarkdown
+- `app/layout.js` — metadataBase, global canonical, nav header + footer with Topics/Questions/Guides/Read Bible links
+- `app/page.js` — homepage with John 3:16 highlight, category links, clean layout
+- `app/sitemap.js` — dynamic sitemap (65 URLs: static, topics, questions, guides, keyword, Bible chapter pages)
+- `public/robots.txt` — User-agent: *, Allow: /, Sitemap URL
+- `lib/markdownToHtml.js` — markdown-to-HTML string converter (h1/h2/h3, p, ul, ol, strong) for dangerouslySetInnerHTML
+- `app/topics/[slug]/page.js` — topic detail with dangerouslySetInnerHTML + prose-content class
+- `app/questions/[slug]/page.js` — question detail with dangerouslySetInnerHTML + prose-content class
+- `app/guides/[slug]/page.js` — guide detail with dangerouslySetInnerHTML + prose-content class
+- `app/globals.css` — .prose-content CSS class styles all converted markdown HTML elements
 - `app/not-found.js` — 404 page for unmatched routes
 - `next.config.js` — uses CommonJS; serverExternalPackages for better-sqlite3; trailingSlash: true
 

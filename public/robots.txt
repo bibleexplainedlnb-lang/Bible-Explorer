@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bible-verse-insights.vercel.app/sitemap.xml

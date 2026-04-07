@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { questions } from '../../../lib/db.js';
+import { markdownToHtml } from '../../../lib/markdownToHtml.js';
 
 export function generateMetadata({ params }) {
   const q = questions.findBySlug(params.slug);
@@ -11,32 +12,15 @@ export function generateMetadata({ params }) {
   };
 }
 
-function renderContent(text) {
-  if (!text) return null;
-  const paragraphs = text.split('\n\n');
-  return paragraphs.map((para, i) => {
-    if (para.startsWith('**') && para.endsWith('**')) {
-      const heading = para.slice(2, -2);
-      return <h3 key={i} style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 'bold', color: '#1e2d4a', marginTop: '1.5rem', marginBottom: '0.5rem' }}>{heading}</h3>;
-    }
-    const parts = para.split(/(\*\*[^*]+\*\*)/g);
-    const rendered = parts.map((part, j) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={j} style={{ color: '#1e2d4a' }}>{part.slice(2, -2)}</strong>;
-      }
-      return part;
-    });
-    return <p key={i} style={{ marginBottom: '1rem', lineHeight: 1.85, color: '#2a2015' }}>{rendered}</p>;
-  });
-}
-
 export default function QuestionPage({ params }) {
   const q = questions.findBySlug(params.slug);
   if (!q) notFound();
 
+  const html = markdownToHtml(q.content);
+
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
-      <Link href="/questions" style={{ color: '#b8860b', textDecoration: 'none', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginBottom: '1.5rem' }}>
+      <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginBottom: '1.5rem' }}>
         ← All Questions
       </Link>
 
@@ -58,13 +42,15 @@ export default function QuestionPage({ params }) {
           {q.title}
         </h1>
 
-        <div style={{ fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          {renderContent(q.content)}
-        </div>
+        <div
+          className="prose-content"
+          style={{ fontFamily: 'Georgia, serif' }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </article>
 
       <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <Link href="/questions" style={{
+        <Link href="/questions/" style={{
           backgroundColor: '#f5f0e8', color: '#2c4270',
           padding: '0.6rem 1.25rem', borderRadius: '0.5rem',
           fontWeight: '500', textDecoration: 'none', fontSize: '0.875rem',
