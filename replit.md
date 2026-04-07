@@ -118,6 +118,28 @@ Next.js 15 (App Router) content site styled with Tailwind CSS 4.
 - Bible pages display all KJV verses from the live API; when a `bibleExplanation` entry exists for the chapter, a sticky explanation panel (Overview / Context / Application tabs) is shown alongside the verses
 - Any chapter in the entire Bible is accessible at `/bible/[book]/[chapter]` even without an explanation entry — only the verse column renders in that case
 
+### `artifacts/bible-explorer` — Bible Explorer (Bible Verse Insights)
+
+Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `npm run dev` in the workspace root.
+
+**Content architecture:**
+- `data/content.json` — seed data for topics, questions, guides, bibleExplanations (source of truth for fresh deploys)
+- `data/content.db` — SQLite database (better-sqlite3); falls back to `/tmp/bible-explorer.db` on read-only filesystems (Vercel)
+- `lib/db.js` — DB setup, seed functions, typed exports (`topics`, `questions`, `guides`, `verses`, `bibleNotes`)
+- `lib/content.js` — full SEO content for all 8 topics, 3 thin questions, and 5 guide additions (800-1200 words each, markdown format)
+- `upgradeExpandedContent(db)` in `lib/db.js` runs on every cold start and UPDATEs topic content, thin question content (<200 chars), and unexpanded guide content (<4000 chars)
+
+**Topics table** has a `content TEXT` column (added via ALTER TABLE migration) that stores full markdown content rendered by `renderTopicContent()` in `app/topics/[slug]/page.js`.
+
+**Key files:**
+- `app/layout.js` — metadataBase, global canonical, nav with trailing slashes
+- `app/page.js` — homepage with John 3:16 highlight
+- `app/topics/[slug]/page.js` — topic detail with renderTopicContent (markdown → JSX)
+- `app/questions/[slug]/page.js` — question detail with renderContent
+- `app/guides/[slug]/page.js` — guide detail with renderMarkdown
+- `app/not-found.js` — 404 page for unmatched routes
+- `next.config.js` — uses CommonJS; serverExternalPackages for better-sqlite3; trailingSlash: true
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
