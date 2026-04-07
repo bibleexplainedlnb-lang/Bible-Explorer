@@ -19,7 +19,7 @@ function ChapterNav({ book, chapter, totalChapters }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
       {prev ? (
-        <Link href={`/bible/${book.id}/${prev}`} style={{
+        <Link href={`/bible/${book.id}/${prev}/`} style={{
           backgroundColor: 'white', border: '1px solid #e8dfc8',
           color: '#2c4270', padding: '0.5rem 1rem', borderRadius: '0.5rem',
           textDecoration: 'none', fontSize: '0.875rem', fontWeight: '500',
@@ -31,7 +31,7 @@ function ChapterNav({ book, chapter, totalChapters }) {
         Chapter {chapter} of {totalChapters}
       </span>
       {next ? (
-        <Link href={`/bible/${book.id}/${next}`} style={{
+        <Link href={`/bible/${book.id}/${next}/`} style={{
           backgroundColor: 'white', border: '1px solid #e8dfc8',
           color: '#2c4270', padding: '0.5rem 1rem', borderRadius: '0.5rem',
           textDecoration: 'none', fontSize: '0.875rem', fontWeight: '500',
@@ -53,7 +53,7 @@ function BookSelector({ currentBook }) {
       </h3>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.25rem' }}>
         {otBooks.map(b => (
-          <Link key={b.id} href={`/bible/${b.id}/1`} style={{
+          <Link key={b.id} href={`/bible/${b.id}/1/`} style={{
             padding: '0.25rem 0.6rem', borderRadius: '0.375rem', fontSize: '0.8rem',
             textDecoration: 'none', fontWeight: b.id === currentBook.id ? '600' : '400',
             backgroundColor: b.id === currentBook.id ? '#1e2d4a' : '#f5f0e8',
@@ -70,7 +70,7 @@ function BookSelector({ currentBook }) {
       </h3>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
         {ntBooks.map(b => (
-          <Link key={b.id} href={`/bible/${b.id}/1`} style={{
+          <Link key={b.id} href={`/bible/${b.id}/1/`} style={{
             padding: '0.25rem 0.6rem', borderRadius: '0.375rem', fontSize: '0.8rem',
             textDecoration: 'none', fontWeight: b.id === currentBook.id ? '600' : '400',
             backgroundColor: b.id === currentBook.id ? '#1e2d4a' : '#f5f0e8',

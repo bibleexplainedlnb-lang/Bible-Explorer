@@ -52,10 +52,10 @@ export default function RootLayout({ children }) {
               }}
             >
               {[
-                { href: "/topics", label: "Topics" },
-                { href: "/questions", label: "Questions" },
-                { href: "/guides", label: "Guides" },
-                { href: "/bible/john/1", label: "Read Bible" },
+                { href: "/topics/", label: "Topics" },
+                { href: "/questions/", label: "Questions" },
+                { href: "/guides/", label: "Guides" },
+                { href: "/bible/john/1/", label: "Read Bible" },
               ].map(({ href, label }) => (
                 <Link
                   key={href}
