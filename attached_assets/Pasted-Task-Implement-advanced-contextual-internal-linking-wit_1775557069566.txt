@@ -1,0 +1,165 @@
+Task: Implement advanced contextual internal linking with relevance filtering and keyword variation
+
+Goal:
+
+* Ensure all internal links are contextually relevant
+* Avoid keyword repetition and over-optimization
+* Improve SEO + user experience
+* Maintain clean, natural linking system
+
+---
+
+## GLOBAL RULES (STRICT)
+
+1. CONTEXT FIRST:
+
+   * Only add link if it matches user intent
+   * Ask: “Does this help the reader right now?”
+   * If NO → do NOT link
+
+2. KEYWORD VARIATION:
+
+   * Do NOT repeat same anchor text across pages
+   * Use synonyms and natural variations
+
+   Example for "Bible verses about patience":
+
+   * "scriptures on patience"
+   * "verses related to patience"
+   * "what the Bible says about patience"
+
+3. LIMITS:
+
+   * Mid content: max 1–2 links
+   * End section: 3–4 links
+   * Inline links: natural only
+
+---
+
+1. CONTEXTUAL INLINE LINKING
+
+---
+
+Example:
+
+<p>
+  Patience is a key virtue in Christianity. You can explore
+  <a href="/topics/patience/">
+    a deeper explanation of patience in the Bible
+  </a>
+  to understand its meaning.
+</p>
+
+---
+
+2. MID-CONTENT BLOCK
+
+---
+
+Add ONLY when relevant:
+
+<div style={{ margin: "2rem 0", padding: "1rem", background: "#f9f9f9" }}>
+  <strong>Read this also:</strong>
+  <ul>
+    <li>
+      <a href="/bible-verses-about-patience/">
+        Scriptures that teach patience and perseverance
+      </a>
+    </li>
+  </ul>
+</div>
+
+Rules:
+
+* Must relate directly to previous section
+* Use varied anchor text (not exact repetition)
+
+---
+
+3. END SECTION (RELEVANT ARTICLES)
+
+---
+
+<h2>Relevant Articles</h2>
+
+<ul>
+  <li>
+    <a href="/topics/patience/">
+      Understanding patience in Christian life
+    </a>
+  </li>
+  <li>
+    <a href="/questions/why-is-patience-important/">
+      Why patience matters in faith
+    </a>
+  </li>
+  <li>
+    <a href="/bible-verses-about-patience/">
+      Key scriptures on patience explained
+    </a>
+  </li>
+  <li>
+    <a href="/topics/faith/">
+      How faith supports patience
+    </a>
+  </li>
+</ul>
+
+Rules:
+
+* Articles must be closely related
+* Avoid unrelated categories
+* Use mixed anchor styles
+
+---
+
+4. BIBLE LINKING (CURRENT RULE)
+
+---
+
+<a href="/bible/james/1/">
+  James 1:3
+</a>
+
+* Link to chapter page
+* Do NOT overuse
+* Max 1–3 per page
+
+---
+
+5. SEMANTIC RELEVANCE FILTER
+
+---
+
+Before adding any link:
+
+Check:
+
+* Same topic OR closely related topic?
+* Same user intent?
+* Helps user understand better?
+
+If NOT → skip link
+
+---
+
+6. APPLY TO ALL CONTENT
+
+---
+
+* Topics
+* Questions
+* Guides
+* Keyword pages
+* Future articles
+
+---
+
+## EXPECTED RESULT
+
+* Clean, natural internal linking
+* No keyword stuffing
+* Strong topical authority
+* Better SEO ranking potential
+
+---

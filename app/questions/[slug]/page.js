@@ -42,7 +42,7 @@ export default function QuestionPage({ params }) {
 
       <article style={{ backgroundColor: 'white', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '2.5rem' }}>
         {q.topic_title && (
-          <Link href={`/topics/${q.topic_slug}`} style={{ textDecoration: 'none' }}>
+          <Link href={`/topics/${q.topic_slug}/`} style={{ textDecoration: 'none' }}>
             <span style={{
               display: 'inline-block', backgroundColor: '#f5f0e8',
               color: '#8b7355', fontSize: '0.8rem', padding: '0.2rem 0.75rem',
@@ -73,7 +73,7 @@ export default function QuestionPage({ params }) {
           ← More Questions
         </Link>
         {q.topic_slug && (
-          <Link href={`/topics/${q.topic_slug}`} style={{
+          <Link href={`/topics/${q.topic_slug}/`} style={{
             backgroundColor: '#1e2d4a', color: 'white',
             padding: '0.6rem 1.25rem', borderRadius: '0.5rem',
             fontWeight: '500', textDecoration: 'none', fontSize: '0.875rem',
@@ -82,6 +82,38 @@ export default function QuestionPage({ params }) {
           </Link>
         )}
       </div>
+
+      <section style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f9f5ee', borderRadius: '0.75rem', border: '1px solid #e8dfc8' }}>
+        <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem', marginTop: 0 }}>
+          Relevant Articles
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {q.topic_slug && (
+            <>
+              <li>
+                <Link href={`/topics/${q.topic_slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+                  Understanding {q.topic_title} in Christian life →
+                </Link>
+              </li>
+              <li>
+                <Link href={`/bible-verses-about-${q.topic_slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+                  What the Bible says about {q.topic_title?.toLowerCase()} →
+                </Link>
+              </li>
+            </>
+          )}
+          <li>
+            <Link href="/guides/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Start a Bible study guide →
+            </Link>
+          </li>
+          <li>
+            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              More questions on faith →
+            </Link>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

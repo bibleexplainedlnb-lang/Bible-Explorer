@@ -111,7 +111,7 @@ export default function GuidePage({ params }) {
       </article>
 
       <div style={{ marginTop: '2rem' }}>
-        <Link href="/guides" style={{
+        <Link href="/guides/" style={{
           backgroundColor: '#f5f0e8', color: '#2c4270',
           padding: '0.6rem 1.25rem', borderRadius: '0.5rem',
           fontWeight: '500', textDecoration: 'none', fontSize: '0.875rem',
@@ -120,6 +120,34 @@ export default function GuidePage({ params }) {
           ← More Guides
         </Link>
       </div>
+
+      <section style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f9f5ee', borderRadius: '0.75rem', border: '1px solid #e8dfc8' }}>
+        <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem', marginTop: 0 }}>
+          Relevant Articles
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <li>
+            <Link href="/topics/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Browse Bible topics and themes →
+            </Link>
+          </li>
+          <li>
+            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Common spiritual questions answered →
+            </Link>
+          </li>
+          <li>
+            <Link href="/topics/faith/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              What the Bible teaches about faith →
+            </Link>
+          </li>
+          <li>
+            <Link href="/bible-verses-about-patience/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Scriptures on patience and perseverance →
+            </Link>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

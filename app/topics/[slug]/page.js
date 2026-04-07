@@ -71,7 +71,7 @@ export default function TopicPage({ params }) {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {relatedQuestions.map((q) => (
-              <Link key={q.slug} href={`/questions/${q.slug}`} style={{ textDecoration: 'none' }}>
+              <Link key={q.slug} href={`/questions/${q.slug}/`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   backgroundColor: 'white', border: '1px solid #e8dfc8',
                   borderRadius: '0.625rem', padding: '1.125rem 1.25rem',
@@ -91,11 +91,39 @@ export default function TopicPage({ params }) {
       {relatedQuestions.length === 0 && (
         <div style={{ backgroundColor: '#f5f0e8', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center', color: '#8b7355' }}>
           <p>No questions found for this topic yet.</p>
-          <Link href="/questions" style={{ color: '#b8860b', textDecoration: 'none', fontWeight: '500' }}>
+          <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontWeight: '500' }}>
             Browse all questions →
           </Link>
         </div>
       )}
+
+      <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e8dfc8' }}>
+        <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem' }}>
+          Relevant Articles
+        </h2>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <li>
+            <Link href={`/bible-verses-about-${params.slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Key scriptures on {topic.title.toLowerCase()} explained →
+            </Link>
+          </li>
+          <li>
+            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Browse spiritual questions and answers →
+            </Link>
+          </li>
+          <li>
+            <Link href="/guides/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Explore Bible study guides →
+            </Link>
+          </li>
+          <li>
+            <Link href="/bible/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
+              Read the Bible online →
+            </Link>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }
