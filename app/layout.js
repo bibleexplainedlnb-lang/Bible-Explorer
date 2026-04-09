@@ -25,18 +25,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      {/* Google Tag Manager — Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}
-      <Script
-        id="gtm-head"
-        strategy="beforeInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-NKWTM2RV');`,
-        }}
-      />
       <body
         className="min-h-screen flex flex-col"
         style={{ backgroundColor: "#faf7f2", color: "#1a1208" }}
@@ -50,6 +38,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+        {/* Google Tag Manager — Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}
+        <Script
+          id="gtm-head"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NKWTM2RV');`,
+          }}
+        />
 
         <header style={{ backgroundColor: "#1e2d4a" }} className="shadow-lg">
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
