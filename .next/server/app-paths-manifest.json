@@ -1,8 +1,4 @@
 {
   "/[slug]/page": "app/[slug]/page.js",
-  "/page": "app/page.js",
-  "/sitemap.xml/[[...__metadata_id__]]/route": "app/sitemap.xml/[[...__metadata_id__]]/route.js",
-  "/guides/page": "app/guides/page.js",
-  "/topics/[slug]/page": "app/topics/[slug]/page.js",
-  "/questions/[slug]/page": "app/questions/[slug]/page.js"
+  "/page": "app/page.js"
 }

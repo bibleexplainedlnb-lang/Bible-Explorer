@@ -1,0 +1,95 @@
+Configure SEO blocking, Google Search Console verification, and Google Tag Manager setup for a Next.js (App Router) project.
+
+-----------------------------------
+1. ROBOTS.TXT (BLOCK ALL CRAWLERS)
+-----------------------------------
+
+- Create a file at: /public/robots.txt
+
+Content:
+
+User-agent: *
+Disallow: /
+
+- Ensure it is accessible at:
+https://yourdomain.com/robots.txt
+
+- Add comment:
+"REMOVE THIS BEFORE GOING LIVE"
+
+-----------------------------------
+2. GLOBAL NOINDEX META TAG
+-----------------------------------
+
+- In app/layout.tsx (or layout.js), inside <head>, add:
+
+<meta name="robots" content="noindex, nofollow" />
+
+- This must apply to ALL pages
+
+- Add comment:
+"REMOVE NOINDEX BEFORE GOING LIVE"
+
+-----------------------------------
+3. GOOGLE SEARCH CONSOLE VERIFICATION
+-----------------------------------
+
+- Add this meta tag inside <head>:
+
+<meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
+
+-----------------------------------
+4. GOOGLE TAG MANAGER (ONLY TRACKING SYSTEM)
+-----------------------------------
+
+- Add this script inside <head>:
+
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id=GTM-NKWTM2RV'+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NKWTM2RV');
+</script>
+
+- Immediately after opening <body> tag, add:
+
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKWTM2RV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+
+-----------------------------------
+5. IMPORTANT RULE (NO GOOGLE ANALYTICS DIRECT SCRIPT)
+-----------------------------------
+
+- Do NOT include any direct Google Analytics (gtag.js) script
+
+- Add comment in code:
+
+"Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager"
+
+-----------------------------------
+6. PERFORMANCE + CLEAN CODE
+-----------------------------------
+
+- Ensure:
+  - Scripts are async
+  - No duplicate tracking
+  - Clean layout structure
+
+-----------------------------------
+7. FINAL NOTES (VERY IMPORTANT)
+-----------------------------------
+
+- Before going live:
+  1. Remove robots.txt Disallow: /
+  2. Remove noindex meta tag
+  3. Keep Google Tag Manager active
+  4. Submit sitemap in Google Search Console
+
+-----------------------------------
+RETURN:
+- Updated layout.tsx
+- robots.txt file
+- Confirmation everything is working
