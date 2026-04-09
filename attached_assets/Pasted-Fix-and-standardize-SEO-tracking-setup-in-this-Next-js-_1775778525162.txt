@@ -1,0 +1,121 @@
+Fix and standardize SEO + tracking setup in this Next.js (App Router) project.
+
+IMPORTANT: Replace existing incorrect implementations instead of adding duplicates.
+
+-----------------------------------
+1. CLEAN UP OLD CODE (VERY IMPORTANT)
+-----------------------------------
+
+- Find and REMOVE:
+  - Any existing Google Tag Manager scripts
+  - Any Google Analytics (gtag.js) scripts
+  - Any duplicate meta robots tags
+  - Any incorrectly placed scripts in components
+
+Ensure no duplicate tracking or meta tags remain.
+
+-----------------------------------
+2. UPDATE ROOT LAYOUT (REPLACE HEAD + BODY STRUCTURE)
+-----------------------------------
+
+- Open: /app/layout.tsx (or layout.js)
+
+- Replace the <head> and <body> structure with correct implementation:
+
+HEAD should include:
+
+- Google Search Console verification meta
+- Noindex meta (temporary)
+- Google Tag Manager script (using dangerouslySetInnerHTML)
+
+BODY should include:
+
+- GTM noscript iframe IMMEDIATELY after opening <body>
+
+-----------------------------------
+3. EXACT IMPLEMENTATION DETAILS
+-----------------------------------
+
+HEAD:
+
+<meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
+
+<meta name="robots" content="noindex, nofollow" />
+<!-- REMOVE THIS BEFORE GOING LIVE -->
+
+<script dangerouslySetInnerHTML={{
+  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id=GTM-NKWTM2RV'+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-NKWTM2RV');`
+}} />
+
+-----------------------------------
+
+BODY (top):
+
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKWTM2RV"
+  height="0" width="0" style={{display:'none',visibility:'hidden'}}></iframe>
+</noscript>
+
+-----------------------------------
+4. FIX ROBOTS.TXT (404 ISSUE)
+-----------------------------------
+
+- Create /public folder if it does not exist
+
+- Create file: /public/robots.txt
+
+Content:
+
+User-agent: *
+Disallow: /
+
+- Ensure it is accessible at:
+https://yourdomain.com/robots.txt
+
+-----------------------------------
+5. FIX SITEMAP (TEMP FILE)
+-----------------------------------
+
+- Create file: /public/sitemap.xml
+
+Add basic content:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://yourdomain.com/</loc>
+  </url>
+</urlset>
+
+-----------------------------------
+6. FINAL VERIFICATION
+-----------------------------------
+
+Ensure:
+
+- robots.txt returns 200 (not 404)
+- sitemap.xml returns 200
+- GTM script loads on all pages
+- No duplicate scripts exist
+- Meta tags applied globally
+
+-----------------------------------
+7. COMMENTS (IMPORTANT)
+-----------------------------------
+
+Add comments in code:
+
+- "REMOVE NOINDEX BEFORE GOING LIVE"
+- "REMOVE ROBOTS BLOCK BEFORE GOING LIVE"
+
+-----------------------------------
+RETURN:
+
+- Updated layout.tsx
+- robots.txt file
+- sitemap.xml file
+- Confirmation everything is fixed

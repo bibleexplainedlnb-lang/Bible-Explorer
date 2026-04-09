@@ -1,6 +1,5 @@
 import "./globals.css";
 import Link from "next/link";
-import Script from "next/script";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bible-verse-insights.vercel.app';
 
@@ -12,36 +11,21 @@ export const metadata = {
   alternates: {
     canonical: '/',
   },
-  // REMOVE NOINDEX BEFORE GOING LIVE
-  robots: {
-    index: false,
-    follow: false,
-  },
-  verification: {
-    google: 'FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU',
-  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className="min-h-screen flex flex-col"
-        style={{ backgroundColor: "#faf7f2", color: "#1a1208" }}
-      >
-        {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-NKWTM2RV"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
-        {/* Google Tag Manager — Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}
-        <Script
-          id="gtm-head"
-          strategy="afterInteractive"
+      <head>
+        {/* Google Search Console verification */}
+        <meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
+
+        {/* REMOVE NOINDEX BEFORE GOING LIVE */}
+        <meta name="robots" content="noindex, nofollow" />
+
+        {/* Google Tag Manager */}
+        {/* Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}
+        <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -50,6 +34,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-NKWTM2RV');`,
           }}
         />
+      </head>
+      <body
+        className="min-h-screen flex flex-col"
+        style={{ backgroundColor: "#faf7f2", color: "#1a1208" }}
+      >
+        {/* Google Tag Manager (noscript) — immediately after opening body */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-NKWTM2RV"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
 
         <header style={{ backgroundColor: "#1e2d4a" }} className="shadow-lg">
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
