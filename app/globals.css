@@ -85,6 +85,19 @@ body {
   font-weight: 600;
 }
 
+/* Internal links injected by the linking engine */
+.internal-link {
+  color: #b8860b;
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.35);
+  text-underline-offset: 2px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.internal-link:hover {
+  color: #2c4270;
+  text-decoration-color: rgba(44, 66, 112, 0.4);
+}
+
 .verse-text {
   font-family: Georgia, "Times New Roman", serif;
   line-height: 1.9;

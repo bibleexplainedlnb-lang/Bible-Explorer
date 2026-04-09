@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { topics, questions, verses } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
+import { addInternalLinks } from '../../../lib/internalLinks.js';
 
 export function generateMetadata({ params }) {
   const topic = topics.findBySlug(params.slug);
@@ -19,7 +20,10 @@ export default function TopicPage({ params }) {
   const relatedQuestions = questions.listByTopic(topic.id);
   const topicVerses = verses.listByTopic(topic.id);
 
-  const contentHtml = markdownToHtml(topic.content);
+  // Exclude the current topic URL so the content doesn't link to itself
+  const contentHtml = addInternalLinks(markdownToHtml(topic.content), {
+    exclude: [`/topics/${params.slug}/`],
+  });
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>

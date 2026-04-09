@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { guides } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
+import { addInternalLinks } from '../../../lib/internalLinks.js';
 
 export function generateMetadata({ params }) {
   const guide = guides.findBySlug(params.slug);
@@ -16,7 +17,9 @@ export default function GuidePage({ params }) {
   const guide = guides.findBySlug(params.slug);
   if (!guide) notFound();
 
-  const html = markdownToHtml(guide.content);
+  const html = addInternalLinks(markdownToHtml(guide.content), {
+    exclude: [`/guides/${params.slug}/`],
+  });
 
   return (
     <div style={{ maxWidth: '52rem', margin: '0 auto', padding: '2.5rem 1rem' }}>

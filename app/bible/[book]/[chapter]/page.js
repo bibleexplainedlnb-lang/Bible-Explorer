@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { fetchChapter } from '../../../../lib/bible.js';
 import { findBook, BIBLE_BOOKS } from '../../../../lib/bible.js';
 import { bibleNotes } from '../../../../lib/db.js';
+import { addLinksToText } from '../../../../lib/internalLinks.js';
 
 export function generateMetadata({ params }) {
   const book = findBook(params.book);
@@ -88,6 +89,8 @@ function BookSelector({ currentBook }) {
 
 function ExplanationPanel({ notes }) {
   if (!notes) return null;
+  const pStyle = { fontSize: '0.9rem', lineHeight: 1.7, color: '#2a2015', margin: 0, fontFamily: 'Georgia, serif' };
+  const labelStyle = { fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#b8860b', fontWeight: '600', marginBottom: '0.5rem' };
   return (
     <div style={{ backgroundColor: '#f5f0e8', border: '1px solid #e8dfc8', borderRadius: '0.875rem', padding: '1.5rem', marginBottom: '1.25rem' }}>
       <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1.25rem' }}>
@@ -95,20 +98,20 @@ function ExplanationPanel({ notes }) {
       </h3>
       {notes.overview && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#b8860b', fontWeight: '600', marginBottom: '0.5rem' }}>Overview</div>
-          <p style={{ fontSize: '0.9rem', lineHeight: 1.7, color: '#2a2015', margin: 0, fontFamily: 'Georgia, serif' }}>{notes.overview}</p>
+          <div style={labelStyle}>Overview</div>
+          <p style={pStyle} dangerouslySetInnerHTML={{ __html: addLinksToText(notes.overview) }} />
         </div>
       )}
       {notes.context && (
         <div style={{ marginBottom: '1.25rem' }}>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#b8860b', fontWeight: '600', marginBottom: '0.5rem' }}>Historical Context</div>
-          <p style={{ fontSize: '0.9rem', lineHeight: 1.7, color: '#2a2015', margin: 0, fontFamily: 'Georgia, serif' }}>{notes.context}</p>
+          <div style={labelStyle}>Historical Context</div>
+          <p style={pStyle} dangerouslySetInnerHTML={{ __html: addLinksToText(notes.context) }} />
         </div>
       )}
       {notes.application && (
         <div>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#b8860b', fontWeight: '600', marginBottom: '0.5rem' }}>Application</div>
-          <p style={{ fontSize: '0.9rem', lineHeight: 1.7, color: '#2a2015', margin: 0, fontFamily: 'Georgia, serif' }}>{notes.application}</p>
+          <div style={labelStyle}>Application</div>
+          <p style={pStyle} dangerouslySetInnerHTML={{ __html: addLinksToText(notes.application) }} />
         </div>
       )}
     </div>

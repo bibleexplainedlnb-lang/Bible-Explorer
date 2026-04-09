@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { questions } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
+import { addInternalLinks } from '../../../lib/internalLinks.js';
 
 export function generateMetadata({ params }) {
   const q = questions.findBySlug(params.slug);
@@ -16,7 +17,9 @@ export default function QuestionPage({ params }) {
   const q = questions.findBySlug(params.slug);
   if (!q) notFound();
 
-  const html = markdownToHtml(q.content);
+  const html = addInternalLinks(markdownToHtml(q.content), {
+    exclude: [`/questions/${params.slug}/`],
+  });
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
