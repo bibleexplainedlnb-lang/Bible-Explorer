@@ -20,15 +20,19 @@ model Topic {
 }
 
 model Question {
-  id          Int      @id @default(autoincrement())
-  title       String
-  slug        String   @unique
-  contentHtml String   @map("content_html")
-  summary     String?
-  topicId     Int?     @map("topic_id")
-  topic       Topic?   @relation(fields: [topicId], references: [id])
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id              Int      @id @default(autoincrement())
+  title           String
+  slug            String   @unique
+  contentHtml     String   @map("content_html")
+  summary         String?
+  metaTitle       String?  @map("meta_title")
+  metaDescription String?  @map("meta_description")
+  keywords        String[] @default([])
+  relatedSlugs    String[] @default([]) @map("related_slugs")
+  topicId         Int?     @map("topic_id")
+  topic           Topic?   @relation(fields: [topicId], references: [id])
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("questions")
 }

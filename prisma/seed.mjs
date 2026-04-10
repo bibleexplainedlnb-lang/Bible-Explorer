@@ -34,7 +34,7 @@ const TOPICS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Questions  (contentHtml exported from existing SQLite DB via markdownToHtml)
+// Questions
 // ---------------------------------------------------------------------------
 const QUESTIONS = [
   {
@@ -42,6 +42,10 @@ const QUESTIONS = [
     slug: 'how-to-start-reading-bible',
     topicSlug: 'bible-basics',
     summary: 'A practical step-by-step guide for first-time Bible readers — where to begin, which translation to use, and how to build a consistent reading habit.',
+    metaTitle: 'How to Start Reading the Bible — A Practical Guide for Beginners',
+    metaDescription: 'Not sure where to begin in the Bible? Start with the Gospel of John, read the Psalms daily, and choose a modern translation. Step-by-step guidance for new readers.',
+    keywords: ['how to read the Bible', 'Bible for beginners', 'start reading the Bible', 'Gospel of John', 'Bible translations'],
+    relatedSlugs: ['what-is-faith', 'how-should-christians-pray', 'what-is-grace'],
     contentHtml: `<p>Starting the Bible for the first time can feel overwhelming — it is a library of 66 books spanning thousands of years. Here is a practical approach to get started.</p>
 <p><strong>Begin with the Gospel of John.</strong> John is widely recommended as the best starting point for new readers. It tells the story of Jesus in clear, beautiful prose, addresses the big questions of meaning and eternal life, and is written explicitly so 'that you may believe that Jesus is the Christ, the Son of God' (John 20:31).</p>
 <p><strong>Then read the rest of the Gospels.</strong> Matthew, Mark, and Luke each give a different perspective on Jesus\u2019 life, ministry, death, and resurrection. Understanding Jesus is the key to understanding the whole Bible.</p>
@@ -57,6 +61,10 @@ const QUESTIONS = [
     slug: 'what-is-faith',
     topicSlug: 'faith',
     summary: "Faith is confident trust in God and His promises — not blind belief, but assurance grounded in God's revealed character and Word.",
+    metaTitle: 'What Is Faith? The Biblical Definition of Faith Explained',
+    metaDescription: "Faith in the Bible means confident trust in God and His promises. Learn what Hebrews 11:1 teaches about faith, and how the 'Hall of Faith' shows faith in action.",
+    keywords: ['what is faith', 'biblical faith', 'faith in the Bible', 'Hebrews 11', 'faith and works'],
+    relatedSlugs: ['what-is-grace', 'how-to-start-reading-bible', 'how-should-christians-pray'],
     contentHtml: `<p>The Bible gives us a clear definition of faith in Hebrews 11:1: 'Now faith is the substance of things hoped for, the evidence of things not seen.' Faith, in the biblical sense, is not blind belief \u2014 it is confident trust grounded in who God is and what He has revealed.</p>
 <p>Faith is closely tied to trust. Proverbs 3:5\u20136 calls us to 'trust in the LORD with all your heart and lean not on your own understanding.' Romans 10:17 tells us that 'faith comes by hearing, and hearing by the word of God.' This means our faith grows as we engage with Scripture.</p>
 <p>The famous 'Hall of Faith' in Hebrews 11 describes men and women throughout history who acted on their belief in God\u2019s promises \u2014 from Noah building the ark to Abraham leaving his homeland to Moses leading the Israelites. Their faith was demonstrated through action.</p>
@@ -69,6 +77,10 @@ const QUESTIONS = [
     slug: 'what-is-grace',
     topicSlug: 'grace',
     summary: "Grace is God's unmerited favor — salvation and transformation freely given through Jesus Christ, not earned by human effort.",
+    metaTitle: "What Is Grace? God's Unmerited Favor Explained from Scripture",
+    metaDescription: "Grace means receiving from God what we could never earn. Explore Ephesians 2:8-9 and how grace saves, transforms, and sustains every believer's life.",
+    keywords: ['what is grace', 'grace in the Bible', 'unmerited favor', 'Ephesians 2:8', 'saved by grace'],
+    relatedSlugs: ['what-is-faith', 'who-is-the-holy-spirit', 'how-to-start-reading-bible'],
     contentHtml: `<p>Grace is one of the most important words in the Bible. At its core, grace means unmerited favor \u2014 receiving something good that we have not earned and do not deserve. While the law reveals what we should be, grace provides what we cannot achieve on our own.</p>
 <p>Grace appears throughout the Old Testament (the Hebrew word 'hesed' meaning steadfast love), but it reaches its fullest expression in Jesus Christ. John 1:17 says, 'For the law was given through Moses; grace and truth came through Jesus Christ.'</p>
 <p>Salvation is entirely a work of grace. Ephesians 2:8\u20139 is the classic text: 'For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.' We cannot earn, buy, or merit salvation \u2014 it is freely given.</p>
@@ -82,6 +94,10 @@ const QUESTIONS = [
     slug: 'who-is-the-holy-spirit',
     topicSlug: 'salvation',
     summary: 'The Holy Spirit is the third person of the Trinity — fully God, indwelling every believer to convict, guide, empower, and transform.',
+    metaTitle: 'Who Is the Holy Spirit? A Biblical Guide to the Third Person of the Trinity',
+    metaDescription: 'The Holy Spirit is fully God — not a force, but a person. Discover the Spirit\'s roles in Scripture: Helper, Comforter, Intercessor, and Fruit-producer (Galatians 5:22).',
+    keywords: ['who is the Holy Spirit', 'Holy Spirit in the Bible', 'fruit of the Spirit', 'Trinity', 'Pentecost Acts 2'],
+    relatedSlugs: ['what-is-grace', 'what-is-faith', 'how-should-christians-pray'],
     contentHtml: `<p>The Holy Spirit is the third person of the Trinity \u2014 fully God, co-equal with the Father and the Son. He is not an impersonal force but a personal being with a mind (Romans 8:27), will (1 Corinthians 12:11), and emotions (Ephesians 4:30).</p>
 <p>In the Old Testament, the Spirit of God hovered over the waters at creation (Genesis 1:2), empowered leaders and prophets (Judges 3:10, Isaiah 61:1), and was promised to be poured out on all people (Joel 2:28).</p>
 <p>At Pentecost (Acts 2), this promise was fulfilled. The Spirit was poured out on all believers, not just special leaders. Since then, every person who believes in Jesus receives the Holy Spirit (Ephesians 1:13\u201314).</p>
@@ -95,6 +111,10 @@ const QUESTIONS = [
     slug: 'how-should-christians-pray',
     topicSlug: 'prayer',
     summary: "Jesus modeled prayer in the Lord's Prayer — approaching God as Father, aligning with His will, and persisting with faith.",
+    metaTitle: "How Should Christians Pray? What Jesus Taught About Prayer",
+    metaDescription: "Learn how to pray from Jesus himself. The Lord's Prayer in Matthew 6 shows us to worship, submit, petition, and persist — with God as our Father.",
+    keywords: ['how to pray', "Lord's Prayer", 'Christian prayer', 'Matthew 6', 'pray without ceasing'],
+    relatedSlugs: ['how-to-start-reading-bible', 'what-is-faith', 'who-is-the-holy-spirit'],
     contentHtml: `<p>Jesus gave us the clearest model for prayer in Matthew 6:9\u201313, known as the Lord\u2019s Prayer. It opens with worship ('Our Father in heaven, hallowed be your name'), moves to submission ('your kingdom come, your will be done'), then to petition (daily bread, forgiveness, deliverance), and closes with praise.</p>
 <p>This model teaches us several things about prayer:</p>
 <p><strong>1. Approach God as Father.</strong> Prayer is not a ritual \u2014 it is a conversation with a loving Father. Jesus called God 'Abba' (Romans 8:15), an intimate term meaning Father or Daddy.</p>
@@ -127,15 +147,36 @@ async function main() {
 
   console.log('');
 
-  // 2. Upsert all questions linked to their topic
+  // 2. Upsert all questions with full SEO metadata
   for (const q of QUESTIONS) {
     const topicId = topicMap[q.topicSlug];
     const question = await prisma.question.upsert({
       where: { slug: q.slug },
-      update: { title: q.title, contentHtml: q.contentHtml, summary: q.summary, topicId },
-      create: { title: q.title, slug: q.slug, contentHtml: q.contentHtml, summary: q.summary, topicId },
+      update: {
+        title: q.title,
+        contentHtml: q.contentHtml,
+        summary: q.summary,
+        metaTitle: q.metaTitle,
+        metaDescription: q.metaDescription,
+        keywords: q.keywords,
+        relatedSlugs: q.relatedSlugs,
+        topicId,
+      },
+      create: {
+        title: q.title,
+        slug: q.slug,
+        contentHtml: q.contentHtml,
+        summary: q.summary,
+        metaTitle: q.metaTitle,
+        metaDescription: q.metaDescription,
+        keywords: q.keywords,
+        relatedSlugs: q.relatedSlugs,
+        topicId,
+      },
     });
-    console.log(`  question \u2713  "${question.title}" (id ${question.id}, topic: ${q.topicSlug})`);
+    console.log(`  question \u2713  "${question.title}"`);
+    console.log(`           keywords: ${question.keywords.join(', ')}`);
+    console.log(`           related:  ${question.relatedSlugs.join(', ')}`);
   }
 
   console.log('\nSeed complete.');
