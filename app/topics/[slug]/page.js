@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { topics, questions, verses } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
 import { addInternalLinks } from '../../../lib/internalLinks.js';
+import { injectMidContentBlocks, readMoreBlock } from '../../../lib/injectReadMore.js';
 
 export function generateMetadata({ params }) {
   const topic = topics.findBySlug(params.slug);
@@ -20,10 +21,23 @@ export default function TopicPage({ params }) {
   const relatedQuestions = questions.listByTopic(topic.id);
   const topicVerses = verses.listByTopic(topic.id);
 
+  // Build contextual mid-content blocks
+  const firstQ = relatedQuestions[0];
+  const midBlock1 = firstQ
+    ? readMoreBlock(`/questions/${firstQ.slug}/`, 'Find out', firstQ.title)
+    : readMoreBlock('/questions/', 'Find out', `Questions readers ask about ${topic.title.toLowerCase()}`);
+  const midBlock2 = readMoreBlock(
+    `/bible-verses-about-${params.slug}/`,
+    'Discover',
+    `Key Bible verses on ${topic.title.toLowerCase()} — with full context and meaning`
+  );
+
   // Exclude the current topic URL so the content doesn't link to itself
-  const contentHtml = addInternalLinks(markdownToHtml(topic.content), {
-    exclude: [`/topics/${params.slug}/`],
-  });
+  const contentHtml = injectMidContentBlocks(
+    addInternalLinks(markdownToHtml(topic.content), { exclude: [`/topics/${params.slug}/`] }),
+    midBlock1,
+    midBlock2
+  );
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>

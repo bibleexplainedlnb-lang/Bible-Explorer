@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { guides } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
 import { addInternalLinks } from '../../../lib/internalLinks.js';
+import { injectMidContentBlocks, GUIDE_MID_BLOCKS } from '../../../lib/injectReadMore.js';
 
 export function generateMetadata({ params }) {
   const guide = guides.findBySlug(params.slug);
@@ -17,9 +18,14 @@ export default function GuidePage({ params }) {
   const guide = guides.findBySlug(params.slug);
   if (!guide) notFound();
 
-  const html = addInternalLinks(markdownToHtml(guide.content), {
+  const baseHtml = addInternalLinks(markdownToHtml(guide.content), {
     exclude: [`/guides/${params.slug}/`],
   });
+
+  const midBlocks = GUIDE_MID_BLOCKS[params.slug];
+  const html = midBlocks
+    ? injectMidContentBlocks(baseHtml, midBlocks[0], midBlocks[1])
+    : baseHtml;
 
   return (
     <div style={{ maxWidth: '52rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
