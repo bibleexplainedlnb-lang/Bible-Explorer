@@ -1,7 +1,9 @@
 {
   "/page": "app/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
   "/api/generate-question/route": "app/api/generate-question/route.js",
+  "/api/topics/route": "app/api/topics/route.js",
   "/admin/page": "app/admin/page.js",
-  "/api/save-question/route": "app/api/save-question/route.js",
-  "/api/topics/route": "app/api/topics/route.js"
+  "/questions/[slug]/page": "app/questions/[slug]/page.js",
+  "/api/save-question/route": "app/api/save-question/route.js"
 }

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import prisma from '../../../lib/prisma.js';
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+// Supports the env var name the user specified; falls back to the secret already set in Replit
+const OPENROUTER_KEY = () =>
+  process.env.OPENROUTER_API_KEY || process.env.Open_Router_API;
+
+// Model — gpt-4.1-mini gives strong JSON output at low cost via OpenRouter
+const MODEL = 'openai/gpt-4.1-mini';
 
 // Sanitise an AI-produced slug to URL-safe lowercase-hyphens
 function sanitiseSlug(raw = '') {
@@ -14,6 +16,37 @@ function sanitiseSlug(raw = '') {
     .replace(/[^a-z0-9-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+}
+
+// Call OpenRouter and return parsed JSON content
+async function callOpenRouter(messages) {
+  const apiKey = OPENROUTER_KEY();
+  if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
+
+  const res = await fetch(OPENROUTER_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization':  `Bearer ${apiKey}`,
+      'Content-Type':   'application/json',
+      'HTTP-Referer':   'https://bibleverseinsights.com',
+      'X-Title':        'Bible Verse Insights',
+    },
+    body: JSON.stringify({
+      model:           MODEL,
+      messages,
+      response_format: { type: 'json_object' },
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`OpenRouter ${res.status}: ${text}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content ?? '';
+  if (!content) throw new Error('OpenRouter returned empty content');
+  return content;
 }
 
 export async function POST(request) {
@@ -90,21 +123,15 @@ RULES:
 - Doctrinal stance: evangelical, biblically faithful
 - Return ONLY the JSON object — no markdown fences, no commentary`;
 
-    // ── 3. Call OpenAI ───────────────────────────────────────────────────────
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5.2',
-      max_completion_tokens: 8192,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a biblical content expert. Always respond with a valid JSON object only — no markdown, no extra text.',
-        },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-    });
+    // ── 3. Call OpenRouter ───────────────────────────────────────────────────
+    const raw = await callOpenRouter([
+      {
+        role:    'system',
+        content: 'You are a biblical content expert. Always respond with a valid JSON object only — no markdown, no extra text.',
+      },
+      { role: 'user', content: userPrompt },
+    ]);
 
-    const raw = completion.choices[0]?.message?.content ?? '';
     let generated;
     try {
       generated = JSON.parse(raw);
