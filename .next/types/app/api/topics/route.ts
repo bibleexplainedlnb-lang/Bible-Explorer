@@ -1,8 +1,8 @@
-// File: /home/runner/workspace/app/api/generate-ideas/route.js
-import * as entry from '../../../../../app/api/generate-ideas/route.js'
+// File: /home/runner/workspace/app/api/topics/route.js
+import * as entry from '../../../../../app/api/topics/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../app/api/generate-ideas/route.js')
+type TEntry = typeof import('../../../../../app/api/topics/route.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
