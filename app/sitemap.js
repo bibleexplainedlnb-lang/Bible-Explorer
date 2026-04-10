@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { topics, questions, guides } from '../lib/db.js';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bible-verse-insights.vercel.app';
