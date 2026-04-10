@@ -2,7 +2,7 @@
 const nextConfig = {
   output: "standalone",
   trailingSlash: true,
-  serverExternalPackages: ['better-sqlite3'],
+  serverExternalPackages: ['better-sqlite3', '@prisma/client', 'prisma'],
   allowedDevOrigins: [
     "*.replit.dev",
     "*.picard.replit.dev",

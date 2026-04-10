@@ -129,6 +129,17 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - `lib/content.js` — full SEO content for all 8 topics, 3 thin questions, and 5 guide additions (800-1200 words each, markdown format)
 - `upgradeExpandedContent(db)` in `lib/db.js` runs on every cold start and UPDATEs topic content, thin question content (<200 chars), and unexpanded guide content (<4000 chars)
 
+**PostgreSQL + Prisma (scaling layer):**
+- `prisma/schema.prisma` — 4 models: `Topic`, `Question`, `BibleVerse`, `VerseExplanation`; synced to Replit's built-in PostgreSQL via `npx prisma db push`
+- `lib/prisma.js` — singleton PrismaClient (prevents connection exhaustion during HMR)
+- `prisma` + `@prisma/client` pinned at 5.22.0 (Prisma 7 removed `url` in schema — stay on v5)
+- **API routes** (`app/api/`):
+  - `GET /api/questions/[slug]/` — question by slug, includes topic relation
+  - `GET /api/topics/[slug]/` — topic + all its questions
+  - `GET /api/verses/[book]/[chapter]/` — all verses in chapter with explanations
+  - `GET /api/verses/[book]/[chapter]/?verse=N` — single verse with explanation
+- Database tables: `topics`, `questions`, `bible_verses`, `verse_explanations` (PostgreSQL)
+
 **Topics table** has a `content TEXT` column (added via ALTER TABLE migration) that stores full markdown content rendered by `renderTopicContent()` in `app/topics/[slug]/page.js`.
 
 **Key files:**
@@ -142,7 +153,7 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - `app/guides/[slug]/page.js` — guide detail with dangerouslySetInnerHTML + prose-content class
 - `app/globals.css` — .prose-content CSS class styles all converted markdown HTML elements
 - `app/not-found.js` — 404 page for unmatched routes
-- `next.config.js` — uses CommonJS; serverExternalPackages for better-sqlite3; trailingSlash: true
+- `next.config.js` — uses CommonJS; serverExternalPackages for better-sqlite3, @prisma/client, prisma; trailingSlash: true
 
 ### `scripts` (`@workspace/scripts`)
 

@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Topic {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String?
+  questions   Question[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("topics")
+}
+
+model Question {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  contentHtml String   @map("content_html")
+  summary     String?
+  topicId     Int?     @map("topic_id")
+  topic       Topic?   @relation(fields: [topicId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("questions")
+}
+
+model BibleVerse {
+  id           Int                @id @default(autoincrement())
+  book         String
+  chapter      Int
+  verse        Int
+  text         String
+  explanations VerseExplanation[]
+
+  @@unique([book, chapter, verse])
+  @@map("bible_verses")
+}
+
+model VerseExplanation {
+  id          Int        @id @default(autoincrement())
+  verseId     Int        @map("verse_id")
+  verse       BibleVerse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  contentHtml String     @map("content_html")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("verse_explanations")
+}
