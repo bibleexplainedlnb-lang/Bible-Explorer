@@ -4,37 +4,90 @@ import { questions } from '../../../lib/db.js';
 import { markdownToHtml } from '../../../lib/markdownToHtml.js';
 import { addInternalLinks } from '../../../lib/internalLinks.js';
 import { injectMidContentBlocks, readMoreBlock } from '../../../lib/injectReadMore.js';
+import prisma from '../../../lib/prisma.js';
 
-export function generateMetadata({ params }) {
-  const q = questions.findBySlug(params.slug);
+// ---------------------------------------------------------------------------
+// Resolve question from PostgreSQL first, fall back to SQLite
+// Returns a normalised shape used by both generateMetadata and the page.
+// ---------------------------------------------------------------------------
+async function resolveQuestion(slug) {
+  // 1. Try PostgreSQL via Prisma
+  try {
+    const dbQ = await prisma.question.findUnique({
+      where: { slug },
+      include: {
+        topic: { select: { id: true, name: true, slug: true } },
+      },
+    });
+
+    if (dbQ) {
+      return {
+        source: 'db',
+        title: dbQ.title,
+        summary: dbQ.summary,
+        topicTitle: dbQ.topic?.name ?? null,
+        topicSlug: dbQ.topic?.slug ?? null,
+        // Content is already HTML in Postgres — skip markdownToHtml
+        rawHtml: dbQ.contentHtml,
+      };
+    }
+  } catch (_) {
+    // Prisma unavailable — fall through to SQLite
+  }
+
+  // 2. Fall back to SQLite
+  const sqQ = questions.findBySlug(slug);
+  if (!sqQ) return null;
+
+  return {
+    source: 'sqlite',
+    title: sqQ.title,
+    summary: sqQ.summary ?? null,
+    topicTitle: sqQ.topic_title ?? null,
+    topicSlug: sqQ.topic_slug ?? null,
+    // SQLite stores markdown — convert to HTML
+    rawHtml: markdownToHtml(sqQ.content),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Metadata
+// ---------------------------------------------------------------------------
+export async function generateMetadata({ params }) {
+  const q = await resolveQuestion(params.slug);
   if (!q) return { title: 'Not Found' };
   return {
     title: q.title,
+    ...(q.summary ? { description: q.summary } : {}),
     alternates: { canonical: `/questions/${params.slug}/` },
   };
 }
 
-export default function QuestionPage({ params }) {
-  const q = questions.findBySlug(params.slug);
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+export default async function QuestionPage({ params }) {
+  const q = await resolveQuestion(params.slug);
   if (!q) notFound();
 
-  const baseHtml = addInternalLinks(markdownToHtml(q.content), {
+  // Apply internal links then inject mid-content read-more blocks
+  const baseHtml = addInternalLinks(q.rawHtml, {
     exclude: [`/questions/${params.slug}/`],
   });
 
-  const block1 = q.topic_slug
+  const block1 = q.topicSlug
     ? readMoreBlock(
         `/guides/getting-started-bible-study/`,
         'Learn more',
-        `A step-by-step guide to studying ${q.topic_title?.toLowerCase() || 'these'} passages in depth`
+        `A step-by-step guide to studying ${q.topicTitle?.toLowerCase() || 'these'} passages in depth`
       )
     : readMoreBlock('/guides/getting-started-bible-study/', 'Learn more', 'A step-by-step guide to studying the Bible');
 
-  const block2 = q.topic_slug
+  const block2 = q.topicSlug
     ? readMoreBlock(
-        `/topics/${q.topic_slug}/`,
+        `/topics/${q.topicSlug}/`,
         'Dive deeper',
-        `What the Bible teaches about ${q.topic_title?.toLowerCase()} — from Genesis to Revelation`
+        `What the Bible teaches about ${q.topicTitle?.toLowerCase()} — from Genesis to Revelation`
       )
     : readMoreBlock('/topics/', 'Explore more', 'Browse all Bible topics and themes');
 
@@ -47,15 +100,15 @@ export default function QuestionPage({ params }) {
       </Link>
 
       <article style={{ backgroundColor: 'white', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '2.5rem' }}>
-        {q.topic_title && (
-          <Link href={`/topics/${q.topic_slug}/`} style={{ textDecoration: 'none' }}>
+        {q.topicTitle && (
+          <Link href={`/topics/${q.topicSlug}/`} style={{ textDecoration: 'none' }}>
             <span style={{
               display: 'inline-block', backgroundColor: '#f5f0e8',
               color: '#8b7355', fontSize: '0.8rem', padding: '0.2rem 0.75rem',
               borderRadius: '1rem', border: '1px solid #e8dfc8',
               marginBottom: '1rem',
             }}>
-              {q.topic_title}
+              {q.topicTitle}
             </span>
           </Link>
         )}
@@ -80,13 +133,13 @@ export default function QuestionPage({ params }) {
         }}>
           ← More Questions
         </Link>
-        {q.topic_slug && (
-          <Link href={`/topics/${q.topic_slug}/`} style={{
+        {q.topicSlug && (
+          <Link href={`/topics/${q.topicSlug}/`} style={{
             backgroundColor: '#1e2d4a', color: 'white',
             padding: '0.6rem 1.25rem', borderRadius: '0.5rem',
             fontWeight: '500', textDecoration: 'none', fontSize: '0.875rem',
           }}>
-            Browse {q.topic_title} →
+            Browse {q.topicTitle} →
           </Link>
         )}
       </div>
@@ -95,16 +148,16 @@ export default function QuestionPage({ params }) {
         <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem', marginTop: 0 }}>
           Relevant Articles
         </h2>
-        {q.topic_slug ? (
+        {q.topicSlug ? (
           <>
             <div className="read-more">
-              <Link href={`/topics/${q.topic_slug}/`}>
-                <span className="cta-label">Explore more:</span> What Scripture teaches about {q.topic_title}
+              <Link href={`/topics/${q.topicSlug}/`}>
+                <span className="cta-label">Explore more:</span> What Scripture teaches about {q.topicTitle}
               </Link>
             </div>
             <div className="read-more">
-              <Link href={`/bible-verses-about-${q.topic_slug}/`}>
-                <span className="cta-label">Discover:</span> Key Bible verses on {q.topic_title?.toLowerCase()} and their meaning
+              <Link href={`/bible-verses-about-${q.topicSlug}/`}>
+                <span className="cta-label">Discover:</span> Key Bible verses on {q.topicTitle?.toLowerCase()} and their meaning
               </Link>
             </div>
           </>

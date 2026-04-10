@@ -16,10 +16,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/topics/[slug]/page": [
+    "/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/topics/[slug]/page.js"
+      "static/chunks/app/[slug]/page.js"
     ],
     "/questions/[slug]/page": [
       "static/chunks/webpack.js",
