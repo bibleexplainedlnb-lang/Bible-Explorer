@@ -49,28 +49,16 @@ export default function GuidePage({ params }) {
         <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem', marginTop: 0 }}>
           Relevant Articles
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <li>
-            <Link href="/topics/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Browse Bible topics and themes →
-            </Link>
-          </li>
-          <li>
-            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Common spiritual questions answered →
-            </Link>
-          </li>
-          <li>
-            <Link href="/topics/faith/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              What the Bible teaches about faith →
-            </Link>
-          </li>
-          <li>
-            <Link href="/bible-verses-about-patience/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Scriptures on patience and perseverance →
-            </Link>
-          </li>
-        </ul>
+        <div className="read-more">
+          <Link href="/topics/">
+            <span className="cta-label">Learn more:</span> Browse all Bible topics — faith, grace, love, and more
+          </Link>
+        </div>
+        <div className="read-more">
+          <Link href="/questions/">
+            <span className="cta-label">Understand:</span> Answers to the most common spiritual questions
+          </Link>
+        </div>
       </section>
     </div>
   );

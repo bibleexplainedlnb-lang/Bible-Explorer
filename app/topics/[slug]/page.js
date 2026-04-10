@@ -117,28 +117,16 @@ export default function TopicPage({ params }) {
         <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem' }}>
           Relevant Articles
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <li>
-            <Link href={`/bible-verses-about-${params.slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Key scriptures on {topic.title.toLowerCase()} explained →
-            </Link>
-          </li>
-          <li>
-            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Browse spiritual questions and answers →
-            </Link>
-          </li>
-          <li>
-            <Link href="/guides/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Explore Bible study guides →
-            </Link>
-          </li>
-          <li>
-            <Link href="/bible/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Read the Bible online →
-            </Link>
-          </li>
-        </ul>
+        <div className="read-more">
+          <Link href={`/bible-verses-about-${params.slug}/`}>
+            <span className="cta-label">Find out:</span> The most powerful Bible verses on {topic.title.toLowerCase()} — with context and meaning
+          </Link>
+        </div>
+        <div className="read-more">
+          <Link href="/guides/">
+            <span className="cta-label">Dive deeper:</span> Follow a structured Bible study guide on this theme
+          </Link>
+        </div>
       </section>
     </div>
   );

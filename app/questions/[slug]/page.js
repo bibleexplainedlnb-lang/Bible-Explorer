@@ -76,32 +76,33 @@ export default function QuestionPage({ params }) {
         <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '1rem', marginTop: 0 }}>
           Relevant Articles
         </h2>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {q.topic_slug && (
-            <>
-              <li>
-                <Link href={`/topics/${q.topic_slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-                  Understanding {q.topic_title} in Christian life →
-                </Link>
-              </li>
-              <li>
-                <Link href={`/bible-verses-about-${q.topic_slug}/`} style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-                  What the Bible says about {q.topic_title?.toLowerCase()} →
-                </Link>
-              </li>
-            </>
-          )}
-          <li>
-            <Link href="/guides/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              Start a Bible study guide →
-            </Link>
-          </li>
-          <li>
-            <Link href="/questions/" style={{ color: '#b8860b', textDecoration: 'none', fontFamily: 'Georgia, serif' }}>
-              More questions on faith →
-            </Link>
-          </li>
-        </ul>
+        {q.topic_slug ? (
+          <>
+            <div className="read-more">
+              <Link href={`/topics/${q.topic_slug}/`}>
+                <span className="cta-label">Explore more:</span> What Scripture teaches about {q.topic_title}
+              </Link>
+            </div>
+            <div className="read-more">
+              <Link href={`/bible-verses-about-${q.topic_slug}/`}>
+                <span className="cta-label">Discover:</span> Key Bible verses on {q.topic_title?.toLowerCase()} and their meaning
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="read-more">
+              <Link href="/topics/">
+                <span className="cta-label">Explore more:</span> Browse all Bible topics and themes
+              </Link>
+            </div>
+            <div className="read-more">
+              <Link href="/guides/">
+                <span className="cta-label">Dive deeper:</span> Start a structured Bible study guide
+              </Link>
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

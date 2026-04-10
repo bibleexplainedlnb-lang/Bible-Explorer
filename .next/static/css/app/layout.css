@@ -3119,6 +3119,33 @@ body {
   color: #2c4270;
   text-decoration-color: rgba(44, 66, 112, 0.4);
 }
+.read-more {
+  margin: 0.75rem 0;
+  padding: 0.875rem 1.125rem;
+  background: #fffdf7;
+  border-left: 3px solid #b8860b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.read-more:hover {
+  background: #f5f0e8;
+  border-color: #2c4270;
+}
+.read-more a {
+  color: #2c4270;
+  text-decoration: none;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: block;
+}
+.read-more a:hover {
+  color: #b8860b;
+}
+.read-more a span.cta-label {
+  font-weight: 600;
+  color: #b8860b;
+}
 .verse-text {
   font-family: Georgia, "Times New Roman", serif;
   line-height: 1.9;
