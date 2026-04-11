@@ -1,0 +1,133 @@
+Build a full content management and automation system for my Next.js app using Supabase.
+
+SETUP:
+- Supabase is already connected via environment variables:
+  NEXT_PUBLIC_SUPABASE_URL
+  NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+GOALS:
+Fix my admin panel and make it a full SEO content generator system.
+
+---
+
+1. DATABASE SETUP (Supabase)
+
+Create these tables:
+
+1. topics
+- id (uuid, primary key)
+- name (text)
+- category (text) → (topics, guides, questions)
+- created_at (timestamp)
+
+2. articles
+- id (uuid, primary key)
+- topic_id (relation to topics)
+- title (text)
+- slug (text)
+- content (text)
+- status (draft / published)
+- created_at (timestamp)
+
+---
+
+2. ADMIN PANEL FIX (/admin)
+
+Fix the "Select topic" dropdown:
+- Fetch topics dynamically from Supabase
+- Show all topics grouped by category
+
+---
+
+3. ADD TOPIC MANAGEMENT
+
+In admin panel:
+- Add new topic
+- Select category (topics / guides / questions)
+- Save to Supabase
+
+---
+
+4. ARTICLE GENERATOR
+
+When clicking "Generate Article":
+- Call API route (/api/generate-ideas)
+- Generate:
+  - SEO title
+  - full article content
+- Save as "draft" in Supabase
+
+---
+
+5. PREVIEW + EDIT SYSTEM
+
+Before publishing:
+- Show preview page
+- Allow editing:
+  - title
+  - content
+
+---
+
+6. PUBLISH SYSTEM
+
+- Button: "Publish"
+- Save article as "published"
+- Generate slug automatically
+
+---
+
+7. DASHBOARD SYSTEM
+
+Create a dashboard in /admin:
+
+Show:
+- Total topics
+- Total articles
+- Draft articles
+- Published articles
+
+Also:
+- List all articles
+- Filter by:
+  - category
+  - status
+
+---
+
+8. AUTOMATION (VERY IMPORTANT)
+
+Add bulk generation feature:
+
+- Select:
+  - category
+  - number of articles (e.g. 5)
+
+System should:
+- Pick topics automatically
+- Generate articles
+- Save as drafts
+
+---
+
+9. UX IMPROVEMENTS
+
+- Fix loading issues (currently slow)
+- Add loading spinner
+- Handle errors properly
+- Ensure dropdown works fast
+
+---
+
+10. FINAL REQUIREMENTS
+
+- Clean UI
+- Fast performance
+- Fully working admin system
+- No hardcoded topics (everything from database)
+
+---
+
+IMPORTANT:
+Do not break existing structure.
+Only extend and fix current system.
