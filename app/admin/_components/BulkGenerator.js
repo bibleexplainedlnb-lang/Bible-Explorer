@@ -28,7 +28,7 @@ export default function BulkGenerator({ onSaved }) {
     e.preventDefault();
     setError(''); setResults(null); setStatus('generating');
     try {
-      const res = await fetch('/api/admin/bulk/', {
+      const res = await fetch('/api/admin/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category, count }),

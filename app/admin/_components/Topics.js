@@ -22,9 +22,13 @@ export default function Topics() {
   const [success, setSuccess] = useState('');
 
   async function load() {
-    const res = await fetch('/api/admin/topics/');
-    const d   = await res.json();
-    if (Array.isArray(d)) setTopics(d);
+    try {
+      const res = await fetch('/api/admin/topics');
+      const d   = await res.json();
+      if (Array.isArray(d)) setTopics(d);
+    } catch (err) {
+      console.error('[Topics] load error:', err);
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -34,7 +38,7 @@ export default function Topics() {
     if (!name.trim()) { setError('Topic name is required.'); return; }
     setError(''); setSaving(true);
     try {
-      const res = await fetch('/api/admin/topics/', {
+      const res = await fetch('/api/admin/topics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), category: cat }),

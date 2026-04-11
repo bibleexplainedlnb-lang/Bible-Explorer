@@ -28,10 +28,14 @@ export default function Generator({ onSaved }) {
   const [error,    setError]    = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/topics/')
+    fetch('/api/admin/topics')
       .then(r => r.json())
-      .then(d => { if (Array.isArray(d)) setTopics(d); })
-      .catch(() => {});
+      .then(d => {
+        console.log('[Generator] topics loaded:', d);
+        if (Array.isArray(d)) setTopics(d);
+        else console.error('[Generator] unexpected topics response:', d);
+      })
+      .catch(err => console.error('[Generator] topics fetch error:', err));
   }, []);
 
   const grouped = topics.reduce((acc, t) => {
@@ -47,7 +51,7 @@ export default function Generator({ onSaved }) {
     if (!topicId) { setError('Please select a topic.'); return; }
     setError(''); setPreview(null); setEditing(false); setStatus('generating');
     try {
-      const res = await fetch('/api/admin/generate/', {
+      const res = await fetch('/api/admin/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topicId, topicName: selectedTopic?.name, idea: idea.trim(), category: selectedTopic?.category }),
@@ -71,7 +75,7 @@ export default function Generator({ onSaved }) {
       status: publish ? 'published' : 'draft',
     };
     try {
-      const res = await fetch('/api/admin/articles/', {
+      const res = await fetch('/api/admin/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

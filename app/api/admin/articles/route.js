@@ -5,22 +5,32 @@ import { supabase } from '../../../../lib/supabase.js';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const status   = searchParams.get('status');
-  const category = searchParams.get('category');
-  const limit    = parseInt(searchParams.get('limit') || '50', 10);
+  const status   = searchParams.get('status')   || '';
+  const category = searchParams.get('category') || '';
+  const limit    = parseInt(searchParams.get('limit') || '100', 10);
 
   let query = supabase
     .from('articles')
-    .select('id, title, slug, status, category, created_at, topic_id, topics(name)')
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(limit);
 
   if (status)   query = query.eq('status', status);
-  if (category) query = query.eq('category', category);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  if (error) {
+    console.error('[articles GET]', error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  let result = data || [];
+
+  if (category) {
+    result = result.filter(a => a.category === category);
+  }
+
+  return NextResponse.json(result);
 }
 
 export async function POST(request) {
@@ -31,20 +41,23 @@ export async function POST(request) {
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
 
+    const insertData = {
+      title: title.trim(),
+      slug:  slug.trim(),
+      content:          content          || null,
+      meta_title:       meta_title       || null,
+      meta_description: meta_description || null,
+      keywords:         Array.isArray(keywords)      ? keywords      : [],
+      related_slugs:    Array.isArray(related_slugs) ? related_slugs : [],
+      topic_id:         topic_id || null,
+      status,
+    };
+
+    if (category) insertData.category = category;
+
     const { data, error } = await supabase
       .from('articles')
-      .insert({
-        title: title.trim(),
-        slug:  slug.trim(),
-        content,
-        meta_title,
-        meta_description,
-        keywords:      Array.isArray(keywords)      ? keywords      : [],
-        related_slugs: Array.isArray(related_slugs) ? related_slugs : [],
-        topic_id:      topic_id || null,
-        category:      category || null,
-        status,
-      })
+      .insert(insertData)
       .select()
       .single();
 

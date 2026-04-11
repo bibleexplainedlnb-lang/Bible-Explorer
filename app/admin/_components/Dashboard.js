@@ -21,25 +21,33 @@ export default function Dashboard() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (filter.status)   params.set('status',   filter.status);
-    if (filter.category) params.set('category', filter.category);
+    try {
+      const params = new URLSearchParams();
+      if (filter.status)   params.set('status',   filter.status);
+      if (filter.category) params.set('category', filter.category);
 
-    const [statsRes, articlesRes] = await Promise.all([
-      fetch('/api/admin/stats/'),
-      fetch(`/api/admin/articles/?${params}`),
-    ]);
-    const [s, a] = await Promise.all([statsRes.json(), articlesRes.json()]);
-    setStats(s);
-    setArticles(Array.isArray(a) ? a : []);
-    setLoading(false);
+      const [statsRes, articlesRes] = await Promise.all([
+        fetch(`/api/admin/stats?${params}`),
+        fetch(`/api/admin/articles?${params}`),
+      ]);
+
+      const s = statsRes.ok   ? await statsRes.json()   : {};
+      const a = articlesRes.ok ? await articlesRes.json() : [];
+
+      setStats(s);
+      setArticles(Array.isArray(a) ? a : []);
+    } catch (err) {
+      console.error('[Dashboard] loadData error:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [filter]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
   async function toggleStatus(article) {
     const newStatus = article.status === 'published' ? 'draft' : 'published';
-    await fetch(`/api/admin/articles/${article.id}/`, {
+    await fetch(`/api/admin/articles/${article.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
@@ -49,7 +57,7 @@ export default function Dashboard() {
 
   async function deleteArticle(id) {
     if (!confirm('Delete this article?')) return;
-    await fetch(`/api/admin/articles/${id}/`, { method: 'DELETE' });
+    await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' });
     loadData();
   }
 
