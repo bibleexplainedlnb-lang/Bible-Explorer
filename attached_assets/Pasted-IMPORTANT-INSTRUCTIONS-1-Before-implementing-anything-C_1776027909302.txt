@@ -1,0 +1,102 @@
+IMPORTANT INSTRUCTIONS:
+
+1. Before implementing anything:
+   - Check if content generation logic already exists
+
+2. If it exists and works:
+   - DO NOT rewrite entire API
+
+3. Only improve prompt generation logic
+
+4. Replace ONLY the prompt part if needed
+
+5. Do NOT break existing working features
+6. Do NOT change database structure
+7. Do NOT change API routes
+
+---
+
+TASK: Improve content generation quality using category-based prompts and word limits
+
+1. Add a helper function:
+
+function getPrompt(category, topic, idea) {
+  const input = idea || topic;
+
+  if (category === "questions") {
+    return `Answer this Christian question: "${input}"
+
+Requirements:
+- 1000–1100 words
+- Clear direct answer first
+- Include Bible references
+- Provide explanation and real-life application
+
+Structure:
+- Direct answer
+- Explanation
+- Bible references
+- Practical takeaway
+
+Write in a natural human tone. Avoid repetition and AI-like phrasing.`;
+  }
+
+  if (category === "guides") {
+    return `Write a detailed Christian guide: "${input}"
+
+Requirements:
+- 1300–1500 words
+- Deep, practical, and actionable
+
+Structure:
+- Introduction
+- 5–7 clear steps
+- Bible references
+- Real-life examples
+- Practical application
+
+Avoid generic content. Make it useful and engaging.`;
+  }
+
+  if (category === "teachings") {
+    return `Write a deep Christian teaching article: "${input}"
+
+Requirements:
+- 1300–1500 words
+- Deep explanation with theological clarity
+
+Structure:
+- Introduction
+- Background/context
+- Meaning and explanation
+- Bible references
+- Key lessons
+- Application in life
+
+Write like a human teacher. Avoid fluff and generic AI tone.`;
+  }
+
+  return `Write a helpful Christian article about "${input}"`;
+}
+
+---
+
+2. Replace existing prompt usage with:
+
+const prompt = getPrompt(category, topicName, idea);
+
+---
+
+3. Ensure article saving includes:
+
+category: category
+intent: category
+status: "draft"
+
+---
+
+GOAL:
+
+- Structured content per category
+- Better depth for guides and teachings
+- Human-like, problem-solving output
