@@ -11,6 +11,65 @@ function sanitiseSlug(raw = '') {
   return raw.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 }
 
+function getPrompt(category, topic, idea) {
+  const input = (idea && idea.trim()) ? idea.trim() : topic;
+
+  if (category === 'questions') {
+    return `Answer this Christian question: "${input}"
+
+Requirements:
+- 1000–1100 words
+- Clear direct answer first
+- Include Bible references
+- Provide explanation and real-life application
+
+Structure:
+- Direct answer
+- Explanation
+- Bible references
+- Practical takeaway
+
+Write in a natural human tone. Avoid repetition and AI-like phrasing.`;
+  }
+
+  if (category === 'guides') {
+    return `Write a detailed Christian guide: "${input}"
+
+Requirements:
+- 1300–1500 words
+- Deep, practical, and actionable
+
+Structure:
+- Introduction
+- 5–7 clear steps
+- Bible references
+- Real-life examples
+- Practical application
+
+Avoid generic content. Make it useful and engaging.`;
+  }
+
+  if (category === 'teachings') {
+    return `Write a deep Christian teaching article: "${input}"
+
+Requirements:
+- 1300–1500 words
+- Deep explanation with theological clarity
+
+Structure:
+- Introduction
+- Background/context
+- Meaning and explanation
+- Bible references
+- Key lessons
+- Application in life
+
+Write like a human teacher. Avoid fluff and generic AI tone.`;
+  }
+
+  return `Write a helpful Christian article about "${input}"`;
+}
+
 async function callOpenRouter(messages) {
   const apiKey = OPENROUTER_KEY();
   if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
@@ -47,30 +106,29 @@ export async function POST(request) {
     const existingSlugs = new Set((existing || []).map(a => a.slug));
     const existingTitles = (existing || []).map(a => `  - ${a.title}`).join('\n') || '  (none yet)';
 
-    const prompt = `You are an expert biblical content writer creating SEO-optimized articles for a Bible study website.
+    const contentPrompt = getPrompt(category, topicName.trim(), idea);
 
-TOPIC: ${topicName.trim()}
-CATEGORY: ${category}
-${idea?.trim() ? `FOCUS ANGLE: ${idea.trim()}` : ''}
+    const prompt = `You are an expert biblical content writer creating SEO-optimized articles for a Bible study website.
 
 EXISTING ARTICLES (do NOT duplicate):
 ${existingTitles}
 
-Generate ONE comprehensive, theologically sound, SEO-optimized Bible article. Return ONLY this JSON:
+${contentPrompt}
 
+Return ONLY this JSON (no markdown, no commentary):
 {
-  "title":           "Clear question or article title",
-  "slug":            "url-friendly-slug",
-  "meta_title":      "SEO title under 60 chars",
-  "meta_description":"140-155 char meta description",
-  "keywords":        ["3-5 keyword strings"],
-  "content":         "<p>Full article HTML, 600-800 words, cite Bible verses as BookName Chapter:Verse. Use only <p>, <h2>, <h3>, <ul>, <li>, <strong> tags.</p>"
+  "title":            "Clear article title",
+  "slug":             "url-friendly-slug",
+  "meta_title":       "SEO title under 60 chars",
+  "meta_description": "140-155 char meta description",
+  "keywords":         ["3-5 keyword strings"],
+  "content":          "<p>Full article HTML using only <p>, <h2>, <h3>, <ul>, <li>, <strong> tags. Cite Bible verses as BookName Chapter:Verse.</p>"
 }
 
 RULES:
 - Doctrinal stance: evangelical, biblically faithful
 - Slug: lowercase hyphens only
-- Return ONLY the JSON — no markdown, no commentary`;
+- Return ONLY the JSON`;
 
     const raw = await callOpenRouter([
       { role: 'system', content: 'You are a biblical content expert. Respond with valid JSON only.' },
@@ -87,14 +145,16 @@ RULES:
     const finalSlug = existingSlugs.has(slug) ? `${slug}-${Date.now()}` : slug;
 
     return NextResponse.json({
-      title:           generated.title,
-      slug:            finalSlug,
-      meta_title:      generated.meta_title,
-      meta_description:generated.meta_description,
-      keywords:        Array.isArray(generated.keywords) ? generated.keywords : [],
-      content:         generated.content,
-      topic_id:        topicId || null,
+      title:            generated.title,
+      slug:             finalSlug,
+      meta_title:       generated.meta_title,
+      meta_description: generated.meta_description,
+      keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
+      content:          generated.content,
+      topic_id:         topicId || null,
       category,
+      intent:           category,
+      status:           'draft',
     });
   } catch (err) {
     console.error('[admin/generate]', err);
