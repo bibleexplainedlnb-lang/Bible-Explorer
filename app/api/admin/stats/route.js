@@ -9,12 +9,14 @@ export async function GET() {
     { count: totalArticles },
     { count: drafts },
     { count: published },
+    { count: rejected },
   ] = await Promise.all([
     supabase.from('topics').select('*', { count: 'exact', head: true }),
     supabase.from('articles').select('*', { count: 'exact', head: true }),
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
     supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'rejected'),
   ]);
 
-  return NextResponse.json({ totalTopics, totalArticles, drafts, published });
+  return NextResponse.json({ totalTopics, totalArticles, drafts, published, rejected });
 }

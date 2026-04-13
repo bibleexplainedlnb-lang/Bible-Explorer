@@ -6,7 +6,8 @@ const S = {
   card:    { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '0.875rem', padding: '1.5rem' },
   label:   { fontSize: '0.72rem', fontWeight: 'bold', color: '#8b7355', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 0.25rem' },
   badge:   (s) => ({ display:'inline-block', padding:'0.2rem 0.65rem', borderRadius:'1rem', fontSize:'0.75rem', fontWeight:'600',
-    background: s==='published' ? '#dcf5e7' : '#fff3cd', color: s==='published' ? '#1b5e20' : '#856404' }),
+    background: s==='published' ? '#dcf5e7' : s==='rejected' ? '#fde8e8' : '#fff3cd',
+    color:      s==='published' ? '#1b5e20' : s==='rejected' ? '#7b2020' : '#856404' }),
   th:      { padding: '0.6rem 1rem', fontSize:'0.8rem', fontWeight:'600', color:'#6b6b6b', textAlign:'left', borderBottom:'1px solid #e8dfc8' },
   td:      { padding: '0.65rem 1rem', fontSize:'0.875rem', color:'#2a2a2a', borderBottom:'1px solid #f5f0e8' },
   btn:     { padding:'0.35rem 0.9rem', border:'1px solid #e8dfc8', borderRadius:'0.5rem', fontSize:'0.8rem', cursor:'pointer', background:'white', color:'#1e2d4a', fontFamily:'inherit' },
@@ -66,6 +67,7 @@ export default function Dashboard() {
     { label: 'Articles',  value: stats?.totalArticles, color: '#1e2d4a' },
     { label: 'Drafts',    value: stats?.drafts,        color: '#b8860b' },
     { label: 'Published', value: stats?.published,     color: '#2d6a4f' },
+    { label: 'Rejected',  value: stats?.rejected,      color: '#7b2020' },
   ];
 
   return (

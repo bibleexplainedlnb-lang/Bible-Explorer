@@ -6,9 +6,11 @@ import Dashboard     from './_components/Dashboard.js';
 import Generator     from './_components/Generator.js';
 import BulkGenerator from './_components/BulkGenerator.js';
 import Topics        from './_components/Topics.js';
+import Articles      from './_components/Articles.js';
 
 const TABS = [
   { id: 'dashboard', label: '📊 Dashboard' },
+  { id: 'articles',  label: '📄 Articles' },
   { id: 'generate',  label: '✦ Generate' },
   { id: 'bulk',      label: '⚡ Bulk Generate' },
   { id: 'topics',    label: '🗂 Topics' },
@@ -60,6 +62,7 @@ export default function AdminPage() {
       {/* Content */}
       <div style={{ maxWidth:'72rem', margin:'0 auto', padding:'2rem 1.5rem' }}>
         {activeTab === 'dashboard' && <Dashboard key={refreshKey} />}
+        {activeTab === 'articles'  && <Articles key={refreshKey} />}
         {activeTab === 'generate'  && <Generator  onSaved={handleSaved} />}
         {activeTab === 'bulk'      && <BulkGenerator onSaved={handleSaved} />}
         {activeTab === 'topics'    && <Topics />}

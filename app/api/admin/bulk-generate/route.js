@@ -76,7 +76,7 @@ export async function POST(request) {
 
         const [{ data: topicsData, error: topicsError }, { data: existingArticles }] = await Promise.all([
           supabase.from('topics').select('id, name, category').eq('category', category || 'questions'),
-          supabase.from('articles').select('slug, title').limit(500),
+          supabase.from('articles').select('slug, title, topic_id, status').limit(500),
         ]);
 
         if (topicsError || !topicsData?.length) {
@@ -85,10 +85,25 @@ export async function POST(request) {
           return;
         }
 
+        const usedTopicIds = new Set(
+          (existingArticles || [])
+            .filter(a => a.status === 'published' || a.status === 'rejected')
+            .map(a => a.topic_id)
+            .filter(Boolean)
+        );
+
+        const availableTopics = topicsData.filter(t => !usedTopicIds.has(t.id));
+
+        if (!availableTopics.length) {
+          send({ type: 'error', message: `All topics in "${category}" already have published or rejected articles. Add more topics first.` });
+          controller.close();
+          return;
+        }
+
         const existingSlugs   = new Set((existingArticles || []).map(a => a.slug));
         const existingTitles  = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
 
-        const shuffled = [...topicsData].sort(() => Math.random() - 0.5);
+        const shuffled = [...availableTopics].sort(() => Math.random() - 0.5);
         const pickedTopics = Array.from({ length: safeCount }, (_, i) => shuffled[i % shuffled.length]);
 
         let generated = 0;
