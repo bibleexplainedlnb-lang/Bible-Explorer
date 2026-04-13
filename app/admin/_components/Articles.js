@@ -22,6 +22,7 @@ const S = {
         variant === 'draft'    ? { background: '#fff3cd', color: '#856404' } :
         variant === 'reject'   ? { background: '#fde8e8', color: '#7b2020' } :
         variant === 'delete'   ? { background: '#fde8e8', color: '#7b2020' } :
+        variant === 'improve'  ? { background: '#ede9fe', color: '#4c1d95' } :
         variant === 'primary'  ? { background: '#1e2d4a', color: '#fff', padding: '0.55rem 1.25rem', fontSize: '0.9rem' } :
         variant === 'ghost'    ? { background: 'transparent', color: '#6b6b6b', border: '1px solid #d4c5a9', padding: '0.55rem 1.25rem', fontSize: '0.9rem' } : {}),
   }),
@@ -29,6 +30,35 @@ const S = {
   label:      { display: 'block', fontWeight: '600', color: '#1e2d4a', marginBottom: '0.35rem', fontSize: '0.85rem' },
   fieldWrap:  { marginBottom: '1rem' },
 };
+
+function Toast({ toast, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 5000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  const isError = toast.status === 'error';
+  return (
+    <div style={{
+      position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 2000,
+      background: isError ? '#fff0f0' : '#f0fdf4',
+      border: `1px solid ${isError ? '#f5c6c6' : '#bbf7d0'}`,
+      color: isError ? '#7b2020' : '#166534',
+      borderRadius: '0.75rem', padding: '0.85rem 1.25rem',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+      maxWidth: '380px', fontSize: '0.875rem', lineHeight: 1.45,
+    }}>
+      <div style={{ fontWeight: '700', marginBottom: '0.2rem' }}>
+        {isError ? '✗ Improve failed' : '✓ Article improved'}
+      </div>
+      <div style={{ color: isError ? '#a33' : '#15803d' }}>{toast.message}</div>
+      <button
+        onClick={onClose}
+        style={{ position: 'absolute', top: '0.5rem', right: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: '#aaa', lineHeight: 1 }}
+      >×</button>
+    </div>
+  );
+}
 
 function ConfirmModal({ title, message, onConfirm, onCancel }) {
   return (
@@ -154,6 +184,8 @@ export default function Articles() {
   const [editing,   setEditing]   = useState(null);
   const [deleting,  setDeleting]  = useState(null);
   const [actioning, setActioning] = useState(null);
+  const [improving, setImproving] = useState(new Set());
+  const [toast,     setToast]     = useState(null);
 
   const loadArticles = useCallback(async () => {
     setLoading(true);
@@ -196,6 +228,25 @@ export default function Articles() {
     setArticles(prev => prev.map(a => a.id === updated.id ? updated : a));
   }
 
+  async function improveArticle(article) {
+    setImproving(prev => new Set([...prev, article.id]));
+    setToast(null);
+    try {
+      const res = await fetch(`/api/admin/articles/${article.id}/improve`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'Something went wrong' });
+      } else {
+        setArticles(prev => prev.map(a => a.id === data.id ? data : a));
+        setToast({ status: 'success', message: `"${article.title}" has been rewritten and enriched with internal links.` });
+      }
+    } catch (err) {
+      setToast({ status: 'error', message: err.message });
+    } finally {
+      setImproving(prev => { const s = new Set(prev); s.delete(article.id); return s; });
+    }
+  }
+
   const fmt = (dateStr) => {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -203,6 +254,7 @@ export default function Articles() {
 
   return (
     <div>
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
       {editing  && <EditModal article={editing}  onSave={handleEditSaved} onClose={() => setEditing(null)} />}
       {deleting && (
         <ConfirmModal
@@ -257,9 +309,10 @@ export default function Articles() {
               </thead>
               <tbody>
                 {articles.map(a => {
-                  const busy = actioning && actioning.startsWith(a.id);
+                  const busy      = actioning && actioning.startsWith(a.id);
+                  const isImproving = improving.has(a.id);
                   return (
-                    <tr key={a.id} style={{ opacity: busy ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                    <tr key={a.id} style={{ opacity: (busy || isImproving) ? 0.6 : 1, transition: 'opacity 0.2s' }}>
                       <td style={{ ...S.td, maxWidth: '320px' }}>
                         <span style={{ color: '#1e2d4a', fontWeight: '600', lineHeight: 1.35 }}>{a.title}</span>
                         <br />
@@ -272,25 +325,34 @@ export default function Articles() {
                       <td style={S.td} suppressHydrationWarning>{fmt(a.created_at)}</td>
                       <td style={{ ...S.td, whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy}>Edit</button>
+                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy || isImproving}>Edit</button>
+
+                          <button
+                            onClick={() => improveArticle(a)}
+                            style={{ ...S.btn('improve'), minWidth: '4.5rem' }}
+                            disabled={busy || isImproving}
+                            title="Rewrite with AI to improve quality, add practical sections, and apply SEO internal linking"
+                          >
+                            {isImproving ? '…' : '✦ Improve'}
+                          </button>
 
                           {a.status !== 'published' && (
-                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy}>
+                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy || isImproving}>
                               Publish
                             </button>
                           )}
                           {a.status !== 'draft' && (
-                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy}>
+                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy || isImproving}>
                               Draft
                             </button>
                           )}
                           {a.status !== 'rejected' && (
-                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy}>
+                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy || isImproving}>
                               Reject
                             </button>
                           )}
 
-                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy}>Delete</button>
+                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy || isImproving}>Delete</button>
                         </div>
                       </td>
                     </tr>
