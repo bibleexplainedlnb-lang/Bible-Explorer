@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { supabase } from '../../../../lib/supabase.js';
 import { sanitiseSlug, getPrompt, callOpenRouter } from '../../../../lib/generator.js';
+import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 function sseEvent(data) {
   return `data: ${JSON.stringify(data)}\n\n`;
@@ -76,7 +77,7 @@ export async function POST(request) {
 
         const [{ data: topicsData, error: topicsError }, { data: existingArticles }] = await Promise.all([
           supabase.from('topics').select('id, name, category').eq('category', category || 'questions'),
-          supabase.from('articles').select('slug, title, topic_id, status').limit(500),
+          supabase.from('articles').select('slug, title, topic_id, status, category').limit(500),
         ]);
 
         if (topicsError || !topicsData?.length) {
@@ -100,8 +101,9 @@ export async function POST(request) {
           return;
         }
 
-        const existingSlugs   = new Set((existingArticles || []).map(a => a.slug));
-        const existingTitles  = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
+        const existingSlugs     = new Set((existingArticles || []).map(a => a.slug));
+        const existingTitles    = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
+        const publishedArticles = (existingArticles || []).filter(a => a.status === 'published');
 
         const shuffled = [...availableTopics].sort(() => Math.random() - 0.5);
         const pickedTopics = Array.from({ length: safeCount }, (_, i) => shuffled[i % shuffled.length]);
@@ -134,6 +136,8 @@ export async function POST(request) {
             }
 
             existingSlugs.add(article.slug);
+
+            article.content = enrichContent(article.content, publishedArticles, category, article.slug);
 
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();
 

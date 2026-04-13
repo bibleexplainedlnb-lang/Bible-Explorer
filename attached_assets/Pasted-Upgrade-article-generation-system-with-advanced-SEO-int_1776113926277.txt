@@ -1,0 +1,134 @@
+Upgrade article generation system with advanced SEO internal linking and content structure.
+
+========================
+1. KEYWORD VARIATION SYSTEM
+========================
+
+Define keyword groups:
+
+faith → faith, trust in God, belief, spiritual confidence  
+fear → fear, anxiety, worry, doubt  
+prayer → prayer, talking to God, seeking God, supplication  
+love → love, compassion, kindness, grace  
+forgiveness → forgiveness, mercy, letting go, grace  
+
+Rules:
+- Use main keyword max 2–3 times
+- Use variations naturally across content
+- Avoid keyword stuffing
+- Keep content human-like and readable
+
+========================
+2. INLINE INTERNAL LINKING
+========================
+
+- Scan content for keywords + variations
+- If matching published article exists:
+  replace with:
+  <a href="/bible-verses/{slug}">anchor text</a>
+
+Rules:
+- Max 5 inline links per article
+- Do NOT repeat same link
+- Use varied anchor text (synonyms)
+- Only link when contextually relevant
+- Only use articles with status = 'published'
+
+========================
+3. CONTEXTUAL "KNOW MORE" LINK (VERY IMPORTANT)
+========================
+
+Insert ONLY ONE contextual link:
+
+Placement:
+- After 1st paragraph (preferred)
+- OR after 2nd paragraph (if first is too short)
+- NEVER after that
+
+Conditions:
+- Do NOT insert if article has less than 2 paragraphs
+
+Format:
+<p><strong>Know more:</strong> <a href="/bible-verses/{slug}">Article Title</a></p>
+
+Rules:
+- Must match the context of first paragraphs
+- Do NOT repeat
+- Do NOT place randomly later
+
+========================
+4. RELATED ARTICLES SECTION
+========================
+
+Add at end:
+
+Title:
+<h3>Related Articles</h3>
+
+Logic:
+- Fetch 3–5 articles
+- From SAME topic/category
+- Only status = 'published'
+
+Format:
+<ul>
+  <li><a href="/bible-verses/{slug}">Article Title</a></li>
+</ul>
+
+========================
+5. READ MORE SECTION
+========================
+
+Add BELOW related articles:
+
+Title:
+<h3>Read More</h3>
+
+Logic:
+- 2 articles from same category
+- 1 article from different category
+- Must be relevant (semantic match)
+
+Rules:
+- Minimum 3 articles
+- Do NOT duplicate from Related Articles
+
+========================
+6. GENERAL RULES
+========================
+
+- Do NOT over-link
+- Maintain clean HTML
+- Keep spacing readable
+- Ensure natural content flow
+- Apply to:
+  - Single Generate
+  - Bulk Generate
+
+========================
+7. CONTENT QUALITY RULES
+========================
+
+- Write like human, not AI
+- Clear structure:
+  - Introduction
+  - Explanation
+  - Practical application
+  - Conclusion
+
+- Avoid generic sentences
+- Add value in every section
+- Keep tone:
+  - Biblical
+  - Helpful
+  - Practical
+
+========================
+GOAL
+========================
+
+Build a strong internal linking system that:
+- Improves SEO
+- Increases engagement
+- Builds topical authority
+- Feels natural and helpful

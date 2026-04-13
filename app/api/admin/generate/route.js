@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../../lib/supabase.js';
 import { sanitiseSlug, getPrompt, callOpenRouter } from '../../../../lib/generator.js';
+import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 export async function POST(request) {
   try {
@@ -10,10 +11,10 @@ export async function POST(request) {
 
     if (!topicName?.trim()) return NextResponse.json({ error: 'topicName is required' }, { status: 400 });
 
-    const { data: existing } = await supabase
-      .from('articles')
-      .select('slug, title')
-      .limit(100);
+    const [{ data: existing }, { data: publishedArticles }] = await Promise.all([
+      supabase.from('articles').select('slug, title').limit(100),
+      supabase.from('articles').select('slug, title, category').eq('status', 'published').limit(200),
+    ]);
 
     const existingSlugs = new Set((existing || []).map(a => a.slug));
     const existingTitles = (existing || []).map(a => `  - ${a.title}`).join('\n') || '  (none yet)';
@@ -56,13 +57,20 @@ RULES:
 
     const finalSlug = existingSlugs.has(slug) ? `${slug}-${Date.now()}` : slug;
 
+    const enrichedContent = enrichContent(
+      generated.content,
+      publishedArticles || [],
+      category,
+      finalSlug
+    );
+
     return NextResponse.json({
       title:            generated.title,
       slug:             finalSlug,
       meta_title:       generated.meta_title,
       meta_description: generated.meta_description,
       keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
-      content:          generated.content,
+      content:          enrichedContent,
       topic_id:         topicId || null,
       category,
       intent:           category,
