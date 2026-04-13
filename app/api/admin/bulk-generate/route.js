@@ -11,31 +11,33 @@ function sseEvent(data) {
 async function generateArticle(topic, category, existingSlugs, existingTitles) {
   const contentPrompt = getPrompt(category, topic.name.trim(), '');
 
-  const prompt = `You are an expert biblical content writer creating SEO-optimized articles for a Bible study website.
-
-EXISTING ARTICLES (do NOT duplicate these titles):
+  const prompt = `EXISTING ARTICLES — do NOT write a duplicate of any of these:
 ${existingTitles || '  (none yet)'}
 
 ${contentPrompt}
 
-Return ONLY this JSON (no markdown, no commentary):
+Return ONLY this JSON object (no markdown, no code fences, no commentary outside the JSON):
 {
-  "title":            "Clear article title",
-  "slug":             "url-friendly-slug",
+  "title":            "Specific, compelling article title — not generic",
+  "slug":             "url-friendly-slug-with-hyphens",
   "meta_title":       "SEO title under 60 chars",
-  "meta_description": "140-155 char meta description",
+  "meta_description": "140-155 char meta description that makes someone want to click",
   "keywords":         ["3-5 keyword strings"],
-  "content":          "<p>Full article HTML using only <p>, <h2>, <h3>, <ul>, <li>, <strong> tags. Cite Bible verses as BookName Chapter:Verse.</p>"
+  "content":          "<p>Full article HTML. Use only these tags: p, h2, h3, ul, ol, li, strong. Cite Bible verses inline as BookName Chapter:Verse (e.g. John 3:16). Do NOT use h1. Do NOT include markdown.</p>"
 }
 
-RULES:
+HARD RULES:
 - Doctrinal stance: evangelical, biblically faithful
-- Slug: lowercase hyphens only
-- Return ONLY the JSON`;
+- Slug: lowercase letters and hyphens only, no underscores, no numbers unless essential
+- content field: valid HTML string, all double-quotes inside escaped as \\"
+- Return ONLY the JSON — nothing before or after it`;
 
   const raw = await callOpenRouter([
-    { role: 'system', content: 'You are a biblical content expert. Respond with valid JSON only.' },
-    { role: 'user',   content: prompt },
+    {
+      role: 'system',
+      content: `You are a senior Christian content writer with 15 years of experience writing for major Bible study publications. Your writing is known for being human, direct, and grounded in Scripture without being preachy. You write for real people dealing with real struggles — not for bots or algorithms. You always respond with valid JSON only, exactly as specified.`,
+    },
+    { role: 'user', content: prompt },
   ]);
 
   const generated = JSON.parse(raw);
