@@ -2,7 +2,16 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Bible Explorer — Next.js 14 (App Router, JavaScript) KJV Bible study site, migrated from Vercel to Replit.
+
+**Running:** `npm run dev` on port 3000 (workflow: "Start application")
+
+**Required environment variables:**
+- `DATABASE_URL` — PostgreSQL connection string (Prisma/PostgreSQL layer)
+- `OPENROUTER_API_KEY` — AI content generation (admin routes)
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL (admin article management; optional)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (admin article management; optional)
+- `NEXT_PUBLIC_SITE_URL` — Public site URL for sitemap/canonical (defaults to Vercel URL if not set)
 
 ## Stack
 
