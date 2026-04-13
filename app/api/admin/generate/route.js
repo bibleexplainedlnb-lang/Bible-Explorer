@@ -33,7 +33,7 @@ Return ONLY this JSON object (no markdown, no code fences, no commentary outside
   "meta_title":       "SEO title under 60 chars",
   "meta_description": "140-155 char meta description that makes someone want to click",
   "keywords":         ["3-5 keyword strings"],
-  "content":          "<p>Full article HTML. Use only these tags: p, h2, h3, ul, ol, li, strong. Cite Bible verses inline as BookName Chapter:Verse (e.g. John 3:16). Do NOT use h1. Do NOT include markdown.</p>"
+  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\"Verse text\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
 }
 
 HARD RULES:
@@ -59,7 +59,7 @@ HARD RULES:
 
     const finalSlug = existingSlugs.has(slug) ? `${slug}-${Date.now()}` : slug;
 
-    const enrichedContent = enrichContent(
+    const { html: enrichedContent } = enrichContent(
       generated.content,
       publishedArticles || [],
       category,

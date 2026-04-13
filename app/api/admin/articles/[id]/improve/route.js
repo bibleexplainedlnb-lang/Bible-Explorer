@@ -41,7 +41,8 @@ BANNED PHRASES — never use any of these:
 KEEP INTACT:
 - Original meaning and doctrinal stance (evangelical, biblically faithful)
 - All Bible verse references (Book Chapter:Verse format)
-- HTML tag structure: use only p, h2, h3, ul, ol, li, strong
+- HTML tag structure: use only p, h2, h3, ul, ol, li, strong, blockquote
+- Format any directly quoted Bible verse text as: <blockquote>"Verse text" (Book Chapter:Verse)</blockquote>
 - Do NOT add h1 tags
 - Do NOT add markdown
 
@@ -71,7 +72,7 @@ export async function POST(request, { params }) {
       { role: 'user',   content: IMPROVE_USER_PROMPT(article.title, article.category, article.content) },
     ], { json: false });
 
-    const enrichedContent = enrichContent(
+    const { html: enrichedContent } = enrichContent(
       improvedHtml,
       publishedArticles || [],
       article.category,

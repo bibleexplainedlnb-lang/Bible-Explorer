@@ -30,7 +30,18 @@ BEGIN
   END IF;
 END $$;
 
--- 4. Unique index to prevent duplicate titles per topic
+-- 4. Unique constraint to prevent duplicate titles per topic (required for upsert ON CONFLICT)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'content_ideas_topic_id_title_unique'
+  ) THEN
+    ALTER TABLE content_ideas
+      ADD CONSTRAINT content_ideas_topic_id_title_unique UNIQUE (topic_id, title);
+  END IF;
+END $$;
+-- Keep the index in sync (Postgres creates it automatically with the constraint above, but safe to run)
 CREATE UNIQUE INDEX IF NOT EXISTS content_ideas_title_topic_unique
   ON content_ideas (topic_id, title);
 
