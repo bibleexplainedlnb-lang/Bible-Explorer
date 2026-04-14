@@ -1,13 +1,16 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { supabase } from '../../lib/supabase.js';
+import { isCategoryActive } from '../../lib/categories.js';
 
 export const metadata = { title: 'Study Guides' };
 
 const GUIDE_ICONS = ['📖', '🕊️', '✝️', '📜', '🙏', '⚓', '💡', '🌿'];
 
 export default async function GuidesPage() {
+  if (!isCategoryActive('guides')) notFound();
   let articles = [];
 
   if (supabase) {

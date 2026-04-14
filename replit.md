@@ -131,10 +131,16 @@ Next.js 15 (App Router) content site styled with Tailwind CSS 4.
 
 Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `npm run dev` in the workspace root.
 
-**Content architecture — fully DB-driven (Supabase `articles` table):**
+**Content architecture — STRICT DB-driven (Supabase `articles` table):**
 - ALL pages fetch exclusively from the Supabase `articles` table. No SQLite, no Prisma, no static/hardcoded content.
-- If a slug is not found in the DB → 404. No fallbacks.
+- If a slug is not found in DB → `notFound()` (404). Zero fallbacks. Zero auto-generation.
+- Category listing pages check `isCategoryActive()` from `lib/categories.js` before rendering; inactive categories → 404.
+- Sitemap: only `SELECT slug FROM articles WHERE status='published'`; no static pages, no category pages, no Bible chapter URLs.
+- Interlinking: only links to slugs that exist as published articles in DB. If no article exists for a keyword group, a plain-text placeholder sentence is injected instead (no dead link created).
+- Slug redirect: when admin renames a slug, old slug is recorded in `slug_redirects` Supabase table; `/bible-verses/[old-slug]/` permanently redirects to new URL.
+  - DB table required: `CREATE TABLE IF NOT EXISTS slug_redirects (old_slug TEXT PRIMARY KEY, new_slug TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());`
 - `lib/supabase.js` — shared Supabase client used by every page
+- `lib/categories.js` — `ACTIVE_CATEGORIES` set; add/remove categories here to activate/deactivate listing pages
 - `lib/db.js` — legacy SQLite file (kept for reference only, not used by any page)
 - `lib/prisma.js` — legacy Prisma file (kept for reference only, not used by any page)
 - `prisma` + `@prisma/client` pinned at 5.22.0 — do NOT upgrade

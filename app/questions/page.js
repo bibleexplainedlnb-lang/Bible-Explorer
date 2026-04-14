@@ -1,11 +1,14 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { supabase } from '../../lib/supabase.js';
+import { isCategoryActive } from '../../lib/categories.js';
 
 export const metadata = { title: 'Questions' };
 
 export default async function QuestionsPage() {
+  if (!isCategoryActive('questions')) notFound();
   let articles = [];
 
   if (supabase) {

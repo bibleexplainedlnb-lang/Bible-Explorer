@@ -1,0 +1,143 @@
+Apply STRICT DATABASE-CONTROLLED CONTENT SYSTEM across the entire project.
+
+---
+
+🔴 CORE RULE (ABSOLUTE)
+
+ONLY render pages that exist in Supabase "articles" table.
+
+If a slug does NOT exist → return 404 using notFound()
+
+NO fallback pages. NO auto-generation. NO exceptions.
+
+---
+
+🟢 CATEGORY CONTROL (IMPORTANT)
+
+1. Fetch categories ONLY where:
+   is_active = true
+
+2. If category is inactive:
+   → treat as non-existent
+   → return 404
+
+3. NEVER generate or render pages from inactive categories
+
+---
+
+🟢 ROUTING RULES
+
+1. Allow ONLY these routes:
+   /topics/[slug]
+   /questions/[slug]
+   /guides/[slug]
+
+2. Future-ready:
+   If category is activated later (e.g. bible-verses),
+   allow route ONLY if:
+
+   * category is_active = true
+   * AND article exists in DB
+
+---
+
+🟢 REMOVE ALL AUTO PAGE CREATION
+
+Remove any logic that:
+
+* creates pages from categories table
+* creates pages from topics list
+* generates content from URL
+* generates fallback content
+* auto-creates pages from interlinks
+
+---
+
+🟢 INTERLINKING SYSTEM (STRICT)
+
+1. Before creating ANY internal link:
+
+   Check:
+   → does slug exist in articles table?
+
+2. IF EXISTS:
+   → create link
+
+3. IF NOT EXISTS:
+   → DO NOT create link
+   → render plain text only
+
+4. NEVER create links for:
+
+   * inactive categories
+   * non-existing slugs
+
+---
+
+🟡 FUTURE CONTENT PLACEHOLDER (SMART SYSTEM)
+
+If a relevant topic is found but article does not exist:
+
+1. Insert a natural paragraph (NOT a link):
+
+Example:
+"Biblical guidance on anxiety and fear will be explored in detail in a dedicated article."
+
+2. DO NOT create URL
+3. DO NOT create page
+
+---
+
+🟢 SITEMAP RULE
+
+Generate sitemap ONLY from:
+
+SELECT slug FROM articles WHERE status = 'published'
+
+DO NOT include:
+
+* category pages
+* static routes
+* generated URLs
+
+---
+
+🟢 ADMIN PANEL CONTROL
+
+Ensure:
+
+* Only admin-created articles exist
+* Delete = remove from DB + frontend
+* Slug update = create redirect
+
+---
+
+🟢 SAFETY CHECK (VERY IMPORTANT)
+
+Before rendering ANY page:
+
+Check:
+
+* category exists AND is_active = true
+* article exists in DB
+
+Else:
+→ return 404
+
+---
+
+🟢 FINAL RESULT
+
+✔ No ghost pages
+✔ No hidden URLs
+✔ No random article creation
+✔ Clean interlinking
+✔ Full DB control
+✔ Future categories safe to activate
+
+---
+
+Apply this across entire routing, linking, and rendering system without breaking existing UI.
+Use OpenRouter for AI tasks, NOT Replit AI.
+
+---

@@ -29,6 +29,19 @@ export async function PATCH(request, { params }) {
       if (key in body) updates[key] = body[key];
     }
 
+    // If slug is changing, fetch the current slug to record a redirect
+    let oldSlug = null;
+    if (updates.slug) {
+      const { data: current } = await supabase
+        .from('articles')
+        .select('slug')
+        .eq('id', params.id)
+        .single();
+      if (current && current.slug !== updates.slug) {
+        oldSlug = current.slug;
+      }
+    }
+
     let { data, error } = await supabase
       .from('articles')
       .update(updates)
@@ -36,7 +49,6 @@ export async function PATCH(request, { params }) {
       .select()
       .single();
 
-    // If optional SEO columns don't exist yet, retry without them
     if (error && isSchemaError(error.message)) {
       console.warn('[articles PATCH] schema fallback — retrying without optional SEO columns');
       const safeUpdates = { ...updates };
@@ -45,6 +57,17 @@ export async function PATCH(request, { params }) {
     }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Record slug redirect so old URLs don't 404
+    if (oldSlug && updates.slug) {
+      const { error: redirectErr } = await supabase
+        .from('slug_redirects')
+        .upsert({ old_slug: oldSlug, new_slug: updates.slug }, { onConflict: 'old_slug' });
+      if (redirectErr) {
+        console.warn('[articles PATCH] slug_redirects table not found or insert failed — create it with: CREATE TABLE slug_redirects (old_slug TEXT PRIMARY KEY, new_slug TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());', redirectErr.message);
+      }
+    }
+
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
 function getSupabase() {
@@ -24,6 +24,22 @@ async function fetchArticle(slug) {
 
   if (error || !data) return null;
   return data;
+}
+
+// Check slug_redirects table for renamed slugs. Returns new slug or null.
+async function checkSlugRedirect(oldSlug) {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  try {
+    const { data } = await supabase
+      .from('slug_redirects')
+      .select('new_slug')
+      .eq('old_slug', oldSlug)
+      .single();
+    return data?.new_slug || null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchRelated(category, currentSlug) {
@@ -76,12 +92,16 @@ const CATEGORY_BACK = {
 };
 
 export default async function ArticlePage({ params }) {
-  const [article, related] = await Promise.all([
-    fetchArticle(params.slug),
-    fetchArticle(params.slug).then(a => a ? fetchRelated(a.category, params.slug) : []),
-  ]);
+  const article = await fetchArticle(params.slug);
 
-  if (!article) notFound();
+  if (!article) {
+    // Before returning 404, check if this slug was renamed and a redirect exists
+    const newSlug = await checkSlugRedirect(params.slug);
+    if (newSlug) permanentRedirect(`/bible-verses/${newSlug}/`);
+    notFound();
+  }
+
+  const related = await fetchRelated(article.category, params.slug);
 
   const catLabel = CATEGORY_LABELS[article.category] || 'Articles';
   const catBack  = CATEGORY_BACK[article.category]  || '/';
