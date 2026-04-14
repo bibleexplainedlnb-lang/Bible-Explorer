@@ -127,20 +127,19 @@ body {
   font-size: 0.94rem;
 }
 
-/* Bible verse reference links (BibleGateway) */
-.prose-content a.verse-ref,
-.prose-content .verse-ref {
-  color: #7b5c0a;
-  font-style: italic;
-  text-decoration: none;
-  border-bottom: 1px dotted #b8860b;
-  padding-bottom: 1px;
-  font-size: 0.92em;
+/* Bible verse reference links → /bible/ internal pages */
+.prose-content a.verse-ref {
+  color: #b8860b;
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.5);
+  text-underline-offset: 2px;
+  font-weight: 500;
   white-space: nowrap;
+  transition: color 0.15s;
 }
 .prose-content a.verse-ref:hover {
-  color: #2c4270;
-  border-bottom-color: #2c4270;
+  color: #7b5c0a;
+  text-decoration-color: rgba(123, 92, 10, 0.7);
 }
 
 /* Related / Read More h3 sections */
@@ -171,17 +170,20 @@ body {
   font-style: normal;
 }
 
-/* Internal links injected by the linking engine */
+/* Internal article-to-article links */
+.prose-content a.article-link,
 .internal-link {
-  color: #b8860b;
+  color: #2c4270;
   text-decoration: underline;
-  text-decoration-color: rgba(184, 134, 11, 0.35);
+  text-decoration-color: rgba(44, 66, 112, 0.35);
   text-underline-offset: 2px;
+  font-weight: 500;
   transition: color 0.15s, text-decoration-color 0.15s;
 }
+.prose-content a.article-link:hover,
 .internal-link:hover {
-  color: #2c4270;
-  text-decoration-color: rgba(44, 66, 112, 0.4);
+  color: #b8860b;
+  text-decoration-color: rgba(184, 134, 11, 0.4);
 }
 
 /* Read-more CTA blocks */
