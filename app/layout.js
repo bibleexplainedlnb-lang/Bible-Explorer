@@ -1,7 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bible-verse-insights.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bibleverseinsights.com';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

@@ -1,5 +1,6 @@
-# REMOVE THIS BEFORE GOING LIVE
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /admin/
+Disallow: /api/
 
-Sitemap: https://bible-verse-insights.vercel.app/sitemap.xml
+Sitemap: https://bibleverseinsights.com/sitemap.xml
