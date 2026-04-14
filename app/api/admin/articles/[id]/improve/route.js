@@ -72,7 +72,7 @@ export async function POST(request, { params }) {
       { role: 'user',   content: IMPROVE_USER_PROMPT(article.title, article.category, article.content) },
     ], { json: false });
 
-    const { html: enrichedContent } = enrichContent(
+    const { html: enrichedContent } = await enrichContent(
       improvedHtml,
       publishedArticles || [],
       article.category,

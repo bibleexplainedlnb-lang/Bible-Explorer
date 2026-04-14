@@ -60,7 +60,7 @@ HARD RULES:
 
     const finalSlug = existingSlugs.has(slug) ? `${slug}-${Date.now()}` : slug;
 
-    const { html: enrichedContent } = enrichContent(
+    const { html: enrichedContent } = await enrichContent(
       generated.content,
       publishedArticles || [],
       category,

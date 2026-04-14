@@ -140,7 +140,7 @@ export async function POST(request) {
 
             existingSlugs.add(article.slug);
 
-            const { html: enrichedHtml } = enrichContent(article.content, publishedArticles, category, article.slug);
+            const { html: enrichedHtml } = await enrichContent(article.content, publishedArticles, category, article.slug);
             article.content = enrichedHtml;
 
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();

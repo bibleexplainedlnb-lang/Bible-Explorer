@@ -49,7 +49,7 @@ export async function POST(request) {
         const stripped = stripArticleLinks(article.content || '');
 
         // Re-run full enrichment pipeline
-        const { html: enriched } = enrichContent(
+        const { html: enriched } = await enrichContent(
           stripped,
           pool.filter(a => a.id !== article.id),
           article.category || 'questions',
