@@ -49,8 +49,8 @@ export default async function QuestionsPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {merged.map((q) => {
           const href = q._source === 'supabase'
-            ? `/bible-verses/${q.slug}`
-            : `/questions/${q.slug}`;
+            ? `/bible-verses/${q.slug}/`
+            : `/questions/${q.slug}/`;
           return (
             <Link key={q.slug} href={href} style={{ textDecoration: 'none' }}>
               <div style={{

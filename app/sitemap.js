@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { topics, questions, guides } from '../lib/db.js';
+import { createClient } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://bibleverseinsights.com';
 
@@ -19,10 +20,27 @@ const KEY_BIBLE_CHAPTERS = [
   ['isaiah', 40], ['isaiah', 53],
 ];
 
-export default function sitemap() {
-  const allTopics = topics.list();
+async function fetchSupabaseArticles() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return [];
+  try {
+    const sb = createClient(url, key);
+    const { data } = await sb
+      .from('articles')
+      .select('slug, created_at')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(500);
+    return data || [];
+  } catch { return []; }
+}
+
+export default async function sitemap() {
+  const allTopics    = topics.list();
   const allQuestions = questions.list();
-  const allGuides = guides.list();
+  const allGuides    = guides.list();
+  const supabaseArticles = await fetchSupabaseArticles();
 
   const staticPages = [
     { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
@@ -67,6 +85,13 @@ export default function sitemap() {
     priority: 0.6,
   }));
 
+  const bibleVersePages = supabaseArticles.map((a) => ({
+    url: `${SITE_URL}/bible-verses/${a.slug}/`,
+    lastModified: new Date(a.created_at || Date.now()),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
   return [
     ...staticPages,
     ...topicPages,
@@ -74,5 +99,6 @@ export default function sitemap() {
     ...guidePages,
     ...keywordPages,
     ...biblePages,
+    ...bibleVersePages,
   ];
 }

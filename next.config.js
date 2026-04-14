@@ -2,6 +2,7 @@
 const replitDomain = process.env.REPLIT_DEV_DOMAIN;
 
 const nextConfig = {
+  trailingSlash: true,
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3', '@prisma/client', 'prisma'],
   },

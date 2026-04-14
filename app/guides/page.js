@@ -51,8 +51,8 @@ export default async function GuidesPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
         {merged.map((guide, i) => {
           const href = guide._source === 'supabase'
-            ? `/bible-verses/${guide.slug}`
-            : `/guides/${guide.slug}`;
+            ? `/bible-verses/${guide.slug}/`
+            : `/guides/${guide.slug}/`;
           return (
             <Link key={guide.slug} href={href} style={{ textDecoration: 'none' }}>
               <div style={{
