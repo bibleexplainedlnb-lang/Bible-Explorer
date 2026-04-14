@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { topics, questions, guides } from '../lib/db.js';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bibleverseinsights.com';
+const SITE_URL = 'https://bibleverseinsights.com';
 
 const KEY_BIBLE_CHAPTERS = [
   ['john', 1], ['john', 3], ['john', 14], ['john', 15],
