@@ -13,6 +13,14 @@ export function generateMetadata({ params }) {
   return {
     title: guide.title,
     alternates: { canonical: `/guides/${params.slug}/` },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: guide.title,
+      description: guide.summary || guide.title,
+      url: `https://bibleverseinsights.com/guides/${params.slug}/`,
+      siteName: 'Bible Verse Insights',
+      type: 'article',
+    },
   };
 }
 

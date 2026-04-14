@@ -11,6 +11,18 @@ export const metadata = {
   alternates: {
     canonical: '/',
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  openGraph: {
+    title: "Bible Verse Insight",
+    description: "Explore Bible verses with deep insights, meanings, explanations, and study guides to understand scripture better.",
+    url: SITE_URL + '/',
+    siteName: "Bible Verse Insights",
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -19,9 +31,6 @@ export default function RootLayout({ children }) {
       <head>
         {/* Google Search Console verification */}
         <meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
-
-        {/* REMOVE NOINDEX BEFORE GOING LIVE */}
-        <meta name="robots" content="noindex, nofollow" />
 
         {/* Google Tag Manager */}
         {/* Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}

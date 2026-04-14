@@ -119,6 +119,14 @@ export async function generateMetadata({ params }) {
     description: q.metaDescription || q.summary || undefined,
     keywords: q.keywords.length > 0 ? q.keywords.join(', ') : undefined,
     alternates: { canonical: `/questions/${params.slug}/` },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: q.metaTitle || q.title,
+      description: q.metaDescription || q.summary || q.title,
+      url: `https://bibleverseinsights.com/questions/${params.slug}/`,
+      siteName: 'Bible Verse Insights',
+      type: 'article',
+    },
   };
 }
 

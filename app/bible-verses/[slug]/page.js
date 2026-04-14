@@ -50,9 +50,12 @@ export async function generateMetadata({ params }) {
     description: article.meta_description || undefined,
     keywords: Array.isArray(article.keywords) ? article.keywords.join(', ') : undefined,
     alternates: { canonical: `/bible-verses/${params.slug}/` },
+    robots: { index: true, follow: true },
     openGraph: {
       title: article.meta_title || article.title,
-      description: article.meta_description || undefined,
+      description: article.meta_description || article.title,
+      url: `https://bibleverseinsights.com/bible-verses/${params.slug}/`,
+      siteName: 'Bible Verse Insights',
       type: 'article',
     },
   };
