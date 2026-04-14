@@ -1,41 +1,30 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { guides } from '../../lib/db.js';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabase.js';
 
 export const metadata = { title: 'Study Guides' };
-
-async function fetchSupabaseGuides() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return [];
-  try {
-    const sb = createClient(url, key);
-    const { data } = await sb
-      .from('articles')
-      .select('slug, title, category, created_at')
-      .eq('category', 'guides')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(200);
-    return (data || []).map(a => ({ ...a, _source: 'supabase' }));
-  } catch { return []; }
-}
 
 const GUIDE_ICONS = ['📖', '🕊️', '✝️', '📜', '🙏', '⚓', '💡', '🌿'];
 
 export default async function GuidesPage() {
-  const [sqliteGuides, supabaseGuides] = await Promise.all([
-    Promise.resolve(guides.list()),
-    fetchSupabaseGuides(),
-  ]);
+  let articles = [];
 
-  const sqliteSlugs = new Set(sqliteGuides.map(g => g.slug));
-  const merged = [
-    ...supabaseGuides.filter(g => !sqliteSlugs.has(g.slug)),
-    ...sqliteGuides,
-  ];
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('id, slug, title, meta_description, created_at')
+      .eq('category', 'guides')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[GuidesPage] Supabase error:', error.message);
+    } else {
+      articles = data || [];
+      console.log('GUIDES ARTICLES:', articles.length, articles.map(a => a.slug));
+    }
+  }
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
@@ -49,37 +38,30 @@ export default async function GuidesPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-        {merged.map((guide, i) => {
-          const href = guide._source === 'supabase'
-            ? `/bible-verses/${guide.slug}/`
-            : `/guides/${guide.slug}/`;
-          return (
-            <Link key={guide.slug} href={href} style={{ textDecoration: 'none' }}>
-              <div style={{
-                backgroundColor: 'white', border: '1px solid #e8dfc8',
-                borderRadius: '0.875rem', padding: '1.625rem',
-                height: '100%', cursor: 'pointer',
-              }}>
-                <div style={{ color: '#d4a017', fontSize: '1.5rem', marginBottom: '0.75rem' }}>
-                  {GUIDE_ICONS[i % GUIDE_ICONS.length]}
-                </div>
-                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '0.5rem' }}>
-                  {guide.title}
-                </h2>
-                {guide.topic_title && (
-                  <span style={{
-                    display: 'inline-block', backgroundColor: '#f5f0e8',
-                    color: '#8b7355', fontSize: '0.75rem', padding: '0.15rem 0.6rem',
-                    borderRadius: '1rem', border: '1px solid #e8dfc8',
-                  }}>
-                    {guide.topic_title}
-                  </span>
-                )}
+        {articles.map((article, i) => (
+          <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white', border: '1px solid #e8dfc8',
+              borderRadius: '0.875rem', padding: '1.625rem',
+              height: '100%', cursor: 'pointer',
+            }}>
+              <div style={{ color: '#d4a017', fontSize: '1.5rem', marginBottom: '0.75rem' }}>
+                {GUIDE_ICONS[i % GUIDE_ICONS.length]}
               </div>
-            </Link>
-          );
-        })}
-        {merged.length === 0 && (
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '0.5rem', margin: '0 0 0.5rem' }}>
+                {article.title}
+              </h2>
+              {article.meta_description && (
+                <p style={{ color: '#6b5c45', fontSize: '0.85rem', lineHeight: 1.5, margin: '0.5rem 0 0' }}>
+                  {article.meta_description.length > 100
+                    ? article.meta_description.slice(0, 100) + '…'
+                    : article.meta_description}
+                </p>
+              )}
+            </div>
+          </Link>
+        ))}
+        {articles.length === 0 && (
           <p style={{ color: '#8b7355', fontStyle: 'italic' }}>No guides published yet.</p>
         )}
       </div>
