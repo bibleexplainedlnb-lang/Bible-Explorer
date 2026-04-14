@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { topics, questions, guides } from '../lib/db.js';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase.js';
 
 const SITE_URL = 'https://bibleverseinsights.com';
 
@@ -20,85 +19,39 @@ const KEY_BIBLE_CHAPTERS = [
   ['isaiah', 40], ['isaiah', 53],
 ];
 
-async function fetchSupabaseArticles() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return [];
-  try {
-    const sb = createClient(url, key);
-    const { data } = await sb
+export default async function sitemap() {
+  let articles = [];
+  if (supabase) {
+    const { data } = await supabase
       .from('articles')
-      .select('slug, created_at')
+      .select('slug, category, created_at')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(500);
-    return data || [];
-  } catch { return []; }
-}
-
-export default async function sitemap() {
-  const allTopics    = topics.list();
-  const allQuestions = questions.list();
-  const allGuides    = guides.list();
-  const supabaseArticles = await fetchSupabaseArticles();
+      .limit(2000);
+    articles = data || [];
+  }
 
   const staticPages = [
-    { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
-    { url: `${SITE_URL}/topics/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${SITE_URL}/questions/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${SITE_URL}/guides/`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/`,          lastModified: new Date(), changeFrequency: 'weekly',  priority: 1.0 },
+    { url: `${SITE_URL}/topics/`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${SITE_URL}/questions/`,lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${SITE_URL}/guides/`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${SITE_URL}/bible/john/1/`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   ];
 
-  const topicPages = allTopics.map((t) => ({
-    url: `${SITE_URL}/topics/${t.slug}/`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.85,
-  }));
-
-  const questionPages = allQuestions.map((q) => ({
-    url: `${SITE_URL}/questions/${q.slug}/`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
-
-  const guidePages = allGuides.map((g) => ({
-    url: `${SITE_URL}/guides/${g.slug}/`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.75,
-  }));
-
-  const keywordPages = allTopics.map((t) => ({
-    url: `${SITE_URL}/bible-verses-about-${t.slug}/`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.75,
-  }));
-
   const biblePages = KEY_BIBLE_CHAPTERS.map(([book, chapter]) => ({
-    url: `${SITE_URL}/bible/${book}/${chapter}/`,
-    lastModified: new Date(),
+    url:             `${SITE_URL}/bible/${book}/${chapter}/`,
+    lastModified:    new Date(),
     changeFrequency: 'yearly',
-    priority: 0.6,
+    priority:        0.6,
   }));
 
-  const bibleVersePages = supabaseArticles.map((a) => ({
-    url: `${SITE_URL}/bible-verses/${a.slug}/`,
-    lastModified: new Date(a.created_at || Date.now()),
+  const articlePages = articles.map((a) => ({
+    url:             `${SITE_URL}/bible-verses/${a.slug}/`,
+    lastModified:    new Date(a.created_at || Date.now()),
     changeFrequency: 'monthly',
-    priority: 0.8,
+    priority:        0.85,
   }));
 
-  return [
-    ...staticPages,
-    ...topicPages,
-    ...questionPages,
-    ...guidePages,
-    ...keywordPages,
-    ...biblePages,
-    ...bibleVersePages,
-  ];
+  return [...staticPages, ...biblePages, ...articlePages];
 }
