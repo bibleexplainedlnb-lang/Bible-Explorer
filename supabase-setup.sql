@@ -19,11 +19,28 @@ CREATE TABLE IF NOT EXISTS articles (
   meta_description TEXT,
   keywords         TEXT[],
   related_slugs    TEXT[],
-  status           TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  status           TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'rejected')),
   category         TEXT,
   created_at       TIMESTAMPTZ DEFAULT NOW(),
   updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 2b. Migration: add any columns missing from earlier versions of this script
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_title       TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_description TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS keywords         TEXT[];
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS related_slugs    TEXT[];
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS category         TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS topic_id         UUID;
+
+-- 2c. Fix status constraint to allow 'rejected' (drop old constraint, add new one)
+DO $$
+BEGIN
+  ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_status_check;
+  ALTER TABLE articles ADD CONSTRAINT articles_status_check
+    CHECK (status IN ('draft', 'published', 'rejected'));
+EXCEPTION WHEN others THEN NULL;
+END $$;
 
 -- 3. Auto-update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at()
