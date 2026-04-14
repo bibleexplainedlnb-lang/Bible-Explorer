@@ -49,7 +49,7 @@ function Toast({ toast, onClose }) {
       maxWidth: '380px', fontSize: '0.875rem', lineHeight: 1.45,
     }}>
       <div style={{ fontWeight: '700', marginBottom: '0.2rem' }}>
-        {isError ? '✗ Improve failed' : '✓ Article improved'}
+        {isError ? '✗ Failed' : '✓ Done'}
       </div>
       <div style={{ color: isError ? '#a33' : '#15803d' }}>{toast.message}</div>
       <button
@@ -178,14 +178,15 @@ function EditModal({ article, onSave, onClose }) {
 }
 
 export default function Articles() {
-  const [articles,  setArticles]  = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [filter,    setFilter]    = useState({ status: '', category: '' });
-  const [editing,   setEditing]   = useState(null);
-  const [deleting,  setDeleting]  = useState(null);
-  const [actioning, setActioning] = useState(null);
-  const [improving, setImproving] = useState(new Set());
-  const [toast,     setToast]     = useState(null);
+  const [articles,   setArticles]   = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [filter,     setFilter]     = useState({ status: '', category: '' });
+  const [editing,    setEditing]    = useState(null);
+  const [deleting,   setDeleting]   = useState(null);
+  const [actioning,  setActioning]  = useState(null);
+  const [improving,  setImproving]  = useState(new Set());
+  const [relinking,  setRelinking]  = useState(false);
+  const [toast,      setToast]      = useState(null);
 
   const loadArticles = useCallback(async () => {
     setLoading(true);
@@ -226,6 +227,25 @@ export default function Articles() {
   function handleEditSaved(updated) {
     setEditing(null);
     setArticles(prev => prev.map(a => a.id === updated.id ? updated : a));
+  }
+
+  async function relinkAll() {
+    setRelinking(true);
+    setToast(null);
+    try {
+      const res = await fetch('/api/admin/articles/relink', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'Re-link failed' });
+      } else {
+        setToast({ status: 'success', message: data.message || `Re-linked ${data.updated} articles.` });
+        loadArticles();
+      }
+    } catch (err) {
+      setToast({ status: 'error', message: err.message });
+    } finally {
+      setRelinking(false);
+    }
   }
 
   async function improveArticle(article) {
@@ -286,6 +306,15 @@ export default function Articles() {
         </select>
 
         <button onClick={loadArticles} style={{ ...S.btn('default'), padding: '0.4rem 0.85rem' }}>↻ Refresh</button>
+
+        <button
+          onClick={relinkAll}
+          disabled={relinking}
+          title="Strip old enrichment and re-run internal linking on all articles using the current article pool"
+          style={{ ...S.btn('improve'), padding: '0.4rem 0.85rem', opacity: relinking ? 0.6 : 1 }}
+        >
+          {relinking ? '⟳ Re-linking…' : '🔗 Re-link All'}
+        </button>
       </div>
 
       <div style={{ ...S.card, padding: 0, overflow: 'hidden' }}>
