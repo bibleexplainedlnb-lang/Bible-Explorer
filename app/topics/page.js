@@ -1,12 +1,27 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { topics } from '../../lib/db.js';
+import { supabase } from '../../lib/supabase.js';
 
 export const metadata = { title: 'Topics' };
 
-export default function TopicsPage() {
-  const allTopics = topics.list();
+export default async function TopicsPage() {
+  let articles = [];
+
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('id, slug, title, meta_description, created_at')
+      .eq('category', 'topics')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[TopicsPage] Supabase error:', error.message);
+    } else {
+      articles = data || [];
+    }
+  }
 
   return (
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>
@@ -20,25 +35,32 @@ export default function TopicsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-        {allTopics.map((topic) => (
-          <Link key={topic.slug} href={`/topics/${topic.slug}/`} style={{ textDecoration: 'none' }}>
+        {articles.map((article) => (
+          <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
             <div style={{
               backgroundColor: 'white', border: '1px solid #e8dfc8',
               borderRadius: '0.875rem', padding: '1.5rem',
               height: '100%', cursor: 'pointer',
             }}>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 'bold', color: '#2c4270', marginBottom: '0.625rem' }}>
-                {topic.title}
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.15rem', fontWeight: 'bold', color: '#2c4270', marginBottom: '0.625rem', margin: '0 0 0.625rem' }}>
+                {article.title}
               </h2>
-              <p style={{ color: '#6b5c45', fontSize: '0.875rem', lineHeight: 1.65, margin: 0 }}>
-                {topic.description?.slice(0, 140)}{topic.description?.length > 140 ? '…' : ''}
-              </p>
-              <div style={{ marginTop: '1rem', color: '#b8860b', fontSize: '0.875rem', fontWeight: '500' }}>
+              {article.meta_description && (
+                <p style={{ color: '#6b5c45', fontSize: '0.875rem', lineHeight: 1.65, margin: '0 0 1rem' }}>
+                  {article.meta_description.length > 140
+                    ? article.meta_description.slice(0, 140) + '…'
+                    : article.meta_description}
+                </p>
+              )}
+              <div style={{ marginTop: 'auto', color: '#b8860b', fontSize: '0.875rem', fontWeight: '500' }}>
                 Explore topic →
               </div>
             </div>
           </Link>
         ))}
+        {articles.length === 0 && (
+          <p style={{ color: '#8b7355', fontStyle: 'italic' }}>No topics published yet.</p>
+        )}
       </div>
     </div>
   );

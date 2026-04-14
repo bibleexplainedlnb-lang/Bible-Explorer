@@ -1,21 +1,41 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { topics } from '../lib/db.js';
-import { guides } from '../lib/db.js';
+import { supabase } from '../lib/supabase.js';
 
 const FEATURED_PASSAGES = [
-  { book: 'john', chapter: 3, label: 'John 3', desc: 'Born Again — Jesus and Nicodemus' },
-  { book: 'psalms', chapter: 23, label: 'Psalm 23', desc: 'The Lord Is My Shepherd' },
-  { book: 'romans', chapter: 8, label: 'Romans 8', desc: 'No Condemnation in Christ' },
-  { book: 'matthew', chapter: 5, label: 'Matthew 5', desc: 'The Sermon on the Mount' },
-  { book: 'genesis', chapter: 1, label: 'Genesis 1', desc: 'In the Beginning — Creation' },
-  { book: '1corinthians', chapter: 13, label: '1 Cor 13', desc: 'The Love Chapter' },
+  { book: 'john',        chapter: 3,  label: 'John 3',      desc: 'Born Again — Jesus and Nicodemus' },
+  { book: 'psalms',      chapter: 23, label: 'Psalm 23',    desc: 'The Lord Is My Shepherd' },
+  { book: 'romans',      chapter: 8,  label: 'Romans 8',    desc: 'No Condemnation in Christ' },
+  { book: 'matthew',     chapter: 5,  label: 'Matthew 5',   desc: 'The Sermon on the Mount' },
+  { book: 'genesis',     chapter: 1,  label: 'Genesis 1',   desc: 'In the Beginning — Creation' },
+  { book: '1corinthians',chapter: 13, label: '1 Cor 13',    desc: 'The Love Chapter' },
 ];
 
-export default function Home() {
-  const allTopics = topics.list();
-  const allGuides = guides.list();
+export default async function Home() {
+  let recentGuides    = [];
+  let recentQuestions = [];
+
+  if (supabase) {
+    const [guidesRes, questionsRes] = await Promise.all([
+      supabase
+        .from('articles')
+        .select('slug, title')
+        .eq('category', 'guides')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase
+        .from('articles')
+        .select('slug, title')
+        .eq('category', 'questions')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(5),
+    ]);
+    recentGuides    = guidesRes.data    || [];
+    recentQuestions = questionsRes.data || [];
+  }
 
   return (
     <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '0 1rem' }}>
@@ -44,13 +64,13 @@ export default function Home() {
           }}>
             Start Reading →
           </Link>
-          <Link href="/topics/" style={{
+          <Link href="/guides/" style={{
             backgroundColor: 'transparent', color: 'white',
             padding: '0.75rem 2rem', borderRadius: '0.5rem',
             fontWeight: '500', textDecoration: 'none', fontSize: '1rem',
             border: '1px solid rgba(255,255,255,0.3)',
           }}>
-            Browse Topics
+            Browse Guides
           </Link>
         </div>
       </section>
@@ -99,22 +119,25 @@ export default function Home() {
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 'bold', color: '#1e2d4a' }}>
-              Study Topics
+              Study Guides
             </h2>
-            <Link href="/topics/" style={{ color: '#b8860b', fontSize: '0.875rem', textDecoration: 'none', fontWeight: '500' }}>
+            <Link href="/guides/" style={{ color: '#b8860b', fontSize: '0.875rem', textDecoration: 'none', fontWeight: '500' }}>
               View all →
             </Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-            {allTopics.slice(0, 5).map((topic) => (
-              <Link key={topic.slug} href={`/topics/${topic.slug}/`} style={{ textDecoration: 'none' }}>
+            {recentGuides.length === 0 && (
+              <p style={{ color: '#8b7355', fontSize: '0.875rem', fontStyle: 'italic' }}>No guides published yet.</p>
+            )}
+            {recentGuides.map((article) => (
+              <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   backgroundColor: 'white', border: '1px solid #e8dfc8',
                   borderRadius: '0.5rem', padding: '0.875rem 1rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  <span style={{ color: '#2c4270', fontWeight: '500', fontFamily: 'Georgia, serif' }}>{topic.title}</span>
-                  <span style={{ color: '#b8860b' }}>→</span>
+                  <span style={{ color: '#2c4270', fontWeight: '500', fontFamily: 'Georgia, serif', fontSize: '0.95rem' }}>{article.title}</span>
+                  <span style={{ color: '#b8860b', flexShrink: 0 }}>→</span>
                 </div>
               </Link>
             ))}
@@ -124,22 +147,25 @@ export default function Home() {
         <section>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 'bold', color: '#1e2d4a' }}>
-              Study Guides
+              Questions Answered
             </h2>
-            <Link href="/guides/" style={{ color: '#b8860b', fontSize: '0.875rem', textDecoration: 'none', fontWeight: '500' }}>
+            <Link href="/questions/" style={{ color: '#b8860b', fontSize: '0.875rem', textDecoration: 'none', fontWeight: '500' }}>
               View all →
             </Link>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-            {allGuides.slice(0, 5).map((guide) => (
-              <Link key={guide.slug} href={`/guides/${guide.slug}/`} style={{ textDecoration: 'none' }}>
+            {recentQuestions.length === 0 && (
+              <p style={{ color: '#8b7355', fontSize: '0.875rem', fontStyle: 'italic' }}>No questions published yet.</p>
+            )}
+            {recentQuestions.map((article) => (
+              <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   backgroundColor: 'white', border: '1px solid #e8dfc8',
                   borderRadius: '0.5rem', padding: '0.875rem 1rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  <span style={{ color: '#2c4270', fontWeight: '500', fontFamily: 'Georgia, serif' }}>{guide.title}</span>
-                  <span style={{ color: '#b8860b' }}>→</span>
+                  <span style={{ color: '#2c4270', fontWeight: '500', fontFamily: 'Georgia, serif', fontSize: '0.95rem' }}>{article.title}</span>
+                  <span style={{ color: '#b8860b', flexShrink: 0 }}>→</span>
                 </div>
               </Link>
             ))}

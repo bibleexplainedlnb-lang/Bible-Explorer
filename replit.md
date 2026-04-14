@@ -131,38 +131,47 @@ Next.js 15 (App Router) content site styled with Tailwind CSS 4.
 
 Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `npm run dev` in the workspace root.
 
-**Content architecture:**
-- `data/content.json` — seed data for topics, questions, guides, bibleExplanations (source of truth for fresh deploys)
-- `data/content.db` — SQLite database (better-sqlite3); falls back to `/tmp/bible-explorer.db` on read-only filesystems (Vercel)
-- `lib/db.js` — DB setup, seed functions, typed exports (`topics`, `questions`, `guides`, `verses`, `bibleNotes`)
-- `lib/content.js` — full SEO content for all 8 topics, 3 thin questions, and 5 guide additions (800-1200 words each, markdown format)
-- `upgradeExpandedContent(db)` in `lib/db.js` runs on every cold start and UPDATEs topic content, thin question content (<200 chars), and unexpanded guide content (<4000 chars)
+**Content architecture — fully DB-driven (Supabase `articles` table):**
+- ALL pages fetch exclusively from the Supabase `articles` table. No SQLite, no Prisma, no static/hardcoded content.
+- If a slug is not found in the DB → 404. No fallbacks.
+- `lib/supabase.js` — shared Supabase client used by every page
+- `lib/db.js` — legacy SQLite file (kept for reference only, not used by any page)
+- `lib/prisma.js` — legacy Prisma file (kept for reference only, not used by any page)
+- `prisma` + `@prisma/client` pinned at 5.22.0 — do NOT upgrade
 
-**PostgreSQL + Prisma (scaling layer):**
-- `prisma/schema.prisma` — 4 models: `Topic`, `Question`, `BibleVerse`, `VerseExplanation`; synced to Replit's built-in PostgreSQL via `npx prisma db push`
-- `lib/prisma.js` — singleton PrismaClient (prevents connection exhaustion during HMR)
-- `prisma` + `@prisma/client` pinned at 5.22.0 (Prisma 7 removed `url` in schema — stay on v5)
-- **API routes** (`app/api/`):
-  - `GET /api/questions/[slug]/` — question by slug, includes topic relation
-  - `GET /api/topics/[slug]/` — topic + all its questions
-  - `GET /api/verses/[book]/[chapter]/` — all verses in chapter with explanations
-  - `GET /api/verses/[book]/[chapter]/?verse=N` — single verse with explanation
-- Database tables: `topics`, `questions`, `bible_verses`, `verse_explanations` (PostgreSQL)
+**Supabase `articles` table columns:**
+- `id`, `slug`, `title`, `content` (HTML), `meta_title`, `meta_description`, `category` (questions/guides/topics/teachings), `status` (published/draft), `created_at`
 
-**Topics table** has a `content TEXT` column (added via ALTER TABLE migration) that stores full markdown content rendered by `renderTopicContent()` in `app/topics/[slug]/page.js`.
+**Page routing:**
+- `/` — homepage; fetches 5 recent guides + 5 recent questions from Supabase
+- `/questions/` — lists articles with `category=questions AND status=published`
+- `/guides/` — lists articles with `category=guides AND status=published`
+- `/topics/` — lists articles with `category=topics AND status=published`
+- `/bible-verses/[slug]/` — canonical article page; full article render from Supabase
+- `/questions/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
+- `/guides/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
+- `/topics/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
+- `/bible-verse-about-patience/` — 404
+- `/[slug]/` (catch-all) — 404
 
 **Key files:**
-- `app/layout.js` — metadataBase, global canonical, nav header + footer with Topics/Questions/Guides/Read Bible links
-- `app/page.js` — homepage with John 3:16 highlight, category links, clean layout
-- `app/sitemap.js` — dynamic sitemap (65 URLs: static, topics, questions, guides, keyword, Bible chapter pages)
+- `app/layout.js` — metadataBase, global robots index/follow, OpenGraph, nav header + footer
+- `app/page.js` — homepage; Supabase fetch, featured Bible passages (hardcoded nav links only)
+- `app/sitemap.js` — dynamic sitemap from Supabase articles
 - `public/robots.txt` — User-agent: *, Allow: /, Sitemap URL
-- `lib/markdownToHtml.js` — markdown-to-HTML string converter (h1/h2/h3, p, ul, ol, strong) for dangerouslySetInnerHTML
-- `app/topics/[slug]/page.js` — topic detail with dangerouslySetInnerHTML + prose-content class
-- `app/questions/[slug]/page.js` — question detail with dangerouslySetInnerHTML + prose-content class
-- `app/guides/[slug]/page.js` — guide detail with dangerouslySetInnerHTML + prose-content class
-- `app/globals.css` — .prose-content CSS class styles all converted markdown HTML elements
-- `app/not-found.js` — 404 page for unmatched routes
-- `next.config.js` — uses CommonJS; serverExternalPackages for better-sqlite3, @prisma/client, prisma; trailingSlash: true
+- `lib/seoEnrich.js` — async AI-powered inline linking pipeline
+- `lib/generator.js` — OpenRouter AI generation (MODEL: gpt-4.1-mini)
+- `app/bible-verses/[slug]/page.js` — canonical article page with full SEO metadata
+- `app/admin/_components/Articles.js` — admin CMS with Upgrade AI, Old Article badge, Save Draft/Publish
+- `app/globals.css` — .prose-content CSS class styles all HTML content
+- `app/not-found.js` — 404 page
+- `next.config.js` — serverExternalPackages for better-sqlite3; trailingSlash: true
+
+**Admin panel** at `/admin/`:
+- Lists all Supabase articles (up to 2000), filterable by category/status
+- Generate single article or bulk generate from ideas
+- AI upgrade preview (does not auto-save)
+- Relink all articles via `POST /api/admin/articles/relink`
 
 ### `scripts` (`@workspace/scripts`)
 
