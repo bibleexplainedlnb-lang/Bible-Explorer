@@ -56,7 +56,7 @@ export async function POST(request, { params }) {
 
     const [{ data: article, error: articleError }, { data: publishedArticles }] = await Promise.all([
       supabase.from('articles').select('*').eq('id', params.id).single(),
-      supabase.from('articles').select('slug, title, category').eq('status', 'published').limit(200),
+      supabase.from('articles').select('slug, title, category').neq('status', 'rejected').limit(200),
     ]);
 
     if (articleError || !article) {

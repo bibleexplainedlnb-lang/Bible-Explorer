@@ -13,7 +13,8 @@ export async function POST(request) {
 
     const [{ data: existing }, { data: publishedArticles }] = await Promise.all([
       supabase.from('articles').select('slug, title').limit(100),
-      supabase.from('articles').select('slug, title, category').eq('status', 'published').limit(200),
+      // Use all non-rejected articles for enrichment so inline links work from day one
+      supabase.from('articles').select('slug, title, category').neq('status', 'rejected').limit(200),
     ]);
 
     const existingSlugs = new Set((existing || []).map(a => a.slug));

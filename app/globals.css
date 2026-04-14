@@ -85,6 +85,75 @@ body {
   font-weight: 600;
 }
 
+/* Inline links injected by SEO enrichment */
+.prose-content a {
+  color: #b8860b;
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.35);
+  text-underline-offset: 2px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.prose-content a:hover {
+  color: #2c4270;
+  text-decoration-color: rgba(44, 66, 112, 0.4);
+}
+
+/* Bible verse blockquotes */
+.prose-content blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  background: #faf7ee;
+  border-left: 4px solid #b8860b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: #3a2e1a;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  position: relative;
+}
+.prose-content blockquote p {
+  margin: 0;
+  color: #3a2e1a;
+}
+
+/* Know More paragraph */
+.prose-content p:has(strong:first-child) {
+  background: #f5f0e8;
+  border-left: 3px solid #2c4270;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Related / Read More h3 sections */
+.prose-content h3 {
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1e2d4a;
+  margin: 2rem 0 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8dfc8;
+}
+.prose-content h3 + ul {
+  list-style: none;
+  padding-left: 0;
+}
+.prose-content h3 + ul li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f0ece3;
+}
+.prose-content h3 + ul li:last-child {
+  border-bottom: none;
+}
+.prose-content h3 + ul li a::before {
+  content: '→ ';
+  color: #b8860b;
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
 /* Internal links injected by the linking engine */
 .internal-link {
   color: #b8860b;
