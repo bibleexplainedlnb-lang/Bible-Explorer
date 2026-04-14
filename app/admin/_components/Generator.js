@@ -341,6 +341,7 @@ export default function Generator({ onSaved }) {
           <hr style={s.hr} />
 
           <div
+            className="prose-content"
             style={{ lineHeight: 1.8, color: '#2a2a2a', fontSize: '0.95rem' }}
             dangerouslySetInnerHTML={{ __html: preview.content }}
           />

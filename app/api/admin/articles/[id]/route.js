@@ -3,6 +3,12 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../../../lib/supabase.js';
 
+const OPTIONAL_COLS = ['meta_title', 'meta_description', 'keywords', 'related_slugs'];
+
+function isSchemaError(msg = '') {
+  return msg.includes('schema cache') || msg.includes('column') || msg.includes('does not exist');
+}
+
 export async function GET(request, { params }) {
   const { data, error } = await supabase
     .from('articles')
@@ -23,12 +29,20 @@ export async function PATCH(request, { params }) {
       if (key in body) updates[key] = body[key];
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('articles')
       .update(updates)
       .eq('id', params.id)
       .select()
       .single();
+
+    // If optional SEO columns don't exist yet, retry without them
+    if (error && isSchemaError(error.message)) {
+      console.warn('[articles PATCH] schema fallback — retrying without optional SEO columns');
+      const safeUpdates = { ...updates };
+      for (const k of OPTIONAL_COLS) delete safeUpdates[k];
+      ({ data, error } = await supabase.from('articles').update(safeUpdates).eq('id', params.id).select().single());
+    }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data);
