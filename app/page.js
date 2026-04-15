@@ -7,7 +7,9 @@ function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
-  return createClient(url, key);
+  return createClient(url, key, {
+    global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) },
+  });
 }
 
 const FEATURED_PASSAGES = [
@@ -25,22 +27,23 @@ export default async function Home() {
 
   const supabase = getSupabase();
   if (supabase) {
-    const [guidesRes, questionsRes] = await Promise.all([
-      supabase
-        .from('articles')
-        .select('slug, title')
-        .eq('category', 'guides')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(5),
-      supabase
-        .from('articles')
-        .select('slug, title')
-        .eq('category', 'questions')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(5),
+    const [guideTopicsRes, questionTopicsRes] = await Promise.all([
+      supabase.from('topics').select('id').eq('category', 'guides'),
+      supabase.from('topics').select('id').eq('category', 'questions'),
     ]);
+
+    const guideTopicIds    = (guideTopicsRes.data    || []).map(t => t.id);
+    const questionTopicIds = (questionTopicsRes.data || []).map(t => t.id);
+
+    const [guidesRes, questionsRes] = await Promise.all([
+      guideTopicIds.length > 0
+        ? supabase.from('articles').select('slug, title').in('topic_id', guideTopicIds).eq('status', 'published').order('created_at', { ascending: false }).limit(5)
+        : Promise.resolve({ data: [] }),
+      questionTopicIds.length > 0
+        ? supabase.from('articles').select('slug, title').in('topic_id', questionTopicIds).eq('status', 'published').order('created_at', { ascending: false }).limit(5)
+        : Promise.resolve({ data: [] }),
+    ]);
+
     recentGuides    = guidesRes.data    || [];
     recentQuestions = questionsRes.data || [];
   }
