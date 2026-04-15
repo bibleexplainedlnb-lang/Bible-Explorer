@@ -11,7 +11,7 @@ const BADGE = {
 const OLD_DAYS  = 30;
 const THIN_CHARS = 500;
 
-const CATEGORIES = ['questions', 'guides', 'topics', 'teachings'];
+const CATEGORIES = ['questions', 'guides', 'topics'];
 
 const S = {
   card:      { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '0.875rem', padding: '1.5rem' },

@@ -54,10 +54,8 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
     }
 
-    const [{ data: article, error: articleError }, { data: publishedArticles }] = await Promise.all([
-      supabase.from('articles').select('*').eq('id', params.id).single(),
-      supabase.from('articles').select('slug, title, category').neq('status', 'rejected').limit(200),
-    ]);
+    const { data: article, error: articleError } = await supabase
+      .from('articles').select('*').eq('id', params.id).single();
 
     if (articleError || !article) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
@@ -72,12 +70,7 @@ export async function POST(request, { params }) {
       { role: 'user',   content: IMPROVE_USER_PROMPT(article.title, article.category, article.content) },
     ], { json: false });
 
-    const { html: enrichedContent } = await enrichContent(
-      improvedHtml,
-      publishedArticles || [],
-      article.category,
-      article.slug
-    );
+    const { html: enrichedContent } = await enrichContent(improvedHtml);
 
     const { data: updated, error: updateError } = await supabase
       .from('articles')

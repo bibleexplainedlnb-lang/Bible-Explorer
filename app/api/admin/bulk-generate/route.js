@@ -103,10 +103,8 @@ export async function POST(request) {
           return;
         }
 
-        const existingSlugs     = new Set((existingArticles || []).map(a => a.slug));
-        const existingTitles    = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
-        // Use all non-rejected articles for enrichment so inline links work from day one
-        const publishedArticles = (existingArticles || []).filter(a => a.status !== 'rejected');
+        const existingSlugs  = new Set((existingArticles || []).map(a => a.slug));
+        const existingTitles = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
 
         const shuffled = [...availableTopics].sort(() => Math.random() - 0.5);
         const pickedTopics = Array.from({ length: safeCount }, (_, i) => shuffled[i % shuffled.length]);
@@ -140,7 +138,7 @@ export async function POST(request) {
 
             existingSlugs.add(article.slug);
 
-            const { html: enrichedHtml } = await enrichContent(article.content, publishedArticles, category, article.slug);
+            const { html: enrichedHtml } = await enrichContent(article.content);
             article.content = enrichedHtml;
 
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();

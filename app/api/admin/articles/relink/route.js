@@ -48,13 +48,8 @@ export async function POST(request) {
         // Strip existing enrichment
         const stripped = stripArticleLinks(article.content || '');
 
-        // Re-run full enrichment pipeline
-        const { html: enriched } = await enrichContent(
-          stripped,
-          pool.filter(a => a.id !== article.id),
-          article.category || 'questions',
-          article.slug
-        );
+        // Re-run enrichment pipeline (Bible verse links only)
+        const { html: enriched } = await enrichContent(stripped);
 
         // Save back
         const { error: updateErr } = await supabase
