@@ -145,14 +145,17 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - `lib/prisma.js` — legacy Prisma file (kept for reference only, not used by any page)
 - `prisma` + `@prisma/client` pinned at 5.22.0 — do NOT upgrade
 
-**Supabase `articles` table columns:**
-- `id`, `slug`, `title`, `content` (HTML), `meta_title`, `meta_description`, `category` (questions/guides/topics/teachings), `status` (published/draft), `created_at`
+**Supabase DB schema:**
+- `articles` table: `id`, `slug`, `title`, `content` (HTML), `meta_title`, `meta_description`, `keywords`, `related_slugs`, `topic_id` (FK → topics.id), `status` (published/draft/rejected), `created_at`. **NO `category` column** — category lives only in `topics`.
+- `topics` table: `id`, `name`, `category` (questions/guides/topics), `created_at`.
+- Category is always read via join: `.select('*, topics(name, category)')` → `article.topics?.category`.
+- **NEVER** query or insert `articles.category` — column does not exist.
 
 **Page routing:**
 - `/` — homepage; fetches 5 recent guides + 5 recent questions from Supabase
-- `/questions/` — lists articles with `category=questions AND status=published`
-- `/guides/` — lists articles with `category=guides AND status=published`
-- `/topics/` — lists articles with `category=topics AND status=published`
+- `/questions/` — lists articles whose `topic_id` matches topics with `category=questions`
+- `/guides/` — lists articles whose `topic_id` matches topics with `category=guides`
+- `/topics/` — lists articles whose `topic_id` matches topics with `category=topics`
 - `/bible-verses/[slug]/` — canonical article page; full article render from Supabase
 - `/questions/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
 - `/guides/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404

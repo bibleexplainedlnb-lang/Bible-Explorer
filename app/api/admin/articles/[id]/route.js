@@ -23,7 +23,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   try {
     const body = await request.json();
-    const allowed = ['title', 'slug', 'content', 'meta_title', 'meta_description', 'keywords', 'related_slugs', 'status', 'topic_id', 'category'];
+    const allowed = ['title', 'slug', 'content', 'meta_title', 'meta_description', 'keywords', 'related_slugs', 'status', 'topic_id'];
     const updates = {};
     for (const key of allowed) {
       if (key in body) updates[key] = body[key];

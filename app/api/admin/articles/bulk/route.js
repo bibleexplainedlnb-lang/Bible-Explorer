@@ -5,7 +5,7 @@ import { supabase } from '../../../../../lib/supabase.js';
 
 export async function POST(request) {
   try {
-    const { ids, action, status, category } = await request.json();
+    const { ids, action, status } = await request.json();
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'ids array is required' }, { status: 400 });
@@ -28,16 +28,6 @@ export async function POST(request) {
         .in('id', ids);
       if (error) throw new Error(error.message);
       return NextResponse.json({ message: `Marked ${ids.length} article${ids.length !== 1 ? 's' : ''} as ${status}.` });
-    }
-
-    if (action === 'set-category') {
-      if (!category) return NextResponse.json({ error: 'category is required for set-category action' }, { status: 400 });
-      const { error } = await supabase
-        .from('articles')
-        .update({ category })
-        .in('id', ids);
-      if (error) throw new Error(error.message);
-      return NextResponse.json({ message: `Moved ${ids.length} article${ids.length !== 1 ? 's' : ''} to category "${category}".` });
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });

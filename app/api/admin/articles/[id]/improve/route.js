@@ -55,7 +55,7 @@ export async function POST(request, { params }) {
     }
 
     const { data: article, error: articleError } = await supabase
-      .from('articles').select('*').eq('id', params.id).single();
+      .from('articles').select('*, topics(name, category)').eq('id', params.id).single();
 
     if (articleError || !article) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
@@ -67,7 +67,7 @@ export async function POST(request, { params }) {
 
     const improvedHtml = await callOpenRouter([
       { role: 'system', content: IMPROVE_SYSTEM_PROMPT },
-      { role: 'user',   content: IMPROVE_USER_PROMPT(article.title, article.category, article.content) },
+      { role: 'user',   content: IMPROVE_USER_PROMPT(article.title, article.topics?.category || '', article.content) },
     ], { json: false });
 
     const { html: enrichedContent } = await enrichContent(improvedHtml);

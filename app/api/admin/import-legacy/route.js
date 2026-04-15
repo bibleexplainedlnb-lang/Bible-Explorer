@@ -33,10 +33,9 @@ export async function POST() {
       };
       toInsert.push({
         slug,
-        title:    titleMap[slug] || slug.charAt(0).toUpperCase() + slug.slice(1),
-        content:  markdownToHtml(mdContent),
-        category: 'topics',
-        status:   'draft',
+        title:   titleMap[slug] || slug.charAt(0).toUpperCase() + slug.slice(1),
+        content: markdownToHtml(mdContent),
+        status:  'draft',
       });
     }
 
@@ -48,7 +47,6 @@ export async function POST() {
         slug:     q.slug,
         title:    q.title,
         content:  mdContent ? markdownToHtml(mdContent) : null,
-        category: 'questions',
         status:   'draft',
       });
     }
@@ -65,7 +63,6 @@ export async function POST() {
         slug:     q.slug,
         title:    q.title,
         content:  mdContent ? markdownToHtml(mdContent) : null,
-        category: q.category,
         status:   'draft',
       });
     }
@@ -76,7 +73,6 @@ export async function POST() {
         slug:     g.slug,
         title:    g.title,
         content:  g.content ? markdownToHtml(g.content) : null,
-        category: 'guides',
         status:   'draft',
       });
     }
@@ -92,7 +88,7 @@ export async function POST() {
     const { data: inserted, error: insertErr } = await supabase
       .from('articles')
       .insert(toInsert)
-      .select('id, slug, category');
+      .select('id, slug');
 
     if (insertErr) throw new Error(insertErr.message);
 
@@ -100,7 +96,7 @@ export async function POST() {
       imported: inserted?.length || 0,
       skipped:  skipped.length,
       message:  `Imported ${inserted?.length || 0} legacy articles as drafts. ${skipped.length} already existed.`,
-      details:  inserted?.map(r => ({ slug: r.slug, category: r.category })) || [],
+      details:  inserted?.map(r => ({ slug: r.slug })) || [],
     });
   } catch (err) {
     console.error('[import-legacy]', err);

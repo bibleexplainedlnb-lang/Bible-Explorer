@@ -17,7 +17,7 @@ async function fetchArticle(slug) {
 
   const { data, error } = await supabase
     .from('articles')
-    .select('*')
+    .select('*, topics(name, category)')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
@@ -44,13 +44,21 @@ async function checkSlugRedirect(oldSlug) {
 
 async function fetchRelated(category, currentSlug) {
   const supabase = getSupabase();
-  if (!supabase) return [];
+  if (!supabase || !category) return [];
+
+  const { data: topicRows } = await supabase
+    .from('topics')
+    .select('id')
+    .eq('category', category);
+
+  const topicIds = (topicRows || []).map(t => t.id);
+  if (!topicIds.length) return [];
 
   const { data } = await supabase
     .from('articles')
-    .select('slug, title, category')
+    .select('slug, title, topics(name, category)')
     .eq('status', 'published')
-    .eq('category', category)
+    .in('topic_id', topicIds)
     .neq('slug', currentSlug)
     .limit(4);
 
@@ -99,10 +107,11 @@ export default async function ArticlePage({ params }) {
     notFound();
   }
 
-  const related = await fetchRelated(article.category, params.slug);
+  const topicCategory = article.topics?.category || '';
+  const related = await fetchRelated(topicCategory, params.slug);
 
-  const catLabel = CATEGORY_LABELS[article.category] || 'Articles';
-  const catBack  = CATEGORY_BACK[article.category]  || '/';
+  const catLabel = CATEGORY_LABELS[topicCategory] || 'Articles';
+  const catBack  = CATEGORY_BACK[topicCategory]  || '/';
 
   return (
     <>

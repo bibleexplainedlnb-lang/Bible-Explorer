@@ -90,7 +90,6 @@ function EditModal({ article, onSave, onClose }) {
   const [form, setForm] = useState({
     title:            article.title            || '',
     slug:             article.slug             || '',
-    category:         article.category         || '',
     status:           article.status           || 'draft',
     meta_title:       article.meta_title       || '',
     meta_description: article.meta_description || '',
@@ -166,11 +165,12 @@ function EditModal({ article, onSave, onClose }) {
             <input value={form.slug} readOnly style={{ ...S.input, background: '#f9f9f9', color: '#888', cursor: 'not-allowed' }} />
           </div>
           <div style={S.fieldWrap}>
-            <label style={S.label}>Category</label>
-            <select value={form.category} onChange={set('category')} style={{ ...S.input }} disabled={busy}>
-              <option value="">— select —</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-            </select>
+            <label style={S.label}>Topic / Category <span style={{ fontWeight: '400', color: '#aaa', fontSize: '0.78rem' }}>(from Topics table)</span></label>
+            <input
+              value={article.topics ? `${article.topics.name || '—'} (${article.topics.category || '—'})` : '—'}
+              readOnly
+              style={{ ...S.input, background: '#f9f9f9', color: '#888', cursor: 'not-allowed' }}
+            />
           </div>
           <div style={S.fieldWrap}>
             <label style={S.label}>Status</label>
@@ -226,26 +226,6 @@ function EditModal({ article, onSave, onClose }) {
   );
 }
 
-/* ─── BulkCategoryModal ─── */
-function BulkCategoryModal({ count, onConfirm, onCancel }) {
-  const [cat, setCat] = useState('');
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: '#fff', borderRadius: '1rem', padding: '2rem', maxWidth: '380px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
-        <p style={{ margin: '0 0 0.5rem', fontWeight: '700', fontSize: '1.05rem', color: '#1e2d4a' }}>Change category</p>
-        <p style={{ margin: '0 0 1rem', color: '#6b6b6b', fontSize: '0.9rem' }}>Set category for {count} selected article{count !== 1 ? 's' : ''}:</p>
-        <select value={cat} onChange={e => setCat(e.target.value)} style={{ ...S.input, marginBottom: '1.5rem' }}>
-          <option value="">— select —</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-        </select>
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} style={S.btn('ghost')}>Cancel</button>
-          <button onClick={() => cat && onConfirm(cat)} disabled={!cat} style={{ ...S.btn('default'), padding: '0.55rem 1.25rem', fontSize: '0.9rem', opacity: cat ? 1 : 0.5 }}>Apply</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ─── Main component ─── */
 export default function Articles() {
@@ -264,7 +244,6 @@ export default function Articles() {
   const [selectedIds,   setSelectedIds]   = useState(new Set());
   const [bulkActioning, setBulkActioning] = useState(false);
   const [bulkConfirm,   setBulkConfirm]   = useState(null);
-  const [bulkCatModal,  setBulkCatModal]  = useState(false);
 
   const loadArticles = useCallback(async () => {
     setLoading(true);
@@ -316,7 +295,6 @@ export default function Articles() {
     if (!ids.length) return;
     setBulkActioning(true);
     setBulkConfirm(null);
-    setBulkCatModal(false);
     try {
       const res  = await fetch('/api/admin/articles/bulk', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -411,13 +389,6 @@ export default function Articles() {
     <div>
       {toast       && <Toast toast={toast} onClose={() => setToast(null)} />}
       {editing     && <EditModal article={editing} onSave={handleEditSaved} onClose={() => setEditing(null)} />}
-      {bulkCatModal && (
-        <BulkCategoryModal
-          count={nSelected}
-          onConfirm={(cat) => executeBulkAction('set-category', { category: cat })}
-          onCancel={() => setBulkCatModal(false)}
-        />
-      )}
       {deleting    && (
         <ConfirmModal
           title="Delete article?"
@@ -523,14 +494,6 @@ export default function Articles() {
           </button>
 
           <button
-            onClick={() => setBulkCatModal(true)}
-            disabled={bulkActioning}
-            style={{ ...S.btn('default'), padding: '0.35rem 0.85rem' }}
-          >
-            Change Category
-          </button>
-
-          <button
             onClick={() => setBulkConfirm({
               title:         'Delete selected?',
               message:       `Permanently delete ${nSelected} article${nSelected !== 1 ? 's' : ''}? This cannot be undone.`,
@@ -610,7 +573,7 @@ export default function Articles() {
                         <br />
                         <span style={{ fontSize: '0.73rem', color: '#aaa', fontFamily: 'monospace' }}>{a.slug}</span>
                       </td>
-                      <td style={{ ...S.td, textTransform: 'capitalize' }}>{a.category || '—'}</td>
+                      <td style={{ ...S.td, textTransform: 'capitalize' }}>{a.topics?.category || '—'}</td>
                       <td style={S.td}>
                         <span style={S.badge(a.status)}>{a.status || 'draft'}</span>
                       </td>

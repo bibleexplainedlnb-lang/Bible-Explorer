@@ -21,17 +21,26 @@ export default async function TopicsPage() {
   const supabase = getSupabase();
 
   if (supabase) {
-    const { data, error } = await supabase
-      .from('articles')
-      .select('id, slug, title, meta_description, created_at')
-      .eq('category', 'topics')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
+    const { data: topicRows } = await supabase
+      .from('topics')
+      .select('id')
+      .eq('category', 'topics');
 
-    if (error) {
-      console.error('[TopicsPage] Supabase error:', error.message);
-    } else {
-      articles = data || [];
+    const topicIds = (topicRows || []).map(t => t.id);
+
+    if (topicIds.length > 0) {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, slug, title, meta_description, created_at')
+        .in('topic_id', topicIds)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[TopicsPage] Supabase error:', error.message);
+      } else {
+        articles = data || [];
+      }
     }
   }
 

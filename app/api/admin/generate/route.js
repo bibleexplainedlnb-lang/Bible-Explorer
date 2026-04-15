@@ -7,13 +7,24 @@ import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 export async function POST(request) {
   try {
-    const { topicId, topicName, idea, category = 'questions' } = await request.json();
+    const { topicId, topicName, idea } = await request.json();
 
     if (!topicName?.trim()) return NextResponse.json({ error: 'topicName is required' }, { status: 400 });
 
+    // Look up the topic's category from the DB — never trust category from the client
+    let category = 'questions';
+    if (topicId) {
+      const { data: topic } = await supabase
+        .from('topics')
+        .select('id, name, category')
+        .eq('id', topicId)
+        .single();
+      if (topic?.category) category = topic.category;
+    }
+
     const { data: existing } = await supabase.from('articles').select('slug, title').limit(100);
 
-    const existingSlugs = new Set((existing || []).map(a => a.slug));
+    const existingSlugs  = new Set((existing || []).map(a => a.slug));
     const existingTitles = (existing || []).map(a => `  - ${a.title}`).join('\n') || '  (none yet)';
 
     const contentPrompt = getPrompt(category, topicName.trim(), idea);
@@ -30,7 +41,7 @@ Return ONLY this JSON object (no markdown, no code fences, no commentary outside
   "meta_title":       "SEO title under 60 chars",
   "meta_description": "140-155 char meta description that makes someone want to click",
   "keywords":         ["3-5 keyword strings"],
-  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\"Verse text\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
+  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\\"Verse text\\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
 }
 
 HARD RULES:
@@ -66,8 +77,6 @@ HARD RULES:
       keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
       content:          enrichedContent,
       topic_id:         topicId || null,
-      category,
-      intent:           category,
       status:           'draft',
     });
   } catch (err) {

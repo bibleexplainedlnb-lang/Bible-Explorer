@@ -129,7 +129,7 @@ export default function Dashboard() {
                       <br />
                       <span style={{ fontSize:'0.75rem', color:'#aaa', fontFamily:'monospace' }}>{a.slug}</span>
                     </td>
-                    <td style={S.td}>{a.category || '—'}</td>
+                    <td style={S.td}>{a.topics?.category || '—'}</td>
                     <td style={S.td}><span style={S.badge(a.status)}>{a.status}</span></td>
                     <td style={S.td} suppressHydrationWarning>{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
                     <td style={{ ...S.td, whiteSpace:'nowrap' }}>

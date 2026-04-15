@@ -53,7 +53,6 @@ HARD RULES:
     keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
     content:          generated.content || '',
     topic_id:         topic.id || null,
-    category,
     status:           'draft',
   };
 }
@@ -79,7 +78,7 @@ export async function POST(request) {
 
         const [{ data: topicsData, error: topicsError }, { data: existingArticles }] = await Promise.all([
           supabase.from('topics').select('id, name, category').eq('category', category || 'questions'),
-          supabase.from('articles').select('slug, title, topic_id, status, category').limit(500),
+          supabase.from('articles').select('slug, title, topic_id, status').limit(500),
         ]);
 
         if (topicsError || !topicsData?.length) {

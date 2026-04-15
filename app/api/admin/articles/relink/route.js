@@ -20,7 +20,7 @@ export async function POST(request) {
     // 1. Fetch all non-rejected articles (the enrichment pool)
     const { data: allArticles, error: fetchErr } = await supabase
       .from('articles')
-      .select('id, slug, title, category, content, status')
+      .select('id, slug, title, topic_id, content, status')
       .neq('status', 'rejected')
       .limit(500);
 
