@@ -2,14 +2,23 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { supabase } from '../../lib/supabase.js';
+import { createClient } from '@supabase/supabase-js';
 import { isCategoryActive } from '../../lib/categories.js';
+
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 export const metadata = { title: 'Questions' };
 
 export default async function QuestionsPage() {
   if (!isCategoryActive('questions')) notFound();
+
   let articles = [];
+  const supabase = getSupabase();
 
   if (supabase) {
     const { data, error } = await supabase
@@ -23,7 +32,6 @@ export default async function QuestionsPage() {
       console.error('[QuestionsPage] Supabase error:', error.message);
     } else {
       articles = data || [];
-      console.log('QUESTIONS ARTICLES:', articles.length, articles.map(a => a.slug));
     }
   }
 

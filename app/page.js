@@ -1,7 +1,14 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { supabase } from '../lib/supabase.js';
+import { createClient } from '@supabase/supabase-js';
+
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 const FEATURED_PASSAGES = [
   { book: 'john',        chapter: 3,  label: 'John 3',      desc: 'Born Again — Jesus and Nicodemus' },
@@ -16,6 +23,7 @@ export default async function Home() {
   let recentGuides    = [];
   let recentQuestions = [];
 
+  const supabase = getSupabase();
   if (supabase) {
     const [guidesRes, questionsRes] = await Promise.all([
       supabase
