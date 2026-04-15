@@ -80,14 +80,12 @@ export async function generateMetadata({ params }) {
 const CATEGORY_LABELS = {
   questions: 'Questions',
   guides:    'Guides',
-  teachings: 'Teachings',
   topics:    'Topics',
 };
 
 const CATEGORY_BACK = {
   questions: '/questions/',
   guides:    '/guides/',
-  teachings: '/teachings/',
   topics:    '/topics/',
 };
 
