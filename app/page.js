@@ -141,7 +141,7 @@ export default async function Home() {
               <p style={{ color: '#8b7355', fontSize: '0.875rem', fontStyle: 'italic' }}>No guides published yet.</p>
             )}
             {recentGuides.map((article) => (
-              <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
+              <Link key={article.slug} href={`/guides/${article.slug}/`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   backgroundColor: 'white', border: '1px solid #e8dfc8',
                   borderRadius: '0.5rem', padding: '0.875rem 1rem',
@@ -169,7 +169,7 @@ export default async function Home() {
               <p style={{ color: '#8b7355', fontSize: '0.875rem', fontStyle: 'italic' }}>No questions published yet.</p>
             )}
             {recentQuestions.map((article) => (
-              <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
+              <Link key={article.slug} href={`/questions/${article.slug}/`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   backgroundColor: 'white', border: '1px solid #e8dfc8',
                   borderRadius: '0.5rem', padding: '0.875rem 1rem',

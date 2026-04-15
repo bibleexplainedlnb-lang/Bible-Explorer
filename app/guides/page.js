@@ -61,7 +61,7 @@ export default async function GuidesPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
         {articles.map((article, i) => (
-          <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
+          <Link key={article.slug} href={`/guides/${article.slug}/`} style={{ textDecoration: 'none' }}>
             <div style={{
               backgroundColor: 'white', border: '1px solid #e8dfc8',
               borderRadius: '0.875rem', padding: '1.625rem',

@@ -152,14 +152,15 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - **NEVER** query or insert `articles.category` — column does not exist.
 
 **Page routing:**
-- `/` — homepage; fetches 5 recent guides + 5 recent questions from Supabase
-- `/questions/` — lists articles whose `topic_id` matches topics with `category=questions`
-- `/guides/` — lists articles whose `topic_id` matches topics with `category=guides`
-- `/topics/` — lists articles whose `topic_id` matches topics with `category=topics`
-- `/bible-verses/[slug]/` — canonical article page; full article render from Supabase
-- `/questions/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
-- `/guides/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
-- `/topics/[slug]/` — 308 redirect to `/bible-verses/[slug]/` if found, else 404
+- `/` — homepage; fetches 5 recent guides + 5 recent questions from Supabase (topic-based)
+- `/questions/` — lists published articles whose `topic_id` matches topics with `category=questions`
+- `/guides/` — lists published articles whose `topic_id` matches topics with `category=guides`
+- `/topics/` — lists published articles whose `topic_id` matches topics with `category=topics`
+- `/guides/[slug]/` — canonical article page for guides category (full article render)
+- `/questions/[slug]/` — canonical article page for questions category (full article render)
+- `/topics/[slug]/` — canonical article page for topics category (full article render)
+- `/bible-verses/[slug]/` — REDIRECT ONLY: looks up article category, 308 redirects to `/{category}/{slug}/`. **NOT a content page.**
+- All article shared rendering logic lives in `lib/articlePage.js` (`makeGenerateMetadata`, `makeArticlePage`, `articleUrl`)
 - `/bible-verse-about-patience/` — 404
 - `/[slug]/` (catch-all) — 404
 

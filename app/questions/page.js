@@ -59,7 +59,7 @@ export default async function QuestionsPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {articles.map((article) => (
-          <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
+          <Link key={article.slug} href={`/questions/${article.slug}/`} style={{ textDecoration: 'none' }}>
             <div style={{
               backgroundColor: 'white', border: '1px solid #e8dfc8',
               borderRadius: '0.75rem', padding: '1.25rem 1.5rem',
