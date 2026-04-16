@@ -15,38 +15,53 @@ function stripOptional(obj) {
   return copy;
 }
 
+async function buildArticlesQuery(status, category, limit) {
+  // Resolve topic IDs for category filter upfront
+  let topicIds = null;
+  if (category) {
+    const { data: topicRows } = await supabase
+      .from('topics')
+      .select('id')
+      .eq('category', category);
+    topicIds = (topicRows || []).map(t => t.id);
+    if (!topicIds.length) return { data: [], error: null };
+  }
+
+  // Try with is_pillar in join; fall back to without it if column absent
+  for (const joinSelect of ['*, topics(name, category, is_pillar)', '*, topics(name, category)']) {
+    let q = supabase
+      .from('articles')
+      .select(joinSelect)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (status)   q = q.eq('status', status);
+    if (topicIds) q = q.in('topic_id', topicIds);
+
+    const { data, error } = await q;
+
+    if (!error) return { data: data || [], error: null };
+    if (!isSchemaError(error.message)) return { data: null, error };
+    console.warn('[articles GET] is_pillar absent — retrying without it');
+  }
+
+  return { data: [], error: null };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const status   = searchParams.get('status')   || '';
   const category = searchParams.get('category') || '';
   const limit    = parseInt(searchParams.get('limit') || '200', 10);
 
-  let query = supabase
-    .from('articles')
-    .select('*, topics(name, category, is_pillar)')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (status) query = query.eq('status', status);
-
-  if (category) {
-    const { data: topicRows } = await supabase
-      .from('topics')
-      .select('id')
-      .eq('category', category);
-    const topicIds = (topicRows || []).map(t => t.id);
-    if (!topicIds.length) return NextResponse.json([]);
-    query = query.in('topic_id', topicIds);
-  }
-
-  const { data, error } = await query;
+  const { data, error } = await buildArticlesQuery(status, category, limit);
 
   if (error) {
     console.error('[articles GET]', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data || []);
+  return NextResponse.json(data);
 }
 
 export async function POST(request) {
@@ -69,6 +84,7 @@ export async function POST(request) {
       status,
     };
 
+    // Try insert — fall back on schema errors by removing optional columns
     let { data, error } = await supabase
       .from('articles')
       .insert(insertData)
@@ -76,9 +92,22 @@ export async function POST(request) {
       .single();
 
     if (error && isSchemaError(error.message)) {
-      console.warn('[articles POST] schema fallback — retrying without optional SEO columns');
+      console.warn('[articles POST] schema fallback pass 1 — retrying with topics(name, category)');
+      ({ data, error } = await supabase
+        .from('articles')
+        .insert(insertData)
+        .select('*, topics(name, category)')
+        .single());
+    }
+
+    if (error && isSchemaError(error.message)) {
+      console.warn('[articles POST] schema fallback pass 2 — removing optional SEO columns');
       const safe = stripOptional(insertData);
-      ({ data, error } = await supabase.from('articles').insert(safe).select('*, topics(name, category, is_pillar)').single());
+      ({ data, error } = await supabase
+        .from('articles')
+        .insert(safe)
+        .select('*, topics(name, category)')
+        .single());
     }
 
     if (error) {
@@ -86,12 +115,17 @@ export async function POST(request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Mark topic as article_created = true
+    // Mark topic as article_created = true — fire-and-forget; silently skip if column absent
     if (topic_id) {
-      await supabase
+      supabase
         .from('topics')
         .update({ article_created: true })
-        .eq('id', topic_id);
+        .eq('id', topic_id)
+        .then(({ error: upErr }) => {
+          if (upErr && !isSchemaError(upErr.message)) {
+            console.warn('[articles POST] article_created update failed:', upErr.message);
+          }
+        });
     }
 
     return NextResponse.json(data, { status: 201 });

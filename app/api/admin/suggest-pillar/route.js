@@ -11,7 +11,7 @@ export async function POST(request) {
 
     const [{ data: article }, { data: topics }] = await Promise.all([
       supabase.from('articles').select('id, title, content, topic_id').eq('id', article_id).single(),
-      supabase.from('topics').select('id, name, category, is_pillar').order('name'),
+      supabase.from('topics').select('*').order('name'),
     ]);
 
     if (!article) return NextResponse.json({ error: 'Article not found' }, { status: 404 });
@@ -23,6 +23,7 @@ export async function POST(request) {
       .trim()
       .slice(0, 800);
 
+    // is_pillar may be absent from DB — treat undefined as false
     const topicList = topics.map(t =>
       `- id: ${t.id} | name: ${t.name} | category: ${t.category}${t.is_pillar ? ' [ALREADY PILLAR]' : ''}`
     ).join('\n');
@@ -64,7 +65,7 @@ Instructions:
       topic_id:   matchedTopic.id,
       topic_name: matchedTopic.name,
       category:   matchedTopic.category,
-      is_pillar:  matchedTopic.is_pillar,
+      is_pillar:  matchedTopic.is_pillar || false,
       reason:     suggestion.reason,
     });
   } catch (err) {
