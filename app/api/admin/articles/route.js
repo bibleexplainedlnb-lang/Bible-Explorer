@@ -15,7 +15,7 @@ function stripOptional(obj) {
   return copy;
 }
 
-async function buildArticlesQuery(status, category, limit) {
+async function buildArticlesQuery(status, category, topicId, limit) {
   // Resolve topic IDs for category filter upfront
   let topicIds = null;
   if (category) {
@@ -36,7 +36,8 @@ async function buildArticlesQuery(status, category, limit) {
       .limit(limit);
 
     if (status)   q = q.eq('status', status);
-    if (topicIds) q = q.in('topic_id', topicIds);
+    if (topicId)  q = q.eq('topic_id', topicId);
+    else if (topicIds) q = q.in('topic_id', topicIds);
 
     const { data, error } = await q;
 
@@ -52,9 +53,10 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const status   = searchParams.get('status')   || '';
   const category = searchParams.get('category') || '';
+  const topicId  = searchParams.get('topic_id') || '';
   const limit    = parseInt(searchParams.get('limit') || '200', 10);
 
-  const { data, error } = await buildArticlesQuery(status, category, limit);
+  const { data, error } = await buildArticlesQuery(status, category, topicId, limit);
 
   if (error) {
     console.error('[articles GET]', error.message);

@@ -3,13 +3,28 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CATEGORIES } from '../../../lib/categories.js';
 
+const FILTERS = [
+  { key: 'all',         label: 'All' },
+  { key: 'not-created', label: 'Not Created' },
+  { key: 'created',     label: 'Created' },
+  { key: 'pillars',     label: 'Pillars' },
+];
+
+function articleUrl(slug, category) {
+  return `/${category}/${slug}/`;
+}
+
 export default function Generator({ onSaved }) {
   const [topics,          setTopics]          = useState([]);
   const [topicsLoading,   setTopicsLoading]   = useState(true);
   const [topicsError,     setTopicsError]     = useState('');
   const [activeTab,       setActiveTab]       = useState(CATEGORIES[0].value);
-  const [showCreated,     setShowCreated]     = useState(false);
+  const [topicFilter,     setTopicFilter]     = useState('all'); // all | not-created | created | pillars
   const [regenConfirm,    setRegenConfirm]    = useState(null);
+
+  // Map of topicId → { slug, category } for "View Article" links
+  const [articleSlugs,    setArticleSlugs]    = useState({});
+  const [viewLoading,     setViewLoading]     = useState(null); // topicId being looked up
 
   const [selectedTopic,   setSelectedTopic]   = useState('');
   const [idea,            setIdea]            = useState('');
@@ -77,6 +92,32 @@ export default function Generator({ onSaved }) {
     setError(''); setIdeas([]); setPreview(null); setRegenConfirm(null);
   }
 
+  async function handleViewArticle(topic) {
+    // Already cached
+    if (articleSlugs[topic.id]) {
+      const { slug, category } = articleSlugs[topic.id];
+      window.open(articleUrl(slug, category), '_blank');
+      return;
+    }
+    setViewLoading(topic.id);
+    try {
+      const res = await fetch(`/api/admin/articles?topic_id=${topic.id}&limit=1`);
+      const data = await res.json();
+      if (res.ok && Array.isArray(data) && data.length > 0) {
+        const art = data[0];
+        const cat = art.topics?.category || topic.category;
+        setArticleSlugs(prev => ({ ...prev, [topic.id]: { slug: art.slug, category: cat } }));
+        window.open(articleUrl(art.slug, cat), '_blank');
+      } else {
+        alert('Article not found. It may not be published yet.');
+      }
+    } catch {
+      alert('Could not load article.');
+    } finally {
+      setViewLoading(null);
+    }
+  }
+
   async function handleGenerateIdeas() {
     const topic = topics.find(t => t.id === selectedTopic);
     if (!topic) return;
@@ -125,6 +166,7 @@ export default function Generator({ onSaved }) {
 
   async function handleSave(publish) {
     if (!preview) return;
+    const topic = topics.find(t => t.id === selectedTopic);
     setSaving(true);
     try {
       const res = await fetch('/api/admin/articles', {
@@ -141,6 +183,11 @@ export default function Generator({ onSaved }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ used: true }),
         }).catch(() => {});
+      }
+
+      // Cache the slug so "View Article" works immediately
+      if (preview.slug && topic) {
+        setArticleSlugs(prev => ({ ...prev, [selectedTopic]: { slug: preview.slug, category: topic.category } }));
       }
 
       setTopics(prev => prev.map(t => t.id === selectedTopic ? { ...t, article_created: true } : t));
@@ -162,19 +209,43 @@ export default function Generator({ onSaved }) {
   const selectedTopicObj = topics.find(t => t.id === selectedTopic);
 
   const tabTopics = topics.filter(t => t.category === activeTab);
-  const visibleTopics = showCreated ? tabTopics : tabTopics.filter(t => !t.article_created);
-  const sortedTopics = [...visibleTopics].sort((a, b) => {
-    if (a.is_pillar && !b.is_pillar) return -1;
-    if (!a.is_pillar && b.is_pillar) return 1;
+
+  // Apply filter
+  const filteredTopics = tabTopics.filter(t => {
+    if (topicFilter === 'not-created') return !t.article_created;
+    if (topicFilter === 'created')     return !!t.article_created;
+    if (topicFilter === 'pillars')     return !!t.is_pillar;
+    return true; // 'all'
+  });
+
+  // Sort: 1. Pillars  2. Not Created  3. Created  (alpha within each group)
+  const sortedTopics = [...filteredTopics].sort((a, b) => {
+    const rank = t => t.is_pillar ? 0 : !t.article_created ? 1 : 2;
+    const rDiff = rank(a) - rank(b);
+    if (rDiff !== 0) return rDiff;
     return a.name.localeCompare(b.name);
   });
-  const createdCount = tabTopics.filter(t => t.article_created).length;
+
+  const createdCount   = tabTopics.filter(t => t.article_created).length;
+  const uncreatedCount = tabTopics.filter(t => !t.article_created).length;
+  const pillarCount    = tabTopics.filter(t => t.is_pillar).length;
 
   return (
     <div style={{ maxWidth: '860px' }}>
       {saved && (
         <div style={s.successBanner}>
-          Article saved! <button onClick={reset} style={s.linkBtn}>Generate another</button>
+          Article saved!{' '}
+          {selectedTopicObj && articleSlugs[selectedTopicObj.id] && (
+            <a
+              href={articleUrl(articleSlugs[selectedTopicObj.id].slug, articleSlugs[selectedTopicObj.id].category)}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: '#1b5e20', fontWeight: 'bold', marginRight: '0.75rem' }}
+            >
+              View Article →
+            </a>
+          )}
+          <button onClick={reset} style={s.linkBtn}>Generate another</button>
         </div>
       )}
 
@@ -210,13 +281,45 @@ export default function Generator({ onSaved }) {
                   })}
                 </div>
 
-                {/* Show created toggle */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.6rem', fontSize: '0.8rem', color: '#8b7355' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
-                    <input type="checkbox" checked={showCreated} onChange={e => setShowCreated(e.target.checked)} style={{ accentColor: '#1e2d4a' }} />
-                    Show Created Topics
-                  </label>
-                  {createdCount > 0 && <span>{createdCount} already created</span>}
+                {/* Filter buttons */}
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem', alignItems: 'center' }}>
+                  {FILTERS.map(f => {
+                    let badge = null;
+                    if (f.key === 'all')         badge = tabTopics.length;
+                    if (f.key === 'not-created') badge = uncreatedCount;
+                    if (f.key === 'created')     badge = createdCount;
+                    if (f.key === 'pillars')     badge = pillarCount;
+                    const isActive = topicFilter === f.key;
+                    return (
+                      <button
+                        key={f.key}
+                        type="button"
+                        onClick={() => setTopicFilter(f.key)}
+                        style={{
+                          padding: '0.3rem 0.75rem', borderRadius: '2rem', fontSize: '0.78rem', fontWeight: '600',
+                          cursor: 'pointer', border: isActive ? '2px solid #1e2d4a' : '1px solid #d4c5a9',
+                          fontFamily: 'inherit',
+                          background: isActive ? '#1e2d4a' : '#f5f0e8',
+                          color:      isActive ? 'white'   : '#5a4a35',
+                          display: 'flex', alignItems: 'center', gap: '0.3rem',
+                        }}
+                      >
+                        {f.key === 'created'     && <span style={{ color: isActive ? '#6ee7b7' : '#15803d' }}>✔</span>}
+                        {f.key === 'pillars'     && <span style={{ color: isActive ? '#ffd700' : '#b8860b' }}>★</span>}
+                        {f.label}
+                        {badge !== null && (
+                          <span style={{
+                            fontSize: '0.68rem', fontWeight: '700',
+                            background: isActive ? 'rgba(255,255,255,0.25)' : '#d4c5a9',
+                            color: isActive ? 'white' : '#5a4a35',
+                            padding: '0 0.4rem', borderRadius: '1rem', lineHeight: '1.4',
+                          }}>
+                            {badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* Topic grid */}
@@ -224,48 +327,70 @@ export default function Generator({ onSaved }) {
                   <p style={{ margin: 0, color: '#aaa', fontSize: '0.875rem', padding: '0.75rem 0' }}>
                     {tabTopics.length === 0
                       ? `No ${CATEGORIES.find(c => c.value === activeTab)?.label} topics yet. Add some in the Topics tab.`
-                      : 'All topics here are created. Toggle "Show Created Topics" to see them.'}
+                      : `No topics match the "${FILTERS.find(f => f.key === topicFilter)?.label}" filter.`}
                   </p>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                     {sortedTopics.map(topic => {
-                      const isSel = topic.id === selectedTopic;
-                      const isCreated = topic.article_created;
+                      const isSel     = topic.id === selectedTopic;
+                      const isCreated = !!topic.article_created;
                       return (
                         <button
                           key={topic.id}
                           type="button"
                           onClick={() => handleTopicClick(topic)}
+                          title={isCreated ? 'Article already created — click to regenerate' : ''}
                           style={{
                             padding: '0.4rem 0.85rem', borderRadius: '2rem', fontSize: '0.82rem', fontWeight: '600',
                             cursor: 'pointer', fontFamily: 'inherit',
-                            border: isSel ? '2px solid #1e2d4a' : '1px solid #d4c5a9',
-                            background: isSel ? '#1e2d4a' : isCreated ? '#f5f0e8' : '#fff',
-                            color:   isSel ? 'white' : isCreated ? '#8b7355' : '#1e2d4a',
+                            opacity: isCreated && !isSel ? 0.6 : 1,
+                            border: isSel ? '2px solid #1e2d4a' : isCreated ? '1px solid #6ee7b7' : '1px solid #d4c5a9',
+                            background: isSel ? '#1e2d4a' : isCreated ? '#f0fdf4' : '#fff',
+                            color:      isSel ? 'white'   : isCreated ? '#15803d' : '#1e2d4a',
                             display: 'flex', alignItems: 'center', gap: '0.3rem',
                           }}
                         >
                           {topic.is_pillar && <span style={{ color: isSel ? '#ffd700' : '#b8860b' }}>★</span>}
                           {topic.name}
-                          {isCreated && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>✔</span>}
+                          {isCreated && (
+                            <span style={{
+                              fontSize: '0.68rem', fontWeight: '700', background: '#dcfce7',
+                              color: '#15803d', padding: '0.05rem 0.4rem', borderRadius: '1rem',
+                              border: '1px solid #a7f3d0',
+                            }}>
+                              ✔ Created
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                   </div>
                 )}
 
-                {/* Regenerate confirm */}
+                {/* Regenerate / View Article confirm */}
                 {regenConfirm && (
                   <div style={s.warnPanel}>
-                    <p style={{ margin: '0 0 0.75rem', fontWeight: '600', color: '#7b2020' }}>
-                      ⚠ An article has already been generated for <strong>{regenConfirm.name}</strong>.
+                    <p style={{ margin: '0 0 0.5rem', fontWeight: '700', color: '#1e2d4a', fontSize: '0.95rem' }}>
+                      Article already exists for <span style={{ color: '#b8860b' }}>{regenConfirm.name}</span>
                     </p>
-                    <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#5a2020' }}>
+                    <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#5a4a35' }}>
                       Do you want to regenerate a new article for this topic?
                     </p>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button type="button" onClick={confirmRegen} style={s.btnDanger}>✓ Yes, Regenerate</button>
-                      <button type="button" onClick={() => setRegenConfirm(null)} style={s.btnGhost}>✕ Cancel</button>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button type="button" onClick={confirmRegen} style={s.btnDanger}>
+                        ↺ Regenerate
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleViewArticle(regenConfirm)}
+                        disabled={viewLoading === regenConfirm.id}
+                        style={{ ...s.btnGreen, opacity: viewLoading === regenConfirm.id ? 0.6 : 1 }}
+                      >
+                        {viewLoading === regenConfirm.id ? 'Loading…' : '↗ View Article'}
+                      </button>
+                      <button type="button" onClick={() => setRegenConfirm(null)} style={s.btnGhost}>
+                        ✕ Cancel
+                      </button>
                     </div>
                   </div>
                 )}
@@ -311,9 +436,9 @@ export default function Generator({ onSaved }) {
                             type="button" onClick={() => pickIdea(item)}
                             style={{
                               ...s.ideaItem,
-                              background:   usedIdeaId === item.id ? '#e8f4fd' : '#f5f0e8',
-                              borderColor:  usedIdeaId === item.id ? '#90caf9' : '#e8dfc8',
-                              fontWeight:   usedIdeaId === item.id ? '600' : '400',
+                              background:  usedIdeaId === item.id ? '#e8f4fd' : '#f5f0e8',
+                              borderColor: usedIdeaId === item.id ? '#90caf9' : '#e8dfc8',
+                              fontWeight:  usedIdeaId === item.id ? '600' : '400',
                             }}
                           >
                             {usedIdeaId === item.id && <span style={{ color: '#1565c0', marginRight: '0.4rem' }}>✓</span>}
@@ -341,13 +466,23 @@ export default function Generator({ onSaved }) {
 
                 {error && <div style={s.errBox}>{error}</div>}
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <button
                     type="submit" disabled={generating}
                     style={{ ...s.btnPrimary, opacity: generating ? 0.6 : 1 }}
                   >
                     {generating ? '⟳ Generating…' : '✦ Generate Article'}
                   </button>
+                  {selectedTopicObj.article_created && (
+                    <button
+                      type="button"
+                      onClick={() => handleViewArticle(selectedTopicObj)}
+                      disabled={viewLoading === selectedTopicObj.id}
+                      style={{ ...s.btnGreen, opacity: viewLoading === selectedTopicObj.id ? 0.6 : 1 }}
+                    >
+                      {viewLoading === selectedTopicObj.id ? 'Loading…' : '↗ View Existing Article'}
+                    </button>
+                  )}
                   {preview && !generating && (
                     <button type="button" onClick={reset} style={s.btnGhost}>Start over</button>
                   )}
@@ -426,11 +561,10 @@ const s = {
   field:        { marginBottom: '1.25rem' },
   label:        { display: 'block', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '0.45rem', fontSize: '0.9rem' },
   input:        { display: 'block', width: '100%', padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '1rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', color: '#000', backgroundColor: '#fff' },
-  hint:         { margin: '0.3rem 0 0', fontSize: '0.78rem', color: '#8b7355' },
   placeholder:  { padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '0.9rem', color: '#8b7355', background: '#f9f5ee', fontStyle: 'italic' },
   errBox:       { background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '6px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' },
-  warnPanel:    { background: '#fff8f8', border: '1px solid #f5c6c6', borderRadius: '8px', padding: '1rem 1.25rem', marginTop: '0.875rem' },
-  successBanner:{ background: '#f0fff4', border: '1px solid #b2dfdb', color: '#1b5e20', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.9rem' },
+  warnPanel:    { background: '#fefce8', border: '1px solid #fde68a', borderRadius: '8px', padding: '1rem 1.25rem', marginTop: '0.875rem' },
+  successBanner:{ background: '#f0fff4', border: '1px solid #b2dfdb', color: '#1b5e20', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' },
   tab:          (active) => ({
     padding: '0.3rem 0.75rem', borderRadius: '2rem', fontSize: '0.78rem', fontWeight: '600',
     cursor: 'pointer', border: 'none', fontFamily: 'inherit',
@@ -442,8 +576,9 @@ const s = {
   btnGhost:     { background: 'transparent', color: '#555', border: '1px solid #d4c5a9', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' },
   btnGold:      { backgroundColor: '#b8860b', color: 'white', border: 'none', borderRadius: '6px', padding: '0.6rem 1.25rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
   btnDanger:    { backgroundColor: '#7b2020', color: 'white', border: 'none', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
+  btnGreen:     { backgroundColor: '#15803d', color: 'white', border: 'none', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
   btnIdeas:     { backgroundColor: '#2c4270', color: 'white', border: 'none', borderRadius: '6px', padding: '0.45rem 1rem', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  linkBtn:      { background: 'none', border: 'none', color: '#1b5e20', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', fontSize: 'inherit', padding: 0, marginLeft: '0.5rem' },
+  linkBtn:      { background: 'none', border: 'none', color: '#1b5e20', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', fontSize: 'inherit', padding: 0 },
   ideasPanel:   { background: '#f5f0e8', border: '1px solid #e8dfc8', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.25rem' },
   ideasHeading: { fontSize: '0.85rem', fontWeight: '700', color: '#1e2d4a', display: 'flex', alignItems: 'center', gap: '0.5rem' },
   ideaCount:    { background: '#1e2d4a', color: 'white', fontSize: '0.7rem', fontWeight: '700', padding: '0.1rem 0.5rem', borderRadius: '1rem' },
