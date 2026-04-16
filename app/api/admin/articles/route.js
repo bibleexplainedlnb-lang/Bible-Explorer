@@ -69,7 +69,14 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { title, slug, content, meta_title, meta_description, keywords, related_slugs, topic_id, status = 'draft' } = body;
+    const {
+      title, slug, content, meta_title, meta_description,
+      keywords, related_slugs, topic_id, status = 'draft',
+      author_name, author_slug,
+      // _meta is a client-only hint from the generate route — never insert into DB
+      _meta: _ignoredMeta,
+      ...rest
+    } = body;
 
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
@@ -83,6 +90,8 @@ export async function POST(request) {
       keywords:         Array.isArray(keywords)      ? keywords      : [],
       related_slugs:    Array.isArray(related_slugs) ? related_slugs : [],
       topic_id:         topic_id || null,
+      author_name:      author_name || 'BVI Team',
+      author_slug:      author_slug || 'bvi-team',
       status,
     };
 
