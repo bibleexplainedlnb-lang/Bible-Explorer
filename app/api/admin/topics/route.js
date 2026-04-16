@@ -8,17 +8,34 @@ function isSchemaError(msg = '') {
   return msg.includes('does not exist') || msg.includes('column') || msg.includes('schema cache');
 }
 
-export async function GET() {
-  // Fetch all topics — sort by is_pillar in JS (handles missing column gracefully)
-  const { data, error } = await supabase
-    .from('topics')
-    .select('*')
-    .order('category')
-    .order('name');
+// Supabase returns at most 1000 rows per request — paginate to get everything
+async function fetchAllTopics() {
+  const batchSize = 1000;
+  let all = [];
+  let from = 0;
 
+  while (true) {
+    const { data, error } = await supabase
+      .from('topics')
+      .select('*')
+      .order('category')
+      .order('name')
+      .range(from, from + batchSize - 1);
+
+    if (error) return { data: null, error };
+    all = all.concat(data || []);
+    if (!data || data.length < batchSize) break;
+    from += batchSize;
+  }
+
+  return { data: all, error: null };
+}
+
+export async function GET() {
+  const { data, error } = await fetchAllTopics();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Sort pillar topics first within each category (is_pillar may be undefined if column absent)
+  // Sort: pillar-first within each category (is_pillar may be undefined if column absent)
   const sorted = (data || []).sort((a, b) => {
     if (a.category < b.category) return -1;
     if (a.category > b.category) return 1;
