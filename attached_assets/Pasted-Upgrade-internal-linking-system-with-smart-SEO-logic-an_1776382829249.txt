@@ -1,0 +1,203 @@
+Upgrade internal linking system with smart SEO logic and automation.
+
+---
+
+========================
+
+1. INPUT DATA
+   ========================
+
+Use:
+
+* Current article content
+* All published articles:
+  (title, slug, topic_id, category, is_pillar)
+
+---
+
+========================
+2. LINK LIMIT RULE
+==================
+
+Per article:
+
+* Total links: 5–8
+
+Breakdown:
+
+* 3–4 contextual links (inside content)
+* 1 mid-content link
+* 2–3 bottom section links
+
+---
+
+========================
+3. CONTEXTUAL LINKING (CORE)
+============================
+
+Scan content:
+
+* detect keywords + phrases
+* detect semantic matches
+
+Example:
+
+fear → anxiety, worry, doubt
+
+---
+
+Insert links:
+
+<a href="/slug">anchor text</a>
+
+---
+
+RULES:
+
+* Do NOT repeat same URL
+* Do NOT repeat same anchor
+* Use variations (synonyms)
+* Only link where natural
+
+---
+
+========================
+4. MID-CONTENT INSERT
+=====================
+
+After 2nd paragraph:
+
+<p><strong>Related:</strong> <a href="/slug">Relevant article</a></p>
+
+---
+
+========================
+5. PARAGRAPH-END LINK
+=====================
+
+After paragraph:
+
+<p><strong>Read more:</strong> <a href="/slug">Explore topic</a></p>
+
+---
+
+========================
+6. BOTTOM SECTION (SAME CATEGORY)
+=================================
+
+Add:
+
+<h3>Related Articles</h3>
+<ul>
+<li><a href="/slug">Title</a></li>
+</ul>
+
+RULES:
+
+* 2 articles from SAME category
+* 1 from SAME topic (if exists)
+
+---
+
+========================
+7. CROSS-CATEGORY LINKING
+=========================
+
+Add section:
+
+<h3>Explore More</h3>
+
+RULES:
+
+* 2 articles from DIFFERENT categories
+* Must be relevant
+
+Example:
+
+Bible verses page → link to guide or question
+
+---
+
+========================
+8. PILLAR BOOSTING (VERY IMPORTANT)
+===================================
+
+* Always prioritize linking TO pillar topics
+* Supporting articles → link to pillar
+* Pillar pages receive more links
+
+---
+
+========================
+9. DUPLICATE CONTROL
+====================
+
+* No same URL twice
+* No duplicate anchor
+* No forced linking
+
+---
+
+========================
+10. SKIP OPTIMIZED ARTICLES
+===========================
+
+If:
+
+link_count >= 7
+
+→ Skip interlinking
+
+---
+
+========================
+11. UPDATE DATABASE
+===================
+
+After linking:
+
+UPDATE articles
+SET link_count = link_count + {number_of_links_added},
+updated_at = now();
+
+---
+
+========================
+12. ADMIN PANEL FEATURES
+========================
+
+Add:
+
+1. Button per article:
+   [Interlink]
+
+2. Bulk option:
+
+   * Select multiple articles
+   * Button: [Mass Interlink]
+
+---
+
+========================
+13. VISUAL OUTPUT
+=================
+
+Ensure:
+
+* clean HTML
+* proper spacing
+* no clutter
+* readable layout
+
+---
+
+========================
+GOAL
+====
+
+* Wikipedia-style linking
+* Strong topical authority
+* Smart, non-spammy links
+* Fully automated system
+
+---

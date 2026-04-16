@@ -241,6 +241,7 @@ export default function Articles() {
   const [importing,     setImporting]     = useState(false);
   const [toast,         setToast]         = useState(null);
 
+  const [interlinking,  setInterlinking]  = useState(new Set());
   const [selectedIds,   setSelectedIds]   = useState(new Set());
   const [bulkActioning, setBulkActioning] = useState(false);
   const [bulkConfirm,   setBulkConfirm]   = useState(null);
@@ -296,10 +297,13 @@ export default function Articles() {
     setBulkActioning(true);
     setBulkConfirm(null);
     try {
-      const res  = await fetch('/api/admin/articles/bulk', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, action, ...extra }),
-      });
+      // Interlink routes through the relink endpoint with explicit IDs
+      const url    = action === 'interlink' ? '/api/admin/articles/relink' : '/api/admin/articles/bulk';
+      const body   = action === 'interlink'
+        ? JSON.stringify({ ids, smart: true })
+        : JSON.stringify({ ids, action, ...extra });
+
+      const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       const data = await res.json();
       if (!res.ok) {
         setToast({ status: 'error', message: data.error || 'Bulk action failed' });
@@ -336,6 +340,23 @@ export default function Articles() {
     setEditing(null);
     setArticles(prev => prev.map(a => a.id === updated.id ? updated : a));
     setToast({ status: 'success', message: `"${updated.title}" saved successfully.` });
+  }
+
+  async function interlinkOne(article) {
+    setInterlinking(prev => new Set([...prev, article.id])); setToast(null);
+    try {
+      const res  = await fetch(`/api/admin/articles/${article.id}/interlink`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'Interlinking failed' });
+      } else if (data.skipped) {
+        setToast({ status: 'success', message: data.message });
+      } else {
+        setArticles(prev => prev.map(a => a.id === data.id ? { ...a, ...data } : a));
+        setToast({ status: 'success', message: `"${article.title}" — ${data.message}` });
+      }
+    } catch (err) { setToast({ status: 'error', message: err.message }); }
+    finally { setInterlinking(prev => { const s = new Set(prev); s.delete(article.id); return s; }); }
   }
 
   async function relinkAll() {
@@ -508,6 +529,20 @@ export default function Articles() {
           </button>
 
           <button
+            onClick={() => setBulkConfirm({
+              title:         'Mass Interlink selected?',
+              message:       `Add smart internal links to ${nSelected} article${nSelected !== 1 ? 's' : ''}? Articles already at 7+ links will be skipped.`,
+              confirmLabel:  'Interlink',
+              confirmVariant: 'improve',
+              action:        'interlink',
+            })}
+            disabled={bulkActioning}
+            style={{ ...S.btn('improve'), padding: '0.35rem 0.85rem' }}
+          >
+            🔗 Interlink
+          </button>
+
+          <button
             onClick={() => setSelectedIds(new Set())}
             style={{ ...S.btn('ghost'), padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
           >
@@ -548,14 +583,15 @@ export default function Articles() {
               </thead>
               <tbody>
                 {displayArticles.map(a => {
-                  const busy        = actioning && actioning.startsWith(a.id);
-                  const isImproving = improving.has(a.id);
-                  const old         = isOldArticle(a.created_at);
-                  const thin        = isThinArticle(a.content);
-                  const checked     = selectedIds.has(a.id);
+                  const busy            = actioning && actioning.startsWith(a.id);
+                  const isImproving     = improving.has(a.id);
+                  const isInterlinking  = interlinking.has(a.id);
+                  const old             = isOldArticle(a.created_at);
+                  const thin            = isThinArticle(a.content);
+                  const checked         = selectedIds.has(a.id);
                   return (
                     <tr key={a.id} style={{
-                      opacity: (busy || isImproving) ? 0.6 : 1,
+                      opacity: (busy || isImproving || isInterlinking) ? 0.6 : 1,
                       transition: 'opacity 0.2s',
                       background: checked ? '#f0f9ff' : undefined,
                     }}>
@@ -580,25 +616,33 @@ export default function Articles() {
                       <td style={S.td} suppressHydrationWarning>{fmt(a.created_at)}</td>
                       <td style={{ ...S.td, whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy || isImproving}>Edit</button>
+                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy || isImproving || isInterlinking}>Edit</button>
                           <button
                             onClick={() => improveArticle(a)}
                             style={{ ...S.btn('improve'), minWidth: '4.5rem' }}
-                            disabled={busy || isImproving}
+                            disabled={busy || isImproving || isInterlinking}
                             title="Rewrite with AI — saves automatically"
                           >
                             {isImproving ? '…' : '✦ Improve'}
                           </button>
+                          <button
+                            onClick={() => interlinkOne(a)}
+                            style={{ ...S.btn('upgrade'), minWidth: '5rem' }}
+                            disabled={busy || isImproving || isInterlinking}
+                            title={`Add smart internal links${(a.link_count || 0) >= 7 ? ' (already optimised — will skip)' : ''}`}
+                          >
+                            {isInterlinking ? '⟳ Linking…' : `🔗 Interlink${(a.link_count || 0) > 0 ? ` (${a.link_count})` : ''}`}
+                          </button>
                           {a.status !== 'published' && (
-                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy || isImproving}>Publish</button>
+                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy || isImproving || isInterlinking}>Publish</button>
                           )}
                           {a.status !== 'draft' && (
-                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy || isImproving}>Draft</button>
+                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy || isImproving || isInterlinking}>Draft</button>
                           )}
                           {a.status !== 'rejected' && (
-                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy || isImproving}>Reject</button>
+                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy || isImproving || isInterlinking}>Reject</button>
                           )}
-                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy || isImproving}>Delete</button>
+                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy || isImproving || isInterlinking}>Delete</button>
                         </div>
                       </td>
                     </tr>
