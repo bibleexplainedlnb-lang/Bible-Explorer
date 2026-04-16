@@ -1,12 +1,28 @@
 -- Bible Explorer CMS — Run this in your Supabase SQL Editor
+-- Safe to run multiple times (CREATE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS)
 
 -- 1. Topics table
 CREATE TABLE IF NOT EXISTS topics (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name       TEXT NOT NULL,
-  category   TEXT NOT NULL CHECK (category IN ('topics', 'guides', 'questions')),
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            TEXT NOT NULL,
+  category        TEXT NOT NULL,
+  is_pillar       BOOLEAN NOT NULL DEFAULT false,
+  article_created BOOLEAN NOT NULL DEFAULT false,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 1b. Add columns for existing tables
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS is_pillar       BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS article_created BOOLEAN NOT NULL DEFAULT false;
+
+-- 1c. Update category CHECK constraint to include all 5 categories
+DO $$
+BEGIN
+  ALTER TABLE topics DROP CONSTRAINT IF EXISTS topics_category_check;
+  ALTER TABLE topics ADD CONSTRAINT topics_category_check
+    CHECK (category IN ('topics', 'guides', 'questions', 'bible-verses', 'bible-characters'));
+EXCEPTION WHEN others THEN NULL;
+END $$;
 
 -- 2. Articles table
 CREATE TABLE IF NOT EXISTS articles (
@@ -25,7 +41,7 @@ CREATE TABLE IF NOT EXISTS articles (
   updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2b. Migration: add any columns missing from earlier versions of this script
+-- 2b. Migration: add any columns missing from earlier versions
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_title       TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS meta_description TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS keywords         TEXT[];
@@ -33,7 +49,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS related_slugs    TEXT[];
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category         TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS topic_id         UUID;
 
--- 2c. Fix status constraint to allow 'rejected' (drop old constraint, add new one)
+-- 2c. Fix status constraint to allow 'rejected'
 DO $$
 BEGIN
   ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_status_check;
@@ -53,14 +69,16 @@ CREATE TRIGGER articles_updated_at
   BEFORE UPDATE ON articles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- 4. RLS: allow all operations from anon key (admin-only app, no public access needed)
+-- 4. RLS: allow all operations from anon key
 ALTER TABLE topics   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "allow_all_topics"   ON topics;
+DROP POLICY IF EXISTS "allow_all_articles" ON articles;
 CREATE POLICY "allow_all_topics"   ON topics   FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_articles" ON articles FOR ALL USING (true) WITH CHECK (true);
 
--- 5. Seed a few starter topics
+-- 5. Seed starter topics (3 original categories)
 INSERT INTO topics (name, category) VALUES
   ('Faith',          'questions'),
   ('Prayer',         'questions'),

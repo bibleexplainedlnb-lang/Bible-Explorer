@@ -1,84 +1,91 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { CATEGORIES } from '../../../lib/categories.js';
 
 export default function Generator({ onSaved }) {
-  const [topics,        setTopics]        = useState([]);
-  const [topicsLoading, setTopicsLoading] = useState(true);
-  const [topicsError,   setTopicsError]   = useState('');
+  const [topics,          setTopics]          = useState([]);
+  const [topicsLoading,   setTopicsLoading]   = useState(true);
+  const [topicsError,     setTopicsError]     = useState('');
+  const [activeTab,       setActiveTab]       = useState(CATEGORIES[0].value);
+  const [showCreated,     setShowCreated]     = useState(false);
+  const [regenConfirm,    setRegenConfirm]    = useState(null);
 
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [idea,          setIdea]          = useState('');
-  const [usedIdeaId,    setUsedIdeaId]    = useState(null);
+  const [selectedTopic,   setSelectedTopic]   = useState('');
+  const [idea,            setIdea]            = useState('');
+  const [usedIdeaId,      setUsedIdeaId]      = useState(null);
 
-  const [ideas,         setIdeas]         = useState([]);
-  const [ideasLoading,  setIdeasLoading]  = useState(false);
+  const [ideas,           setIdeas]           = useState([]);
+  const [ideasLoading,    setIdeasLoading]    = useState(false);
   const [generatingIdeas, setGeneratingIdeas] = useState(false);
-  const [ideasError,    setIdeasError]    = useState('');
+  const [ideasError,      setIdeasError]      = useState('');
 
-  const [generating, setGenerating] = useState(false);
-  const [saving,     setSaving]     = useState(false);
-  const [preview,    setPreview]    = useState(null);
-  const [error,      setError]      = useState('');
-  const [saved,      setSaved]      = useState(false);
+  const [generating,  setGenerating]  = useState(false);
+  const [saving,      setSaving]      = useState(false);
+  const [preview,     setPreview]     = useState(null);
+  const [error,       setError]       = useState('');
+  const [saved,       setSaved]       = useState(false);
 
   useEffect(() => {
     setTopicsLoading(true);
     fetch('/api/admin/topics')
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(data => {
-        console.log('Topics:', data);
-        setTopics(Array.isArray(data) ? data : []);
-      })
-      .catch(err => {
-        console.error('Topics fetch error:', err);
-        setTopicsError('Failed to load topics: ' + err.message);
-      })
+      .then(data => setTopics(Array.isArray(data) ? data : []))
+      .catch(err => setTopicsError('Failed to load topics: ' + err.message))
       .finally(() => setTopicsLoading(false));
   }, []);
 
   const fetchIdeas = useCallback(async (topicId) => {
     if (!topicId) { setIdeas([]); return; }
-    setIdeasLoading(true);
-    setIdeasError('');
+    setIdeasLoading(true); setIdeasError('');
     try {
       const res = await fetch(`/api/admin/ideas?topic_id=${topicId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load ideas');
       setIdeas(Array.isArray(data) ? data : []);
     } catch (err) {
-      setIdeasError(err.message);
-      setIdeas([]);
+      setIdeasError(err.message); setIdeas([]);
     } finally {
       setIdeasLoading(false);
     }
   }, []);
 
-  function handleTopicChange(e) {
-    const id = e.target.value;
-    console.log('Selected topic:', id);
+  function handleTopicClick(topic) {
+    if (topic.id === selectedTopic) return;
+    if (topic.article_created) {
+      setRegenConfirm(topic);
+      return;
+    }
+    selectTopic(topic.id);
+  }
+
+  function selectTopic(id) {
     setSelectedTopic(id);
-    setIdea('');
-    setUsedIdeaId(null);
-    setError('');
+    setIdea(''); setUsedIdeaId(null); setError('');
     setIdeas([]);
     if (id) fetchIdeas(id);
+  }
+
+  function confirmRegen() {
+    if (!regenConfirm) return;
+    selectTopic(regenConfirm.id);
+    setRegenConfirm(null);
+  }
+
+  function clearTopic() {
+    setSelectedTopic(''); setIdea(''); setUsedIdeaId(null);
+    setError(''); setIdeas([]); setPreview(null); setRegenConfirm(null);
   }
 
   async function handleGenerateIdeas() {
     const topic = topics.find(t => t.id === selectedTopic);
     if (!topic) return;
-    setGeneratingIdeas(true);
-    setIdeasError('');
+    setGeneratingIdeas(true); setIdeasError('');
     try {
       const res = await fetch('/api/admin/generate-ideas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic_id:   topic.id,
-          topic_name: topic.name,
-          category:   topic.category,
-        }),
+        body: JSON.stringify({ topic_id: topic.id, topic_name: topic.name, category: topic.category }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to generate ideas');
@@ -104,18 +111,12 @@ export default function Generator({ onSaved }) {
       const res = await fetch('/api/admin/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topicId:   selectedTopic,
-          topicName: topic?.name    || '',
-          category:  topic?.category || '',
-          idea:      idea.trim(),
-        }),
+        body: JSON.stringify({ topicId: selectedTopic, topicName: topic?.name || '', category: topic?.category || '', idea: idea.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       setPreview(data);
     } catch (err) {
-      console.error('Generate error:', err);
       setError(err.message);
     } finally {
       setGenerating(false);
@@ -142,8 +143,8 @@ export default function Generator({ onSaved }) {
         }).catch(() => {});
       }
 
-      setSaved(true);
-      setPreview(null);
+      setTopics(prev => prev.map(t => t.id === selectedTopic ? { ...t, article_created: true } : t));
+      setSaved(true); setPreview(null);
       onSaved?.();
     } catch (err) {
       setError(err.message);
@@ -155,142 +156,206 @@ export default function Generator({ onSaved }) {
   function reset() {
     setSelectedTopic(''); setIdea(''); setPreview(null);
     setError(''); setSaved(false); setGenerating(false);
-    setUsedIdeaId(null); setIdeas([]);
+    setUsedIdeaId(null); setIdeas([]); setRegenConfirm(null);
   }
 
   const selectedTopicObj = topics.find(t => t.id === selectedTopic);
-  const isSaving = saving;
+
+  const tabTopics = topics.filter(t => t.category === activeTab);
+  const visibleTopics = showCreated ? tabTopics : tabTopics.filter(t => !t.article_created);
+  const sortedTopics = [...visibleTopics].sort((a, b) => {
+    if (a.is_pillar && !b.is_pillar) return -1;
+    if (!a.is_pillar && b.is_pillar) return 1;
+    return a.name.localeCompare(b.name);
+  });
+  const createdCount = tabTopics.filter(t => t.article_created).length;
 
   return (
-    <div style={{ maxWidth: '820px' }}>
-
+    <div style={{ maxWidth: '860px' }}>
       {saved && (
         <div style={s.successBanner}>
-          Article saved!{' '}
-          <button onClick={reset} style={s.linkBtn}>Generate another</button>
+          Article saved! <button onClick={reset} style={s.linkBtn}>Generate another</button>
         </div>
       )}
 
       {!saved && (
-        <div style={s.card}>
-          <form onSubmit={handleGenerate}>
-
-            {/* ── Topic selector ── */}
-            <div style={s.field}>
-              <label style={s.label} htmlFor="topic-select">Topic</label>
-
-              {topicsLoading && <div style={s.placeholder}>Loading topics…</div>}
-              {!topicsLoading && topicsError && <div style={s.errBox}>{topicsError}</div>}
-
-              {!topicsLoading && !topicsError && (
-                <select
-                  id="topic-select"
-                  value={selectedTopic}
-                  onChange={handleTopicChange}
-                  style={{
-                    width: '100%', padding: '12px', cursor: 'pointer',
-                    backgroundColor: 'white', color: '#000',
-                    border: '1px solid #d4c5a9', borderRadius: '6px',
-                    fontSize: '1rem', fontFamily: 'inherit',
-                    appearance: 'auto', WebkitAppearance: 'auto',
-                    outline: 'none', boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">Select a topic</option>
-                  {topics.map(t => (
-                    <option key={t.id} value={t.id}>{t.name} ({t.category})</option>
-                  ))}
-                </select>
-              )}
-
-              {!topicsLoading && !topicsError && topics.length > 0 && (
-                <p style={s.hint}>{topics.length} topics available</p>
+        <>
+          {/* ── Topic selector ── */}
+          <div style={{ ...s.card, marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.875rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <span style={{ fontWeight: '700', color: '#1e2d4a', fontSize: '0.9rem' }}>
+                {selectedTopicObj
+                  ? <>Selected: <span style={{ color: '#b8860b' }}>{selectedTopicObj.name}</span>{selectedTopicObj.is_pillar && <span style={s.pillarBadge}>★ Pillar</span>}</>
+                  : 'Select a Topic'}
+              </span>
+              {selectedTopicObj && (
+                <button type="button" onClick={clearTopic} style={s.btnGhost}>Change topic</button>
               )}
             </div>
 
-            {/* ── Content Ideas panel ── */}
-            {selectedTopic && (
-              <div style={s.ideasPanel}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                  <span style={s.ideasHeading}>
-                    💡 Article Ideas
-                    {ideas.length > 0 && <span style={s.ideaCount}>{ideas.length} unused</span>}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleGenerateIdeas}
-                    disabled={generatingIdeas || ideasLoading}
-                    style={{ ...s.btnIdeas, opacity: (generatingIdeas || ideasLoading) ? 0.6 : 1 }}
-                  >
-                    {generatingIdeas ? '⟳ Generating…' : '✦ Generate Ideas'}
-                  </button>
+            {topicsLoading && <div style={s.placeholder}>Loading topics…</div>}
+            {topicsError  && <div style={s.errBox}>{topicsError}</div>}
+
+            {!topicsLoading && !topicsError && (
+              <>
+                {/* Category tabs */}
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.65rem' }}>
+                  {CATEGORIES.map(c => {
+                    const tCount = topics.filter(t => t.category === c.value).length;
+                    return (
+                      <button key={c.value} type="button" onClick={() => setActiveTab(c.value)} style={s.tab(activeTab === c.value)}>
+                        {c.label}{tCount > 0 && <span style={{ opacity: 0.65, marginLeft: '0.3rem', fontSize: '0.7rem' }}>{tCount}</span>}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {ideasLoading && <p style={s.ideasMuted}>Loading ideas…</p>}
-                {ideasError  && <p style={{ ...s.ideasMuted, color: '#7b2020' }}>{ideasError}</p>}
+                {/* Show created toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.6rem', fontSize: '0.8rem', color: '#8b7355' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={showCreated} onChange={e => setShowCreated(e.target.checked)} style={{ accentColor: '#1e2d4a' }} />
+                    Show Created Topics
+                  </label>
+                  {createdCount > 0 && <span>{createdCount} already created</span>}
+                </div>
 
-                {!ideasLoading && !ideasError && ideas.length === 0 && (
-                  <p style={s.ideasMuted}>
-                    No ideas yet for <strong>{selectedTopicObj?.name}</strong>. Click "✦ Generate Ideas" to create some.
+                {/* Topic grid */}
+                {sortedTopics.length === 0 ? (
+                  <p style={{ margin: 0, color: '#aaa', fontSize: '0.875rem', padding: '0.75rem 0' }}>
+                    {tabTopics.length === 0
+                      ? `No ${CATEGORIES.find(c => c.value === activeTab)?.label} topics yet. Add some in the Topics tab.`
+                      : 'All topics here are created. Toggle "Show Created Topics" to see them.'}
                   </p>
-                )}
-
-                {!ideasLoading && ideas.length > 0 && (
-                  <ul style={s.ideaList}>
-                    {ideas.map(item => (
-                      <li key={item.id}>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {sortedTopics.map(topic => {
+                      const isSel = topic.id === selectedTopic;
+                      const isCreated = topic.article_created;
+                      return (
                         <button
+                          key={topic.id}
                           type="button"
-                          onClick={() => pickIdea(item)}
+                          onClick={() => handleTopicClick(topic)}
                           style={{
-                            ...s.ideaItem,
-                            background: usedIdeaId === item.id ? '#e8f4fd' : '#f5f0e8',
-                            borderColor: usedIdeaId === item.id ? '#90caf9' : '#e8dfc8',
-                            fontWeight:  usedIdeaId === item.id ? '600' : '400',
+                            padding: '0.4rem 0.85rem', borderRadius: '2rem', fontSize: '0.82rem', fontWeight: '600',
+                            cursor: 'pointer', fontFamily: 'inherit',
+                            border: isSel ? '2px solid #1e2d4a' : '1px solid #d4c5a9',
+                            background: isSel ? '#1e2d4a' : isCreated ? '#f5f0e8' : '#fff',
+                            color:   isSel ? 'white' : isCreated ? '#8b7355' : '#1e2d4a',
+                            display: 'flex', alignItems: 'center', gap: '0.3rem',
                           }}
                         >
-                          {usedIdeaId === item.id && <span style={{ color: '#1565c0', marginRight: '0.4rem' }}>✓</span>}
-                          {item.title}
+                          {topic.is_pillar && <span style={{ color: isSel ? '#ffd700' : '#b8860b' }}>★</span>}
+                          {topic.name}
+                          {isCreated && <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>✔</span>}
                         </button>
-                      </li>
-                    ))}
-                  </ul>
+                      );
+                    })}
+                  </div>
                 )}
-              </div>
+
+                {/* Regenerate confirm */}
+                {regenConfirm && (
+                  <div style={s.warnPanel}>
+                    <p style={{ margin: '0 0 0.75rem', fontWeight: '600', color: '#7b2020' }}>
+                      ⚠ An article has already been generated for <strong>{regenConfirm.name}</strong>.
+                    </p>
+                    <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#5a2020' }}>
+                      Do you want to regenerate a new article for this topic?
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button type="button" onClick={confirmRegen} style={s.btnDanger}>✓ Yes, Regenerate</button>
+                      <button type="button" onClick={() => setRegenConfirm(null)} style={s.btnGhost}>✕ Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
+          </div>
 
-            {/* ── Content idea input ── */}
-            <div style={s.field}>
-              <label style={s.label} htmlFor="idea-input">
-                Content Idea{' '}
-                <span style={{ fontWeight: 400, color: '#8b7355' }}>(optional — click idea above or type your own)</span>
-              </label>
-              <input
-                id="idea-input"
-                type="text"
-                value={idea}
-                onChange={e => { setIdea(e.target.value); setUsedIdeaId(null); }}
-                placeholder="e.g. how to forgive someone, overcoming doubt"
-                style={s.input}
-              />
+          {/* ── Form (only when topic selected) ── */}
+          {selectedTopicObj && (
+            <div style={s.card}>
+              <form onSubmit={handleGenerate}>
+
+                {/* ── Content Ideas panel ── */}
+                <div style={s.ideasPanel}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                    <span style={s.ideasHeading}>
+                      💡 Article Ideas
+                      {ideas.length > 0 && <span style={s.ideaCount}>{ideas.length} unused</span>}
+                    </span>
+                    <button
+                      type="button" onClick={handleGenerateIdeas}
+                      disabled={generatingIdeas || ideasLoading}
+                      style={{ ...s.btnIdeas, opacity: (generatingIdeas || ideasLoading) ? 0.6 : 1 }}
+                    >
+                      {generatingIdeas ? '⟳ Generating…' : '✦ Generate Ideas'}
+                    </button>
+                  </div>
+
+                  {ideasLoading && <p style={s.ideasMuted}>Loading ideas…</p>}
+                  {ideasError   && <p style={{ ...s.ideasMuted, color: '#7b2020' }}>{ideasError}</p>}
+
+                  {!ideasLoading && !ideasError && ideas.length === 0 && (
+                    <p style={s.ideasMuted}>
+                      No ideas yet for <strong>{selectedTopicObj.name}</strong>. Click "✦ Generate Ideas" to create some.
+                    </p>
+                  )}
+
+                  {!ideasLoading && ideas.length > 0 && (
+                    <ul style={s.ideaList}>
+                      {ideas.map(item => (
+                        <li key={item.id}>
+                          <button
+                            type="button" onClick={() => pickIdea(item)}
+                            style={{
+                              ...s.ideaItem,
+                              background:   usedIdeaId === item.id ? '#e8f4fd' : '#f5f0e8',
+                              borderColor:  usedIdeaId === item.id ? '#90caf9' : '#e8dfc8',
+                              fontWeight:   usedIdeaId === item.id ? '600' : '400',
+                            }}
+                          >
+                            {usedIdeaId === item.id && <span style={{ color: '#1565c0', marginRight: '0.4rem' }}>✓</span>}
+                            {item.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* ── Content idea input ── */}
+                <div style={s.field}>
+                  <label style={s.label} htmlFor="idea-input">
+                    Content Idea{' '}
+                    <span style={{ fontWeight: 400, color: '#8b7355' }}>(optional — click idea above or type your own)</span>
+                  </label>
+                  <input
+                    id="idea-input" type="text" value={idea}
+                    onChange={e => { setIdea(e.target.value); setUsedIdeaId(null); }}
+                    placeholder="e.g. how to forgive someone, overcoming doubt"
+                    style={s.input}
+                  />
+                </div>
+
+                {error && <div style={s.errBox}>{error}</div>}
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    type="submit" disabled={generating}
+                    style={{ ...s.btnPrimary, opacity: generating ? 0.6 : 1 }}
+                  >
+                    {generating ? '⟳ Generating…' : '✦ Generate Article'}
+                  </button>
+                  {preview && !generating && (
+                    <button type="button" onClick={reset} style={s.btnGhost}>Start over</button>
+                  )}
+                </div>
+              </form>
             </div>
-
-            {error && <div style={s.errBox}>{error}</div>}
-
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button
-                type="submit"
-                disabled={generating || topicsLoading}
-                style={{ ...s.btnPrimary, opacity: (generating || topicsLoading) ? 0.6 : 1 }}
-              >
-                {generating ? '⟳ Generating…' : '✦ Generate Article'}
-              </button>
-              {preview && !generating && (
-                <button type="button" onClick={reset} style={s.btnGhost}>Start over</button>
-              )}
-            </div>
-          </form>
-        </div>
+          )}
+        </>
       )}
 
       {/* ── Generating indicator ── */}
@@ -310,12 +375,8 @@ export default function Generator({ onSaved }) {
               <h2 style={s.previewTitle}>{preview.title}</h2>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button onClick={() => handleSave(false)} disabled={isSaving} style={s.btnGhost}>
-                {isSaving ? 'Saving…' : '📄 Save Draft'}
-              </button>
-              <button onClick={() => handleSave(true)} disabled={isSaving} style={s.btnGold}>
-                {isSaving ? 'Saving…' : '✓ Publish'}
-              </button>
+              <button onClick={() => handleSave(false)} disabled={saving} style={s.btnGhost}>{saving ? 'Saving…' : '📄 Save Draft'}</button>
+              <button onClick={() => handleSave(true)}  disabled={saving} style={s.btnGold}>{saving  ? 'Saving…' : '✓ Publish'}</button>
               <button onClick={reset} style={s.btnGhost}>Discard</button>
             </div>
           </div>
@@ -350,8 +411,8 @@ export default function Generator({ onSaved }) {
 
           <hr style={{ ...s.hr, margin: '1.5rem 0' }} />
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => handleSave(false)} disabled={isSaving} style={s.btnGhost}>📄 Save Draft</button>
-            <button onClick={() => handleSave(true)} disabled={isSaving} style={s.btnGold}>✓ Publish Now</button>
+            <button onClick={() => handleSave(false)} disabled={saving} style={s.btnGhost}>📄 Save Draft</button>
+            <button onClick={() => handleSave(true)}  disabled={saving} style={s.btnGold}>✓ Publish Now</button>
             <button onClick={reset} style={s.btnGhost}>Discard</button>
           </div>
         </div>
@@ -361,17 +422,26 @@ export default function Generator({ onSaved }) {
 }
 
 const s = {
-  card:         { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '2rem' },
+  card:         { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '1.5rem' },
   field:        { marginBottom: '1.25rem' },
   label:        { display: 'block', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '0.45rem', fontSize: '0.9rem' },
   input:        { display: 'block', width: '100%', padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '1rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', color: '#000', backgroundColor: '#fff' },
   hint:         { margin: '0.3rem 0 0', fontSize: '0.78rem', color: '#8b7355' },
   placeholder:  { padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '0.9rem', color: '#8b7355', background: '#f9f5ee', fontStyle: 'italic' },
   errBox:       { background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '6px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' },
+  warnPanel:    { background: '#fff8f8', border: '1px solid #f5c6c6', borderRadius: '8px', padding: '1rem 1.25rem', marginTop: '0.875rem' },
   successBanner:{ background: '#f0fff4', border: '1px solid #b2dfdb', color: '#1b5e20', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.9rem' },
+  tab:          (active) => ({
+    padding: '0.3rem 0.75rem', borderRadius: '2rem', fontSize: '0.78rem', fontWeight: '600',
+    cursor: 'pointer', border: 'none', fontFamily: 'inherit',
+    background: active ? '#1e2d4a' : '#f5f0e8',
+    color:      active ? 'white'   : '#5a4a35',
+  }),
+  pillarBadge:  { display: 'inline-flex', alignItems: 'center', gap: '0.2rem', background: '#fff3cd', color: '#856404', fontSize: '0.7rem', fontWeight: '700', padding: '0.1rem 0.5rem', borderRadius: '1rem', border: '1px solid #ffc107', marginLeft: '0.5rem' },
   btnPrimary:   { backgroundColor: '#1e2d4a', color: 'white', border: 'none', borderRadius: '6px', padding: '0.7rem 1.5rem', fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
   btnGhost:     { background: 'transparent', color: '#555', border: '1px solid #d4c5a9', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' },
   btnGold:      { backgroundColor: '#b8860b', color: 'white', border: 'none', borderRadius: '6px', padding: '0.6rem 1.25rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
+  btnDanger:    { backgroundColor: '#7b2020', color: 'white', border: 'none', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
   btnIdeas:     { backgroundColor: '#2c4270', color: 'white', border: 'none', borderRadius: '6px', padding: '0.45rem 1rem', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
   linkBtn:      { background: 'none', border: 'none', color: '#1b5e20', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', fontSize: 'inherit', padding: 0, marginLeft: '0.5rem' },
   ideasPanel:   { background: '#f5f0e8', border: '1px solid #e8dfc8', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.25rem' },
@@ -379,7 +449,7 @@ const s = {
   ideaCount:    { background: '#1e2d4a', color: 'white', fontSize: '0.7rem', fontWeight: '700', padding: '0.1rem 0.5rem', borderRadius: '1rem' },
   ideasMuted:   { margin: '0.4rem 0 0', fontSize: '0.85rem', color: '#8b7355' },
   ideaList:     { listStyle: 'none', margin: '0.5rem 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' },
-  ideaItem:     { width: '100%', textAlign: 'left', padding: '0.55rem 0.9rem', border: '1px solid #e8dfc8', borderRadius: '6px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1e2d4a', transition: 'all 0.1s' },
+  ideaItem:     { width: '100%', textAlign: 'left', padding: '0.55rem 0.9rem', border: '1px solid #e8dfc8', borderRadius: '6px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1e2d4a' },
   badgeLabel:   { fontSize: '0.7rem', fontWeight: 'bold', color: '#b8860b', textTransform: 'uppercase', letterSpacing: '0.07em' },
   previewTitle: { fontFamily: 'Georgia,serif', fontSize: '1.4rem', color: '#1e2d4a', margin: '0.3rem 0 0' },
   metaGrid:     { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem', marginBottom: '1rem' },

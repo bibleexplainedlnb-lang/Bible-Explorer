@@ -140,16 +140,21 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - Slug redirect: when admin renames a slug, old slug is recorded in `slug_redirects` Supabase table; `/bible-verses/[old-slug]/` permanently redirects to new URL.
   - DB table required: `CREATE TABLE IF NOT EXISTS slug_redirects (old_slug TEXT PRIMARY KEY, new_slug TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());`
 - `lib/supabase.js` — shared Supabase client used by every page
-- `lib/categories.js` — `ACTIVE_CATEGORIES` set; add/remove categories here to activate/deactivate listing pages
+- `lib/categories.js` — `CATEGORIES` array (5 locked categories), `CATEGORY_VALUES`, `ACTIVE_CATEGORIES` (all 5 active), `categoryLabel()` helper
 - `lib/db.js` — legacy SQLite file (kept for reference only, not used by any page)
 - `lib/prisma.js` — legacy Prisma file (kept for reference only, not used by any page)
 - `prisma` + `@prisma/client` pinned at 5.22.0 — do NOT upgrade
 
 **Supabase DB schema:**
 - `articles` table: `id`, `slug`, `title`, `content` (HTML), `meta_title`, `meta_description`, `keywords`, `related_slugs`, `topic_id` (FK → topics.id), `status` (published/draft/rejected), `created_at`. **NO `category` column** — category lives only in `topics`.
-- `topics` table: `id`, `name`, `category` (questions/guides/topics), `created_at`.
-- Category is always read via join: `.select('*, topics(name, category)')` → `article.topics?.category`.
+- `topics` table: `id`, `name`, `category`, `is_pillar` (BOOLEAN), `article_created` (BOOLEAN), `created_at`.
+  - **5 locked categories:** `questions`, `guides`, `topics`, `bible-verses`, `bible-characters`. No others allowed.
+  - `is_pillar` — marks a topic as a pillar topic (broad, authoritative).
+  - `article_created` — set to `true` automatically when an article is saved for this topic.
+- `content_ideas` table: `id`, `title`, `topic_id`, `category`, `used` (BOOLEAN), `created_at`.
+- Category is always read via join: `.select('*, topics(name, category, is_pillar)')` → `article.topics?.category`.
 - **NEVER** query or insert `articles.category` — column does not exist.
+- Run `supabase-setup.sql` for full schema (includes all ALTER TABLE migrations). Run `supabase-ideas-setup.sql` for `content_ideas` table.
 
 **Page routing:**
 - `/` — homepage; fetches 5 recent guides + 5 recent questions from Supabase (topic-based)
@@ -178,10 +183,11 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - `next.config.js` — serverExternalPackages for better-sqlite3; trailingSlash: true
 
 **Admin panel** at `/admin/`:
-- Lists all Supabase articles (up to 2000), filterable by category/status
-- Generate single article or bulk generate from ideas
-- AI upgrade preview (does not auto-save)
-- Relink all articles via `POST /api/admin/articles/relink`
+- Dashboard: stats + articles table with Publish/Unpublish/Delete; "★ Pillar" button on each article → AI suggests best pillar topic → one-click assign
+- Generate: tab-based topic selector (5 category tabs), pillar-first sorting, created/not-created status, duplicate-prevention warning, content ideas panel
+- Bulk Generate: 5-category dropdown, streaming progress log
+- Topics: add topics with is_pillar checkbox, toggle pillar on any topic, show ✔ Created / ⬜ status, show/hide created topics toggle
+- API routes: `/api/admin/topics` (GET/POST), `/api/admin/topics/[id]` (PATCH/DELETE), `/api/admin/articles` (GET/POST), `/api/admin/articles/[id]` (PATCH/DELETE), `/api/admin/generate`, `/api/admin/bulk-generate`, `/api/admin/generate-ideas`, `/api/admin/ideas`, `/api/admin/ideas/[id]`, `/api/admin/stats`, `/api/admin/suggest-pillar` (AI pillar suggestion)
 
 ### `scripts` (`@workspace/scripts`)
 

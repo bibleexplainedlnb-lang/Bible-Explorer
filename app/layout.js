@@ -25,15 +25,20 @@ export const metadata = {
   },
 };
 
+const NAV_LINKS = [
+  { href: "/topics/",          label: "Topics" },
+  { href: "/questions/",       label: "Questions" },
+  { href: "/guides/",          label: "Guides" },
+  { href: "/bible-verses/",    label: "Bible Verses" },
+  { href: "/bible-characters/",label: "Bible Characters" },
+  { href: "/bible/john/1/",    label: "Read Bible" },
+];
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Search Console verification */}
         <meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
-
-        {/* Google Tag Manager */}
-        {/* Google Analytics (G-5NPTSB7TLD) will be configured via Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -48,7 +53,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         className="min-h-screen flex flex-col"
         style={{ backgroundColor: "#faf7f2", color: "#1a1208" }}
       >
-        {/* Google Tag Manager (noscript) — immediately after opening body */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-NKWTM2RV"
@@ -62,52 +66,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <Link
               href="/"
-              style={{
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
+              style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
             >
               <span style={{ fontSize: "1.4rem" }}>✝</span>
-              <span
-                style={{
-                  color: "#d4a017",
-                  fontFamily: "Georgia, serif",
-                  fontSize: "1.4rem",
-                  fontWeight: "bold",
-                  letterSpacing: "0.02em",
-                }}
-              >
+              <span style={{ color: "#d4a017", fontFamily: "Georgia, serif", fontSize: "1.4rem", fontWeight: "bold", letterSpacing: "0.02em" }}>
                 Bible Verse Insights
               </span>
             </Link>
-            <nav
-              style={{
-                display: "flex",
-                gap: "0.25rem",
-                flexWrap: "wrap",
-                justifyContent: "center",
-              }}
-            >
-              {[
-                { href: "/topics/", label: "Topics" },
-                { href: "/questions/", label: "Questions" },
-                { href: "/guides/", label: "Guides" },
-                { href: "/bible/john/1/", label: "Read Bible" },
-              ].map(({ href, label }) => (
+            <nav style={{ display: "flex", gap: "0.15rem", flexWrap: "wrap", justifyContent: "center" }}>
+              {NAV_LINKS.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
-                  style={{
-                    color: "#c8b99a",
-                    padding: "0.35rem 0.85rem",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.875rem",
-                    fontWeight: "500",
-                    textDecoration: "none",
-                    transition: "background-color 0.15s",
-                  }}
+                  style={{ color: "#c8b99a", padding: "0.3rem 0.7rem", borderRadius: "0.375rem", fontSize: "0.82rem", fontWeight: "500", textDecoration: "none" }}
                 >
                   {label}
                 </Link>
@@ -118,49 +89,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <main style={{ flex: 1 }}>{children}</main>
 
-        <footer
-          style={{
-            backgroundColor: "#1e2d4a",
-            color: "#8b9bb4",
-            padding: "2.5rem 0",
-            marginTop: "4rem",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: "72rem",
-              margin: "0 auto",
-              padding: "0 1rem",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                color: "#d4a017",
-                marginBottom: "1rem",
-                fontFamily: "Georgia, serif",
-                fontSize: "1.1rem",
-              }}
-            >
+        <footer style={{ backgroundColor: "#1e2d4a", color: "#8b9bb4", padding: "2.5rem 0", marginTop: "4rem" }}>
+          <div style={{ maxWidth: "72rem", margin: "0 auto", padding: "0 1rem", textAlign: "center" }}>
+            <p style={{ color: "#d4a017", marginBottom: "1rem", fontFamily: "Georgia, serif", fontSize: "1.1rem" }}>
               ✝ Bible Verse Insights
             </p>
-            <nav style={{ display: "flex", gap: "0.25rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.25rem" }}>
-              {[
-                { href: "/topics/", label: "Topics" },
-                { href: "/questions/", label: "Questions" },
-                { href: "/guides/", label: "Guides" },
-                { href: "/bible/john/1/", label: "Read Bible" },
-              ].map(({ href, label }) => (
+            <nav style={{ display: "flex", gap: "0.15rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+              {NAV_LINKS.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
-                  style={{
-                    color: "#a0b0c8",
-                    padding: "0.3rem 0.75rem",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.875rem",
-                    textDecoration: "none",
-                  }}
+                  style={{ color: "#a0b0c8", padding: "0.3rem 0.75rem", borderRadius: "0.375rem", fontSize: "0.85rem", textDecoration: "none" }}
                 >
                   {label}
                 </Link>
@@ -168,12 +107,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </nav>
             <p style={{ fontSize: "0.8rem", color: "#6b7a90" }}>
               KJV Scripture text via{" "}
-              <a
-                href="https://bible-api.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#a0b0c8" }}
-              >
+              <a href="https://bible-api.com" target="_blank" rel="noopener noreferrer" style={{ color: "#a0b0c8" }}>
                 bible-api.com
               </a>
             </p>

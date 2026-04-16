@@ -2,12 +2,14 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../../lib/supabase.js';
+import { CATEGORY_VALUES } from '../../../../lib/categories.js';
 
 export async function GET() {
   const { data, error } = await supabase
     .from('topics')
     .select('*')
     .order('category')
+    .order('is_pillar', { ascending: false })
     .order('name');
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -16,15 +18,15 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { name, category } = await request.json();
+    const { name, category, is_pillar = false } = await request.json();
     if (!name?.trim()) return NextResponse.json({ error: 'name is required' }, { status: 400 });
-    if (!['topics', 'guides', 'questions'].includes(category)) {
-      return NextResponse.json({ error: 'category must be topics, guides, or questions' }, { status: 400 });
+    if (!CATEGORY_VALUES.includes(category)) {
+      return NextResponse.json({ error: `category must be one of: ${CATEGORY_VALUES.join(', ')}` }, { status: 400 });
     }
 
     const { data, error } = await supabase
       .from('topics')
-      .insert({ name: name.trim(), category })
+      .insert({ name: name.trim(), category, is_pillar: !!is_pillar })
       .select()
       .single();
 

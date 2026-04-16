@@ -23,13 +23,12 @@ export async function GET(request) {
 
   let query = supabase
     .from('articles')
-    .select('*, topics(name, category)')
+    .select('*, topics(name, category, is_pillar)')
     .order('created_at', { ascending: false })
     .limit(limit);
 
   if (status) query = query.eq('status', status);
 
-  // Filter by topic category via topics join
   if (category) {
     const { data: topicRows } = await supabase
       .from('topics')
@@ -73,18 +72,26 @@ export async function POST(request) {
     let { data, error } = await supabase
       .from('articles')
       .insert(insertData)
-      .select('*, topics(name, category)')
+      .select('*, topics(name, category, is_pillar)')
       .single();
 
     if (error && isSchemaError(error.message)) {
       console.warn('[articles POST] schema fallback — retrying without optional SEO columns');
       const safe = stripOptional(insertData);
-      ({ data, error } = await supabase.from('articles').insert(safe).select('*, topics(name, category)').single());
+      ({ data, error } = await supabase.from('articles').insert(safe).select('*, topics(name, category, is_pillar)').single());
     }
 
     if (error) {
       if (error.code === '23505') return NextResponse.json({ error: `Slug "${slug}" already exists` }, { status: 409 });
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Mark topic as article_created = true
+    if (topic_id) {
+      await supabase
+        .from('topics')
+        .update({ article_created: true })
+        .eq('id', topic_id);
     }
 
     return NextResponse.json(data, { status: 201 });
