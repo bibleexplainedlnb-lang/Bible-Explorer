@@ -76,9 +76,10 @@ export async function POST(request) {
           return;
         }
 
-        const [{ data: topicsData, error: topicsError }, { data: existingArticles }] = await Promise.all([
+        const [{ data: topicsData, error: topicsError }, { data: publishedArticles }] = await Promise.all([
           supabase.from('topics').select('id, name, category').eq('category', category || 'questions'),
-          supabase.from('articles').select('slug, title, topic_id, status').limit(500),
+          // Only published articles — drafts should NOT block new generation
+          supabase.from('articles').select('slug, title, topic_id').eq('status', 'published').limit(2000),
         ]);
 
         if (topicsError || !topicsData?.length) {
@@ -88,8 +89,7 @@ export async function POST(request) {
         }
 
         const usedTopicIds = new Set(
-          (existingArticles || [])
-            .filter(a => a.status === 'published' || a.status === 'rejected')
+          (publishedArticles || [])
             .map(a => a.topic_id)
             .filter(Boolean)
         );
@@ -97,13 +97,13 @@ export async function POST(request) {
         const availableTopics = topicsData.filter(t => !usedTopicIds.has(t.id));
 
         if (!availableTopics.length) {
-          send({ type: 'error', message: `All topics in "${category}" already have published or rejected articles. Add more topics first.` });
+          send({ type: 'error', message: `All topics in "${category}" already have published articles. Add more topics first.` });
           controller.close();
           return;
         }
 
-        const existingSlugs  = new Set((existingArticles || []).map(a => a.slug));
-        const existingTitles = (existingArticles || []).map(a => `  - ${a.title}`).join('\n');
+        const existingSlugs  = new Set((publishedArticles || []).map(a => a.slug));
+        const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
         const shuffled = [...availableTopics].sort(() => Math.random() - 0.5);
         const pickedTopics = Array.from({ length: safeCount }, (_, i) => shuffled[i % shuffled.length]);
@@ -118,19 +118,20 @@ export async function POST(request) {
           try {
             const article = await generateArticle(topic, category, existingSlugs, existingTitles);
 
-            const slugExists = existingSlugs.has(article.slug);
-            if (slugExists) {
-              article.slug = `${article.slug}-${Date.now()}`;
+            // Deduplicate slug (against published + already-generated-this-run)
+            if (existingSlugs.has(article.slug)) {
+              let n = 2;
+              while (existingSlugs.has(`${article.slug}-${n}`)) n++;
+              article.slug = `${article.slug}-${n}`;
             }
 
-            const { data: titleCheck } = await supabase
-              .from('articles')
-              .select('id')
-              .ilike('title', `%${article.title}%`)
-              .limit(1);
-
-            if (titleCheck?.length > 0) {
-              send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: 'Similar title already exists' });
+            // Check for exact duplicate title among published articles only (in-memory)
+            const titleLower = (article.title || '').toLowerCase().trim();
+            const titleConflict = (publishedArticles || []).some(
+              a => (a.title || '').toLowerCase().trim() === titleLower
+            );
+            if (titleConflict) {
+              send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: 'Published article with identical title already exists' });
               skipped++;
               continue;
             }

@@ -8,7 +8,9 @@ import { enrichContent } from '../../../../lib/seoEnrich.js';
 const AUTHOR_NAME = 'BVI Team';
 const AUTHOR_SLUG = 'bvi-team';
 
-// Paginate through all article slugs so duplicate-prevention is complete
+// Paginate through PUBLISHED article slugs only.
+// Drafts are excluded because old/stale drafts should not block new article generation.
+// A unique-constraint error at insert time (code 23505) catches any remaining conflicts.
 async function fetchAllSlugs() {
   const batchSize = 1000;
   const slugs = new Set();
@@ -16,7 +18,8 @@ async function fetchAllSlugs() {
   while (true) {
     const { data, error } = await supabase
       .from('articles')
-      .select('slug, title')
+      .select('slug')
+      .eq('status', 'published')
       .range(from, from + batchSize - 1);
     if (error || !data?.length) break;
     data.forEach(a => slugs.add(a.slug));
