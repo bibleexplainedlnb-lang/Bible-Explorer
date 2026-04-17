@@ -1,0 +1,203 @@
+Create a full SEO Progress Dashboard and Control Center in admin panel.
+
+---
+
+========================
+
+1. OVERALL PROGRESS
+   ========================
+
+Display:
+
+* Total Topics
+* Articles Created (article_created = true)
+* Remaining Topics
+* Completion Percentage
+
+---
+
+Query:
+
+SELECT
+COUNT(*) AS total,
+COUNT(*) FILTER (WHERE article_created = true) AS completed
+FROM topics;
+
+---
+
+========================
+2. CATEGORY-WISE PROGRESS
+=========================
+
+Display per category:
+
+* Total topics
+* Completed
+* Remaining
+
+---
+
+Query:
+
+SELECT
+category,
+COUNT(*) AS total,
+COUNT(*) FILTER (WHERE article_created = true) AS completed
+FROM topics
+GROUP BY category;
+
+---
+
+========================
+3. PILLAR STATUS
+================
+
+Display:
+
+* Total pillar topics
+* Completed pillars
+* Pending pillars
+
+---
+
+Query:
+
+SELECT
+COUNT(*) FILTER (WHERE is_pillar = true) AS total_pillars,
+COUNT(*) FILTER (WHERE is_pillar = true AND article_created = true) AS completed_pillars
+FROM topics;
+
+---
+
+========================
+4. MISSING ARTICLES (ACTION BLOCK)
+==================================
+
+Show list:
+
+* topics where article_created = false
+
+Limit:
+
+Top 20
+
+---
+
+Query:
+
+SELECT name, category
+FROM topics
+WHERE article_created = false
+LIMIT 20;
+
+---
+
+Add button:
+
+[Generate Article]
+
+---
+
+========================
+5. RECENTLY CREATED ARTICLES
+============================
+
+Show last 10:
+
+* title
+* created date
+
+---
+
+========================
+6. INTERLINKING STATUS
+======================
+
+Show:
+
+* articles with low link_count
+
+Label:
+
+"Needs Optimization"
+
+---
+
+Query:
+
+SELECT title, link_count
+FROM articles
+ORDER BY link_count ASC
+LIMIT 10;
+
+---
+
+Add button:
+
+[Interlink]
+
+---
+
+========================
+7. QUICK ACTION BUTTONS
+=======================
+
+Add buttons:
+
+[Generate Missing Articles]
+[Mass Interlink Weak Articles]
+[View Pillar Topics]
+
+---
+
+========================
+8. PILLAR VIEW PANEL
+====================
+
+Display:
+
+* All pillar topics
+* Show status:
+
+✔ Created
+⬜ Not Created
+
+Add:
+
+[View Article]
+[Generate Article]
+
+---
+
+========================
+9. UI DESIGN
+============
+
+* Use card layout
+* Clean sections
+* Highlight key numbers
+* Minimal clutter
+* Fast loading
+
+---
+
+========================
+10. PERFORMANCE RULE
+====================
+
+* Load data once
+* Avoid repeated DB calls
+* Use caching if possible
+
+---
+
+========================
+GOAL
+====
+
+* Full control over content
+* Clear visibility
+* Faster decision making
+* No manual tracking needed
+
+---

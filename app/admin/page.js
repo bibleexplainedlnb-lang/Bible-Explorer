@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Dashboard     from './_components/Dashboard.js';
+import SeoDashboard  from './_components/SeoDashboard.js';
 import Generator     from './_components/Generator.js';
 import BulkGenerator from './_components/BulkGenerator.js';
 import Topics        from './_components/Topics.js';
@@ -10,6 +11,7 @@ import Articles      from './_components/Articles.js';
 
 const TABS = [
   { id: 'dashboard', label: '📊 Dashboard' },
+  { id: 'seo',       label: '📈 SEO' },
   { id: 'articles',  label: '📄 Articles' },
   { id: 'generate',  label: '✦ Generate' },
   { id: 'bulk',      label: '⚡ Bulk Generate' },
@@ -35,7 +37,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab bar */}
-        <div style={{ maxWidth:'72rem', margin:'0 auto', display:'flex', gap:'0', marginTop:'1.25rem' }}>
+        <div style={{ maxWidth:'72rem', margin:'0 auto', display:'flex', gap:'0', marginTop:'1.25rem', flexWrap:'wrap' }}>
           {TABS.map(tab => (
             <button
               key={tab.id}
@@ -62,6 +64,7 @@ export default function AdminPage() {
       {/* Content */}
       <div style={{ maxWidth:'72rem', margin:'0 auto', padding:'2rem 1.5rem' }}>
         {activeTab === 'dashboard' && <Dashboard key={refreshKey} />}
+        {activeTab === 'seo'       && <SeoDashboard key={refreshKey} onNavigate={setActiveTab} />}
         {activeTab === 'articles'  && <Articles key={refreshKey} />}
         {activeTab === 'generate'  && <Generator  onSaved={handleSaved} />}
         {activeTab === 'bulk'      && <BulkGenerator onSaved={handleSaved} />}
