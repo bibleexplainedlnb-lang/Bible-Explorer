@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../../../lib/supabase.js';
+import { supabaseAdmin as supabase } from '../../../../../lib/supabaseAdmin.js';
 
 export async function POST(request) {
   try {

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../../../lib/supabase.js';
+import { supabaseAdmin as supabase } from '../../../../../lib/supabaseAdmin.js';
 
 const OPTIONAL_COLS = ['meta_title', 'meta_description', 'keywords', 'related_slugs'];
 

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { supabase } from '../../../../lib/supabase.js';
+import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
 import { markdownToHtml } from '../../../../lib/markdownToHtml.js';
 import { topicContent, questionContent } from '../../../../lib/content.js';
 
