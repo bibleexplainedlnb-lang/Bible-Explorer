@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { isCategoryActive } from '../../lib/categories.js';
+import { topicSlug } from '../../lib/topicSlug.js';
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,36 +17,30 @@ function getSupabase() {
 
 export const metadata = {
   title: 'Bible Verses | Bible Verse Insights',
-  description: 'Explore key Bible verses with in-depth explanations, context, and practical application for daily Christian living.',
+  description: 'Browse Bible verse collections organised by topic.',
 };
 
 export default async function BibleVersesPage() {
   if (!isCategoryActive('bible-verses')) notFound();
 
-  let articles = [];
   const supabase = getSupabase();
+  let parentTopics = [];
 
   if (supabase) {
-    const { data: topicRows } = await supabase
-      .from('topics')
-      .select('id')
-      .eq('category', 'bible-verses');
-
-    const topicIds = (topicRows || []).map(t => t.id);
-
-    if (topicIds.length > 0) {
+    const batchSize = 1000;
+    let from = 0;
+    while (true) {
       const { data, error } = await supabase
-        .from('articles')
-        .select('id, slug, title, meta_description, created_at')
-        .in('topic_id', topicIds)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('[BibleVersesPage] Supabase error:', error.message);
-      } else {
-        articles = data || [];
-      }
+        .from('topics')
+        .select('id, name')
+        .eq('category', 'bible-verses')
+        .is('parent_id', null)
+        .order('name')
+        .range(from, from + batchSize - 1);
+      if (error || !data?.length) break;
+      parentTopics = parentTopics.concat(data);
+      if (data.length < batchSize) break;
+      from += batchSize;
     }
   }
 
@@ -60,47 +55,31 @@ export default async function BibleVersesPage() {
           Bible Verses
         </h1>
         <p style={{ color: '#6b5c45', fontSize: '1rem', lineHeight: 1.7 }}>
-          Explore key Scripture passages with verse-by-verse explanation, historical context, and practical application for everyday faith.
+          Browse Bible verse collections organised by topic.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-        {articles.map((article) => (
-          <Link key={article.slug} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
-            <div style={{
-              backgroundColor: 'white',
-              border: '1px solid #e8dfc8',
-              borderRadius: '0.875rem',
-              padding: '1.5rem',
-              height: '100%',
-              cursor: 'pointer',
-            }}>
-              <h2 style={{
-                fontFamily: 'Georgia, serif',
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                color: '#2c4270',
-                margin: '0 0 0.625rem',
+      {parentTopics.length === 0 ? (
+        <p style={{ color: '#8b7355', fontStyle: 'italic' }}>
+          No topics yet. Add parent topics (with no parent_id) in the admin panel.
+        </p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+          {parentTopics.map(topic => (
+            <Link key={topic.id} href={`/bible-verses/${topicSlug(topic.name)}`} style={{ textDecoration: 'none' }}>
+              <div style={{
+                backgroundColor: 'white', border: '1px solid #e8dfc8',
+                borderRadius: '0.875rem', padding: '1.25rem', cursor: 'pointer',
               }}>
-                {article.title}
-              </h2>
-              {article.meta_description && (
-                <p style={{ color: '#6b5c45', fontSize: '0.875rem', lineHeight: 1.65, margin: '0 0 1rem' }}>
-                  {article.meta_description.length > 140
-                    ? article.meta_description.slice(0, 140) + '…'
-                    : article.meta_description}
-                </p>
-              )}
-              <div style={{ marginTop: 'auto', color: '#b8860b', fontSize: '0.875rem', fontWeight: '500' }}>
-                Read verse →
+                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', fontWeight: 'bold', color: '#2c4270', margin: 0 }}>
+                  {topic.name}
+                </h2>
+                <p style={{ margin: '0.5rem 0 0', color: '#b8860b', fontSize: '0.85rem' }}>Browse verses →</p>
               </div>
-            </div>
-          </Link>
-        ))}
-        {articles.length === 0 && (
-          <p style={{ color: '#8b7355', fontStyle: 'italic' }}>No Bible verse articles published yet.</p>
-        )}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

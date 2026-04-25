@@ -3,33 +3,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CATEGORIES } from '../../../lib/categories.js';
 
-const FILTERS = [
-  { key: 'all',         label: 'All' },
-  { key: 'not-created', label: 'Not Created' },
-  { key: 'created',     label: 'Created' },
-  { key: 'pillars',     label: 'Pillars' },
-];
-
-function articleUrl(slug, category) {
-  return `/${category}/${slug}/`;
-}
+const S = {
+  card:       { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '0.875rem', padding: '1.5rem', marginBottom: '1rem' },
+  label:      { display: 'block', fontWeight: '600', color: '#1e2d4a', marginBottom: '0.35rem', fontSize: '0.85rem' },
+  select:     { width: '100%', padding: '0.6rem 0.75rem', border: '1px solid #d4c5a9', borderRadius: '0.5rem', fontSize: '0.9rem', fontFamily: 'inherit', background: '#fff', color: '#000' },
+  input:      { width: '100%', padding: '0.6rem 0.85rem', border: '1px solid #d4c5a9', borderRadius: '0.5rem', fontSize: '0.9rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', background: '#fff', color: '#000' },
+  btnPrimary: { background: '#1e2d4a', color: '#fff', border: 'none', borderRadius: '0.5rem', padding: '0.65rem 1.5rem', fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
+  btnGhost:   { background: 'transparent', color: '#6b6b6b', border: '1px solid #d4c5a9', borderRadius: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' },
+  btnGold:    { background: '#dcf5e7', color: '#1b5e20', border: 'none', borderRadius: '0.5rem', padding: '0.5rem 1.1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
+  btnIdeas:   { background: '#ede9fe', color: '#4c1d95', border: 'none', borderRadius: '0.5rem', padding: '0.35rem 0.85rem', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
+  errBox:     { background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '0.5rem', padding: '0.65rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' },
+  successBanner: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', borderRadius: '0.75rem', padding: '1rem 1.25rem', marginBottom: '1.25rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' },
+  metaBox:    { background: '#f9f5ee', borderRadius: '0.5rem', padding: '0.75rem 1rem' },
+  metaLabel:  { margin: '0 0 0.25rem', fontSize: '0.72rem', fontWeight: '700', color: '#8b7355', textTransform: 'uppercase' },
+  metaVal:    { margin: 0, fontSize: '0.875rem', color: '#1e2d4a' },
+  infoBox:    { marginTop: '1rem', padding: '0.65rem 1rem', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#0369a1' },
+};
 
 export default function Generator({ onSaved }) {
   const [topics,          setTopics]          = useState([]);
   const [topicsLoading,   setTopicsLoading]   = useState(true);
   const [topicsError,     setTopicsError]     = useState('');
-  const [activeTab,       setActiveTab]       = useState(CATEGORIES[0].value);
-  const [topicFilter,     setTopicFilter]     = useState('all'); // all | not-created | created | pillars
-  const [regenConfirm,    setRegenConfirm]    = useState(null);
 
-  // Map of topicId → { slug, category } for "View Article" links
-  const [articleSlugs,    setArticleSlugs]    = useState({});
-  const [viewLoading,     setViewLoading]     = useState(null); // topicId being looked up
-
+  const [selCategory,     setSelCategory]     = useState('');
+  const [selParentId,     setSelParentId]     = useState('');
+  const [selChildId,      setSelChildId]      = useState('');
   const [selectedTopic,   setSelectedTopic]   = useState('');
+
   const [idea,            setIdea]            = useState('');
   const [usedIdeaId,      setUsedIdeaId]      = useState(null);
-
   const [ideas,           setIdeas]           = useState([]);
   const [ideasLoading,    setIdeasLoading]    = useState(false);
   const [generatingIdeas, setGeneratingIdeas] = useState(false);
@@ -50,11 +52,30 @@ export default function Generator({ onSaved }) {
       .finally(() => setTopicsLoading(false));
   }, []);
 
-  const fetchIdeas = useCallback(async (topicId) => {
+  const parentTopics = selCategory
+    ? topics.filter(t => t.category === selCategory && !t.parent_id)
+    : [];
+
+  const childTopics = selParentId
+    ? topics.filter(t => t.parent_id === selParentId)
+    : [];
+
+  const selectedTopicObj = topics.find(t => t.id === selectedTopic);
+
+  useEffect(() => {
+    const newId = selChildId || selParentId || '';
+    if (newId === selectedTopic) return;
+    setSelectedTopic(newId);
+    setIdea(''); setUsedIdeaId(null); setError('');
+    setIdeas([]); setPreview(null); setSaved(false);
+    if (newId) fetchIdeasById(newId);
+  }, [selChildId, selParentId]);
+
+  async function fetchIdeasById(topicId) {
     if (!topicId) { setIdeas([]); return; }
     setIdeasLoading(true); setIdeasError('');
     try {
-      const res = await fetch(`/api/admin/ideas?topic_id=${topicId}`);
+      const res  = await fetch(`/api/admin/ideas?topic_id=${topicId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load ideas');
       setIdeas(Array.isArray(data) ? data : []);
@@ -63,74 +84,20 @@ export default function Generator({ onSaved }) {
     } finally {
       setIdeasLoading(false);
     }
-  }, []);
-
-  function handleTopicClick(topic) {
-    if (topic.id === selectedTopic) return;
-    if (topic.article_created) {
-      setRegenConfirm(topic);
-      return;
-    }
-    selectTopic(topic.id);
-  }
-
-  function selectTopic(id) {
-    setSelectedTopic(id);
-    setIdea(''); setUsedIdeaId(null); setError('');
-    setIdeas([]);
-    if (id) fetchIdeas(id);
-  }
-
-  function confirmRegen() {
-    if (!regenConfirm) return;
-    selectTopic(regenConfirm.id);
-    setRegenConfirm(null);
-  }
-
-  function clearTopic() {
-    setSelectedTopic(''); setIdea(''); setUsedIdeaId(null);
-    setError(''); setIdeas([]); setPreview(null); setRegenConfirm(null);
-  }
-
-  async function handleViewArticle(topic) {
-    // Already cached
-    if (articleSlugs[topic.id]) {
-      const { slug, category } = articleSlugs[topic.id];
-      window.open(articleUrl(slug, category), '_blank');
-      return;
-    }
-    setViewLoading(topic.id);
-    try {
-      const res = await fetch(`/api/admin/articles?topic_id=${topic.id}&limit=1`);
-      const data = await res.json();
-      if (res.ok && Array.isArray(data) && data.length > 0) {
-        const art = data[0];
-        const cat = art.topics?.category || topic.category;
-        setArticleSlugs(prev => ({ ...prev, [topic.id]: { slug: art.slug, category: cat } }));
-        window.open(articleUrl(art.slug, cat), '_blank');
-      } else {
-        alert('Article not found. It may not be published yet.');
-      }
-    } catch {
-      alert('Could not load article.');
-    } finally {
-      setViewLoading(null);
-    }
   }
 
   async function handleGenerateIdeas() {
-    const topic = topics.find(t => t.id === selectedTopic);
-    if (!topic) return;
+    if (!selectedTopicObj) return;
     setGeneratingIdeas(true); setIdeasError('');
     try {
-      const res = await fetch('/api/admin/generate-ideas', {
+      const res  = await fetch('/api/admin/generate-ideas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic_id: topic.id, topic_name: topic.name, category: topic.category }),
+        body: JSON.stringify({ topic_id: selectedTopicObj.id, topic_name: selectedTopicObj.name, category: selectedTopicObj.category }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to generate ideas');
-      await fetchIdeas(selectedTopic);
+      await fetchIdeasById(selectedTopic);
     } catch (err) {
       setIdeasError(err.message);
     } finally {
@@ -138,21 +105,15 @@ export default function Generator({ onSaved }) {
     }
   }
 
-  function pickIdea(ideaItem) {
-    setIdea(ideaItem.title);
-    setUsedIdeaId(ideaItem.id);
-  }
-
   async function handleGenerate(e) {
     e.preventDefault();
     if (!selectedTopic) { setError('Please select a topic.'); return; }
-    const topic = topics.find(t => t.id === selectedTopic);
     setError(''); setPreview(null); setSaved(false); setGenerating(true);
     try {
-      const res = await fetch('/api/admin/generate', {
+      const res  = await fetch('/api/admin/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topicId: selectedTopic, topicName: topic?.name || '', category: topic?.category || '', idea: idea.trim() }),
+        body: JSON.stringify({ topicId: selectedTopic, topicName: selectedTopicObj?.name || '', idea: idea.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');
@@ -166,30 +127,21 @@ export default function Generator({ onSaved }) {
 
   async function handleSave(publish) {
     if (!preview) return;
-    const topic = topics.find(t => t.id === selectedTopic);
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/articles', {
+      const res  = await fetch('/api/admin/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...preview, status: publish ? 'published' : 'draft' }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Save failed');
-
       if (usedIdeaId) {
         fetch(`/api/admin/ideas/${usedIdeaId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ used: true }),
         }).catch(() => {});
       }
-
-      // Cache the slug so "View Article" works immediately
-      if (preview.slug && topic) {
-        setArticleSlugs(prev => ({ ...prev, [selectedTopic]: { slug: preview.slug, category: topic.category } }));
-      }
-
       setTopics(prev => prev.map(t => t.id === selectedTopic ? { ...t, article_created: true } : t));
       setSaved(true); setPreview(null);
       onSaved?.();
@@ -201,244 +153,161 @@ export default function Generator({ onSaved }) {
   }
 
   function reset() {
+    setSelCategory(''); setSelParentId(''); setSelChildId('');
     setSelectedTopic(''); setIdea(''); setPreview(null);
     setError(''); setSaved(false); setGenerating(false);
-    setUsedIdeaId(null); setIdeas([]); setRegenConfirm(null);
+    setUsedIdeaId(null); setIdeas([]);
   }
-
-  const selectedTopicObj = topics.find(t => t.id === selectedTopic);
-
-  const tabTopics = topics.filter(t => t.category === activeTab);
-
-  // Apply filter
-  const filteredTopics = tabTopics.filter(t => {
-    if (topicFilter === 'not-created') return !t.article_created;
-    if (topicFilter === 'created')     return !!t.article_created;
-    if (topicFilter === 'pillars')     return !!t.is_pillar;
-    return true; // 'all'
-  });
-
-  // Sort: 1. Pillars  2. Not Created  3. Created  (alpha within each group)
-  const sortedTopics = [...filteredTopics].sort((a, b) => {
-    const rank = t => t.is_pillar ? 0 : !t.article_created ? 1 : 2;
-    const rDiff = rank(a) - rank(b);
-    if (rDiff !== 0) return rDiff;
-    return a.name.localeCompare(b.name);
-  });
-
-  const createdCount   = tabTopics.filter(t => t.article_created).length;
-  const uncreatedCount = tabTopics.filter(t => !t.article_created).length;
-  const pillarCount    = tabTopics.filter(t => t.is_pillar).length;
 
   return (
     <div style={{ maxWidth: '860px' }}>
+
       {saved && (
-        <div style={s.successBanner}>
-          Article saved!{' '}
-          {selectedTopicObj && articleSlugs[selectedTopicObj.id] && (
-            <a
-              href={articleUrl(articleSlugs[selectedTopicObj.id].slug, articleSlugs[selectedTopicObj.id].category)}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: '#1b5e20', fontWeight: 'bold', marginRight: '0.75rem' }}
-            >
-              View Article →
-            </a>
-          )}
-          <button onClick={reset} style={s.linkBtn}>Generate another</button>
+        <div style={S.successBanner}>
+          <span>✓ Article saved!</span>
+          <button onClick={reset} style={{ ...S.btnGhost, fontSize: '0.85rem' }}>Generate another</button>
         </div>
       )}
 
       {!saved && (
         <>
-          {/* ── Topic selector ── */}
-          <div style={{ ...s.card, marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.875rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <span style={{ fontWeight: '700', color: '#1e2d4a', fontSize: '0.9rem' }}>
-                {selectedTopicObj
-                  ? <>Selected: <span style={{ color: '#b8860b' }}>{selectedTopicObj.name}</span>{selectedTopicObj.is_pillar && <span style={s.pillarBadge}>★ Pillar</span>}</>
-                  : 'Select a Topic'}
-              </span>
-              {selectedTopicObj && (
-                <button type="button" onClick={clearTopic} style={s.btnGhost}>Change topic</button>
-              )}
-            </div>
+          {/* ── Topic Selection ── */}
+          <div style={S.card}>
+            <h3 style={{ margin: '0 0 1.25rem', fontFamily: 'Georgia,serif', color: '#1e2d4a', fontSize: '1.05rem', fontWeight: 'bold' }}>
+              Select Topic
+            </h3>
 
-            {topicsLoading && <div style={s.placeholder}>Loading topics…</div>}
-            {topicsError  && <div style={s.errBox}>{topicsError}</div>}
+            {topicsLoading && <p style={{ color: '#aaa', fontSize: '0.875rem', margin: 0 }}>Loading topics…</p>}
+            {topicsError   && <p style={{ color: '#7b2020', fontSize: '0.875rem', margin: 0 }}>{topicsError}</p>}
 
             {!topicsLoading && !topicsError && (
-              <>
-                {/* Category tabs */}
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.65rem' }}>
-                  {CATEGORIES.map(c => {
-                    const tCount = topics.filter(t => t.category === c.value).length;
-                    return (
-                      <button key={c.value} type="button" onClick={() => setActiveTab(c.value)} style={s.tab(activeTab === c.value)}>
-                        {c.label}{tCount > 0 && <span style={{ opacity: 0.65, marginLeft: '0.3rem', fontSize: '0.7rem' }}>{tCount}</span>}
-                      </button>
-                    );
-                  })}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+
+                <div>
+                  <label style={S.label}>Category</label>
+                  <select
+                    value={selCategory}
+                    onChange={e => { setSelCategory(e.target.value); setSelParentId(''); setSelChildId(''); }}
+                    style={S.select}
+                  >
+                    <option value="">— choose category —</option>
+                    {CATEGORIES.map(c => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Filter buttons */}
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem', alignItems: 'center' }}>
-                  {FILTERS.map(f => {
-                    let badge = null;
-                    if (f.key === 'all')         badge = tabTopics.length;
-                    if (f.key === 'not-created') badge = uncreatedCount;
-                    if (f.key === 'created')     badge = createdCount;
-                    if (f.key === 'pillars')     badge = pillarCount;
-                    const isActive = topicFilter === f.key;
-                    return (
-                      <button
-                        key={f.key}
-                        type="button"
-                        onClick={() => setTopicFilter(f.key)}
-                        style={{
-                          padding: '0.3rem 0.75rem', borderRadius: '2rem', fontSize: '0.78rem', fontWeight: '600',
-                          cursor: 'pointer', border: isActive ? '2px solid #1e2d4a' : '1px solid #d4c5a9',
-                          fontFamily: 'inherit',
-                          background: isActive ? '#1e2d4a' : '#f5f0e8',
-                          color:      isActive ? 'white'   : '#5a4a35',
-                          display: 'flex', alignItems: 'center', gap: '0.3rem',
-                        }}
-                      >
-                        {f.key === 'created'     && <span style={{ color: isActive ? '#6ee7b7' : '#15803d' }}>✔</span>}
-                        {f.key === 'pillars'     && <span style={{ color: isActive ? '#ffd700' : '#b8860b' }}>★</span>}
-                        {f.label}
-                        {badge !== null && (
-                          <span style={{
-                            fontSize: '0.68rem', fontWeight: '700',
-                            background: isActive ? 'rgba(255,255,255,0.25)' : '#d4c5a9',
-                            color: isActive ? 'white' : '#5a4a35',
-                            padding: '0 0.4rem', borderRadius: '1rem', lineHeight: '1.4',
-                          }}>
-                            {badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div>
+                  <label style={S.label}>Parent Topic</label>
+                  <select
+                    value={selParentId}
+                    onChange={e => { setSelParentId(e.target.value); setSelChildId(''); }}
+                    style={S.select}
+                    disabled={!selCategory}
+                  >
+                    <option value="">— choose parent topic —</option>
+                    {parentTopics.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}{t.article_created ? ' ✔' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {selCategory && parentTopics.length === 0 && (
+                    <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: '#aaa' }}>
+                      No parent topics found — add topics without a parent_id in the Topics tab.
+                    </p>
+                  )}
                 </div>
 
-                {/* Topic grid */}
-                {sortedTopics.length === 0 ? (
-                  <p style={{ margin: 0, color: '#aaa', fontSize: '0.875rem', padding: '0.75rem 0' }}>
-                    {tabTopics.length === 0
-                      ? `No ${CATEGORIES.find(c => c.value === activeTab)?.label} topics yet. Add some in the Topics tab.`
-                      : `No topics match the "${FILTERS.find(f => f.key === topicFilter)?.label}" filter.`}
-                  </p>
-                ) : (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                    {sortedTopics.map(topic => {
-                      const isSel     = topic.id === selectedTopic;
-                      const isCreated = !!topic.article_created;
-                      return (
-                        <button
-                          key={topic.id}
-                          type="button"
-                          onClick={() => handleTopicClick(topic)}
-                          title={isCreated ? 'Article already created — click to regenerate' : ''}
-                          style={{
-                            padding: '0.4rem 0.85rem', borderRadius: '2rem', fontSize: '0.82rem', fontWeight: '600',
-                            cursor: 'pointer', fontFamily: 'inherit',
-                            opacity: isCreated && !isSel ? 0.6 : 1,
-                            border: isSel ? '2px solid #1e2d4a' : isCreated ? '1px solid #6ee7b7' : '1px solid #d4c5a9',
-                            background: isSel ? '#1e2d4a' : isCreated ? '#f0fdf4' : '#fff',
-                            color:      isSel ? 'white'   : isCreated ? '#15803d' : '#1e2d4a',
-                            display: 'flex', alignItems: 'center', gap: '0.3rem',
-                          }}
-                        >
-                          {topic.is_pillar && <span style={{ color: isSel ? '#ffd700' : '#b8860b' }}>★</span>}
-                          {topic.name}
-                          {isCreated && (
-                            <span style={{
-                              fontSize: '0.68rem', fontWeight: '700', background: '#dcfce7',
-                              color: '#15803d', padding: '0.05rem 0.4rem', borderRadius: '1rem',
-                              border: '1px solid #a7f3d0',
-                            }}>
-                              ✔ Created
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                <div>
+                  <label style={S.label}>
+                    Sub-topic{' '}
+                    <span style={{ fontWeight: 400, color: '#aaa', fontSize: '0.78rem' }}>(optional)</span>
+                  </label>
+                  <select
+                    value={selChildId}
+                    onChange={e => setSelChildId(e.target.value)}
+                    style={S.select}
+                    disabled={!selParentId}
+                  >
+                    <option value="">— none, use parent —</option>
+                    {childTopics.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}{t.article_created ? ' ✔' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {selParentId && childTopics.length === 0 && (
+                    <p style={{ margin: '0.35rem 0 0', fontSize: '0.78rem', color: '#aaa' }}>
+                      No sub-topics — will generate for parent topic.
+                    </p>
+                  )}
+                </div>
 
-                {/* Regenerate / View Article confirm */}
-                {regenConfirm && (
-                  <div style={s.warnPanel}>
-                    <p style={{ margin: '0 0 0.5rem', fontWeight: '700', color: '#1e2d4a', fontSize: '0.95rem' }}>
-                      Article already exists for <span style={{ color: '#b8860b' }}>{regenConfirm.name}</span>
-                    </p>
-                    <p style={{ margin: '0 0 1rem', fontSize: '0.875rem', color: '#5a4a35' }}>
-                      Do you want to regenerate a new article for this topic?
-                    </p>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <button type="button" onClick={confirmRegen} style={s.btnDanger}>
-                        ↺ Regenerate
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleViewArticle(regenConfirm)}
-                        disabled={viewLoading === regenConfirm.id}
-                        style={{ ...s.btnGreen, opacity: viewLoading === regenConfirm.id ? 0.6 : 1 }}
-                      >
-                        {viewLoading === regenConfirm.id ? 'Loading…' : '↗ View Article'}
-                      </button>
-                      <button type="button" onClick={() => setRegenConfirm(null)} style={s.btnGhost}>
-                        ✕ Cancel
-                      </button>
-                    </div>
-                  </div>
+              </div>
+            )}
+
+            {selectedTopicObj && (
+              <div style={S.infoBox}>
+                <strong>Generating for:</strong> {selectedTopicObj.name}
+                <span style={{ marginLeft: '0.5rem', fontSize: '0.78rem', color: '#6b6b6b' }}>
+                  ({selectedTopicObj.category})
+                </span>
+                {selectedTopicObj.article_created && (
+                  <span style={{ marginLeft: '0.75rem', color: '#15803d', fontWeight: '600', fontSize: '0.82rem' }}>
+                    ✔ Article already created
+                  </span>
                 )}
-              </>
+              </div>
             )}
           </div>
 
-          {/* ── Form (only when topic selected) ── */}
+          {/* ── Generate form (only when topic selected) ── */}
           {selectedTopicObj && (
-            <div style={s.card}>
+            <div style={S.card}>
               <form onSubmit={handleGenerate}>
 
-                {/* ── Content Ideas panel ── */}
-                <div style={s.ideasPanel}>
+                {/* Content Ideas panel */}
+                <div style={{ background: '#faf7ee', border: '1px solid #e8dfc8', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                    <span style={s.ideasHeading}>
+                    <span style={{ fontWeight: '700', color: '#1e2d4a', fontSize: '0.88rem' }}>
                       💡 Article Ideas
-                      {ideas.length > 0 && <span style={s.ideaCount}>{ideas.length} unused</span>}
+                      {ideas.length > 0 && (
+                        <span style={{ marginLeft: '0.5rem', background: '#ede9fe', color: '#4c1d95', fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '1rem', fontWeight: '700' }}>
+                          {ideas.length}
+                        </span>
+                      )}
                     </span>
                     <button
                       type="button" onClick={handleGenerateIdeas}
                       disabled={generatingIdeas || ideasLoading}
-                      style={{ ...s.btnIdeas, opacity: (generatingIdeas || ideasLoading) ? 0.6 : 1 }}
+                      style={{ ...S.btnIdeas, opacity: (generatingIdeas || ideasLoading) ? 0.6 : 1 }}
                     >
                       {generatingIdeas ? '⟳ Generating…' : '✦ Generate Ideas'}
                     </button>
                   </div>
 
-                  {ideasLoading && <p style={s.ideasMuted}>Loading ideas…</p>}
-                  {ideasError   && <p style={{ ...s.ideasMuted, color: '#7b2020' }}>{ideasError}</p>}
-
+                  {ideasLoading && <p style={{ margin: 0, color: '#aaa', fontSize: '0.8rem' }}>Loading ideas…</p>}
+                  {ideasError   && <p style={{ margin: 0, color: '#7b2020', fontSize: '0.8rem' }}>{ideasError}</p>}
                   {!ideasLoading && !ideasError && ideas.length === 0 && (
-                    <p style={s.ideasMuted}>
-                      No ideas yet for <strong>{selectedTopicObj.name}</strong>. Click "✦ Generate Ideas" to create some.
+                    <p style={{ margin: 0, color: '#8b7355', fontSize: '0.8rem' }}>
+                      No ideas yet for <strong>{selectedTopicObj.name}</strong> — click "Generate Ideas" to create some.
                     </p>
                   )}
-
                   {!ideasLoading && ideas.length > 0 && (
-                    <ul style={s.ideaList}>
+                    <ul style={{ margin: '0.5rem 0 0', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       {ideas.map(item => (
                         <li key={item.id}>
                           <button
-                            type="button" onClick={() => pickIdea(item)}
+                            type="button"
+                            onClick={() => { setIdea(item.title); setUsedIdeaId(item.id); }}
                             style={{
-                              ...s.ideaItem,
-                              background:  usedIdeaId === item.id ? '#e8f4fd' : '#f5f0e8',
-                              borderColor: usedIdeaId === item.id ? '#90caf9' : '#e8dfc8',
-                              fontWeight:  usedIdeaId === item.id ? '600' : '400',
+                              width: '100%', textAlign: 'left', padding: '0.45rem 0.75rem',
+                              border: `1px solid ${usedIdeaId === item.id ? '#90caf9' : '#e8dfc8'}`,
+                              borderRadius: '0.4rem',
+                              background: usedIdeaId === item.id ? '#e8f4fd' : '#fff',
+                              cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'inherit',
+                              color: '#1e2d4a', fontWeight: usedIdeaId === item.id ? '600' : '400',
                             }}
                           >
                             {usedIdeaId === item.id && <span style={{ color: '#1565c0', marginRight: '0.4rem' }}>✓</span>}
@@ -450,147 +319,98 @@ export default function Generator({ onSaved }) {
                   )}
                 </div>
 
-                {/* ── Content idea input ── */}
-                <div style={s.field}>
-                  <label style={s.label} htmlFor="idea-input">
+                {/* Content idea input */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={S.label} htmlFor="idea-input">
                     Content Idea{' '}
-                    <span style={{ fontWeight: 400, color: '#8b7355' }}>(optional — click idea above or type your own)</span>
+                    <span style={{ fontWeight: 400, color: '#8b7355' }}>(optional — pick one above or type your own)</span>
                   </label>
                   <input
                     id="idea-input" type="text" value={idea}
                     onChange={e => { setIdea(e.target.value); setUsedIdeaId(null); }}
                     placeholder="e.g. how to forgive someone, overcoming doubt"
-                    style={s.input}
+                    style={S.input}
                   />
                 </div>
 
-                {error && <div style={s.errBox}>{error}</div>}
+                {error && <div style={S.errBox}>{error}</div>}
 
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <button
-                    type="submit" disabled={generating}
-                    style={{ ...s.btnPrimary, opacity: generating ? 0.6 : 1 }}
-                  >
-                    {generating ? '⟳ Generating…' : '✦ Generate Article'}
-                  </button>
-                  {selectedTopicObj.article_created && (
-                    <button
-                      type="button"
-                      onClick={() => handleViewArticle(selectedTopicObj)}
-                      disabled={viewLoading === selectedTopicObj.id}
-                      style={{ ...s.btnGreen, opacity: viewLoading === selectedTopicObj.id ? 0.6 : 1 }}
-                    >
-                      {viewLoading === selectedTopicObj.id ? 'Loading…' : '↗ View Existing Article'}
-                    </button>
-                  )}
-                  {preview && !generating && (
-                    <button type="button" onClick={reset} style={s.btnGhost}>Start over</button>
-                  )}
-                </div>
+                <button type="submit" disabled={generating} style={{ ...S.btnPrimary, opacity: generating ? 0.6 : 1 }}>
+                  {generating ? '⟳ Generating…' : '✦ Generate Article'}
+                </button>
               </form>
             </div>
           )}
         </>
       )}
 
-      {/* ── Generating indicator ── */}
+      {/* Generating indicator */}
       {generating && (
-        <div style={{ ...s.card, textAlign: 'center', padding: '3rem', marginTop: '1.25rem' }}>
+        <div style={{ ...S.card, textAlign: 'center', padding: '3rem' }}>
           <p style={{ fontSize: '2rem', margin: '0 0 0.5rem' }}>✦</p>
           <p style={{ color: '#8b7355', margin: 0 }}>Writing article — usually 15–25 seconds…</p>
         </div>
       )}
 
-      {/* ── Preview ── */}
+      {/* Preview */}
       {preview && !generating && (
-        <div style={{ ...s.card, marginTop: '1.25rem' }}>
+        <div style={S.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
             <div style={{ flex: 1 }}>
-              <span style={s.badgeLabel}>Preview — not saved yet</span>
-              <h2 style={s.previewTitle}>{preview.title}</h2>
+              <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#b8860b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Preview — not saved yet
+              </span>
+              <h2 style={{ fontFamily: 'Georgia,serif', fontSize: '1.25rem', color: '#1e2d4a', margin: '0.4rem 0 0', lineHeight: 1.3 }}>
+                {preview.title}
+              </h2>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button onClick={() => handleSave(false)} disabled={saving} style={s.btnGhost}>{saving ? 'Saving…' : '📄 Save Draft'}</button>
-              <button onClick={() => handleSave(true)}  disabled={saving} style={s.btnGold}>{saving  ? 'Saving…' : '✓ Publish'}</button>
-              <button onClick={reset} style={s.btnGhost}>Discard</button>
+              <button onClick={() => handleSave(false)} disabled={saving} style={S.btnGhost}>
+                {saving ? 'Saving…' : '📄 Save Draft'}
+              </button>
+              <button onClick={() => handleSave(true)} disabled={saving} style={S.btnGold}>
+                {saving ? 'Saving…' : '✓ Publish'}
+              </button>
+              <button onClick={reset} style={S.btnGhost}>Discard</button>
             </div>
           </div>
 
-          <div style={s.metaGrid}>
-            <div style={s.metaBox}>
-              <p style={s.metaLabel}>Meta Title ({preview.meta_title?.length || 0} chars)</p>
-              <p style={s.metaVal}>{preview.meta_title}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={S.metaBox}>
+              <p style={S.metaLabel}>Meta Title ({preview.meta_title?.length || 0} chars)</p>
+              <p style={S.metaVal}>{preview.meta_title}</p>
             </div>
-            <div style={s.metaBox}>
-              <p style={s.metaLabel}>Meta Description ({preview.meta_description?.length || 0} chars)</p>
-              <p style={s.metaVal}>{preview.meta_description}</p>
+            <div style={S.metaBox}>
+              <p style={S.metaLabel}>Meta Description ({preview.meta_description?.length || 0} chars)</p>
+              <p style={S.metaVal}>{preview.meta_description}</p>
             </div>
           </div>
 
           {preview.keywords?.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
-              <p style={s.metaLabel}>Keywords</p>
-              {preview.keywords.map(k => <span key={k} style={s.tag}>{k}</span>)}
+              <p style={S.metaLabel}>Keywords</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.35rem' }}>
+                {preview.keywords.map((k, i) => (
+                  <span key={i} style={{ background: '#e8f4fd', color: '#1565c0', fontSize: '0.8rem', padding: '0.2rem 0.6rem', borderRadius: '1rem', border: '1px solid #bfdbfe' }}>
+                    {k}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
-          <hr style={s.hr} />
-
-          <div
-            className="prose-content"
-            style={{ lineHeight: 1.8, color: '#2a2a2a', fontSize: '0.95rem' }}
-            dangerouslySetInnerHTML={{ __html: preview.content }}
-          />
-
-          {error && <div style={{ ...s.errBox, marginTop: '1rem' }}>{error}</div>}
-
-          <hr style={{ ...s.hr, margin: '1.5rem 0' }} />
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button onClick={() => handleSave(false)} disabled={saving} style={s.btnGhost}>📄 Save Draft</button>
-            <button onClick={() => handleSave(true)}  disabled={saving} style={s.btnGold}>✓ Publish Now</button>
-            <button onClick={reset} style={s.btnGhost}>Discard</button>
-          </div>
+          <details>
+            <summary style={{ cursor: 'pointer', color: '#8b7355', fontSize: '0.85rem', userSelect: 'none', padding: '0.5rem 0' }}>
+              Content Preview
+            </summary>
+            <div
+              style={{ marginTop: '0.75rem', padding: '1.25rem', background: '#faf7f2', borderRadius: '0.5rem', border: '1px solid #e8dfc8', maxHeight: '400px', overflowY: 'auto', fontSize: '0.875rem', lineHeight: 1.7 }}
+              dangerouslySetInnerHTML={{ __html: preview.content || '' }}
+            />
+          </details>
         </div>
       )}
+
     </div>
   );
 }
-
-const s = {
-  card:         { background: '#fff', border: '1px solid #e8dfc8', borderRadius: '1rem', padding: '1.5rem' },
-  field:        { marginBottom: '1.25rem' },
-  label:        { display: 'block', fontWeight: 'bold', color: '#1e2d4a', marginBottom: '0.45rem', fontSize: '0.9rem' },
-  input:        { display: 'block', width: '100%', padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '1rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', color: '#000', backgroundColor: '#fff' },
-  placeholder:  { padding: '0.65rem 0.9rem', border: '1px solid #d4c5a9', borderRadius: '6px', fontSize: '0.9rem', color: '#8b7355', background: '#f9f5ee', fontStyle: 'italic' },
-  errBox:       { background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '6px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' },
-  warnPanel:    { background: '#fefce8', border: '1px solid #fde68a', borderRadius: '8px', padding: '1rem 1.25rem', marginTop: '0.875rem' },
-  successBanner:{ background: '#f0fff4', border: '1px solid #b2dfdb', color: '#1b5e20', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' },
-  tab:          (active) => ({
-    padding: '0.3rem 0.75rem', borderRadius: '2rem', fontSize: '0.78rem', fontWeight: '600',
-    cursor: 'pointer', border: 'none', fontFamily: 'inherit',
-    background: active ? '#1e2d4a' : '#f5f0e8',
-    color:      active ? 'white'   : '#5a4a35',
-  }),
-  pillarBadge:  { display: 'inline-flex', alignItems: 'center', gap: '0.2rem', background: '#fff3cd', color: '#856404', fontSize: '0.7rem', fontWeight: '700', padding: '0.1rem 0.5rem', borderRadius: '1rem', border: '1px solid #ffc107', marginLeft: '0.5rem' },
-  btnPrimary:   { backgroundColor: '#1e2d4a', color: 'white', border: 'none', borderRadius: '6px', padding: '0.7rem 1.5rem', fontSize: '0.95rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  btnGhost:     { background: 'transparent', color: '#555', border: '1px solid #d4c5a9', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit' },
-  btnGold:      { backgroundColor: '#b8860b', color: 'white', border: 'none', borderRadius: '6px', padding: '0.6rem 1.25rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  btnDanger:    { backgroundColor: '#7b2020', color: 'white', border: 'none', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  btnGreen:     { backgroundColor: '#15803d', color: 'white', border: 'none', borderRadius: '6px', padding: '0.55rem 1rem', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  btnIdeas:     { backgroundColor: '#2c4270', color: 'white', border: 'none', borderRadius: '6px', padding: '0.45rem 1rem', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' },
-  linkBtn:      { background: 'none', border: 'none', color: '#1b5e20', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit', fontSize: 'inherit', padding: 0 },
-  ideasPanel:   { background: '#f5f0e8', border: '1px solid #e8dfc8', borderRadius: '8px', padding: '1rem 1.25rem', marginBottom: '1.25rem' },
-  ideasHeading: { fontSize: '0.85rem', fontWeight: '700', color: '#1e2d4a', display: 'flex', alignItems: 'center', gap: '0.5rem' },
-  ideaCount:    { background: '#1e2d4a', color: 'white', fontSize: '0.7rem', fontWeight: '700', padding: '0.1rem 0.5rem', borderRadius: '1rem' },
-  ideasMuted:   { margin: '0.4rem 0 0', fontSize: '0.85rem', color: '#8b7355' },
-  ideaList:     { listStyle: 'none', margin: '0.5rem 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' },
-  ideaItem:     { width: '100%', textAlign: 'left', padding: '0.55rem 0.9rem', border: '1px solid #e8dfc8', borderRadius: '6px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1e2d4a' },
-  badgeLabel:   { fontSize: '0.7rem', fontWeight: 'bold', color: '#b8860b', textTransform: 'uppercase', letterSpacing: '0.07em' },
-  previewTitle: { fontFamily: 'Georgia,serif', fontSize: '1.4rem', color: '#1e2d4a', margin: '0.3rem 0 0' },
-  metaGrid:     { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem', marginBottom: '1rem' },
-  metaBox:      { background: '#f9f5ee', borderRadius: '6px', padding: '0.875rem', border: '1px solid #e8dfc8' },
-  metaLabel:    { margin: '0 0 0.3rem', fontSize: '0.7rem', fontWeight: 'bold', color: '#8b7355', textTransform: 'uppercase' },
-  metaVal:      { margin: 0, fontSize: '0.875rem', color: '#1e2d4a' },
-  tag:          { display: 'inline-block', background: '#f5f0e8', color: '#8b7355', fontSize: '0.78rem', padding: '0.2rem 0.65rem', borderRadius: '1rem', border: '1px solid #e8dfc8', marginRight: '0.4rem', marginBottom: '0.4rem' },
-  hr:           { border: 'none', borderTop: '1px solid #e8dfc8', margin: '0 0 1.25rem' },
-};
