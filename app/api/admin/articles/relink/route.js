@@ -49,9 +49,7 @@ export async function POST(request) {
 
         if (fErr || !full) throw new Error(fErr?.message || 'Not found');
 
-        // Skip if forced=false AND already has many links — but user removed the cap,
-        // so only skip if explicitly told to (force=false is now a soft hint, not enforced)
-        if (force === false && (full.link_count || 0) >= 20) continue; // safety ceiling at 20
+        // No link count ceiling — re-link all articles regardless of existing count
 
         // Strip old links
         const stripped = stripArticleLinks(full.content || '');
