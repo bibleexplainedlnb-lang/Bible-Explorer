@@ -231,7 +231,7 @@ function EditModal({ article, onSave, onClose }) {
 export default function Articles() {
   const [articles,      setArticles]      = useState([]);
   const [loading,       setLoading]       = useState(true);
-  const [filter,        setFilter]        = useState({ status: '', category: '' });
+  const [filter,        setFilter]        = useState({ status: 'published', category: '' });
   const [filterSpecial, setFilterSpecial] = useState('');
   const [editing,       setEditing]       = useState(null);
   const [deleting,      setDeleting]      = useState(null);
