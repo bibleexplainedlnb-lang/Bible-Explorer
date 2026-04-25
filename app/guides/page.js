@@ -14,7 +14,12 @@ function getSupabase() {
   });
 }
 
-export const metadata = { title: 'Study Guides' };
+export const metadata = {
+  title: 'Study Guides | Bible Verse Insights',
+  description: 'In-depth Bible study guides to help you read, understand, and apply Scripture.',
+  alternates: { canonical: 'https://bibleverseinsights.com/guides/' },
+  robots: { index: true, follow: true },
+};
 
 const GUIDE_ICONS = ['📖', '🕊️', '✝️', '📜', '🙏', '⚓', '💡', '🌿'];
 

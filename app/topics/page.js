@@ -14,7 +14,12 @@ function getSupabase() {
   });
 }
 
-export const metadata = { title: 'Topics' };
+export const metadata = {
+  title: 'Study Topics | Bible Verse Insights',
+  description: 'Explore key themes of the Christian faith — each topic draws together Scripture, explanation, and practical application.',
+  alternates: { canonical: 'https://bibleverseinsights.com/topics/' },
+  robots: { index: true, follow: true },
+};
 
 export default async function TopicsPage() {
   if (!isCategoryActive('topics')) notFound();

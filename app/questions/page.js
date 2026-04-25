@@ -14,7 +14,12 @@ function getSupabase() {
   });
 }
 
-export const metadata = { title: 'Questions' };
+export const metadata = {
+  title: 'Biblical Questions | Bible Verse Insights',
+  description: 'Scripture-grounded answers to common questions about faith, salvation, prayer, and the Christian life.',
+  alternates: { canonical: 'https://bibleverseinsights.com/questions/' },
+  robots: { index: true, follow: true },
+};
 
 export default async function QuestionsPage() {
   if (!isCategoryActive('questions')) notFound();

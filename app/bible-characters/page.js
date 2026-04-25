@@ -15,6 +15,8 @@ function getSupabase() {
 export const metadata = {
   title: 'Bible Characters | Bible Verse Insights',
   description: 'Explore the lives, stories, and spiritual lessons of key figures in Scripture — from the patriarchs of Genesis to the apostles of the New Testament.',
+  alternates: { canonical: 'https://bibleverseinsights.com/bible-characters/' },
+  robots: { index: true, follow: true },
 };
 
 export default async function BibleCharactersPage() {
