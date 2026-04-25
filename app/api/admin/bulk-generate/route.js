@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, getPrompt, callOpenRouter } from '../../../../lib/generator.js';
+import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 function sseEvent(data) {
@@ -10,11 +10,12 @@ function sseEvent(data) {
 
 async function generateArticle(topic, category, existingSlugs, existingTitles) {
   const contentPrompt = getPrompt(category, topic.name.trim(), '');
+  const titleHint = buildTitleHint(category, topic.name.trim());
 
   const prompt = `EXISTING ARTICLES — do NOT write a duplicate of any of these:
 ${existingTitles || '  (none yet)'}
 
-${contentPrompt}
+${contentPrompt}${titleHint}
 
 Return ONLY this JSON object (no markdown, no code fences, no commentary outside the JSON):
 {

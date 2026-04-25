@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, uniqueSlug, getPrompt, callOpenRouter } from '../../../../lib/generator.js';
+import { sanitiseSlug, uniqueSlug, getPrompt, buildTitleHint, callOpenRouter } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 const AUTHOR_NAME = 'BVI Team';
@@ -60,13 +60,8 @@ export async function POST(request) {
 
     const contentPrompt = getPrompt(category, topicName.trim(), idea);
 
-    // Build title / slug format hints for bible-verses and bible-characters
-    let titleHint = '';
-    if (category === 'bible-verses') {
-      titleHint = `\nIMPORTANT: title must be "Bible Verses About ${topicName.trim()}" and slug must be "bible-verses-about-${sanitiseSlug(topicName.trim())}"`;
-    } else if (category === 'bible-characters') {
-      titleHint = `\nIMPORTANT: title must be "Who Was ${topicName.trim()} in the Bible?" and slug must be "who-was-${sanitiseSlug(topicName.trim())}-in-the-bible"`;
-    }
+    // Build title / slug format hints using classification logic
+    const titleHint = buildTitleHint(category, topicName.trim());
 
     const prompt = `${contentPrompt}${titleHint}
 
