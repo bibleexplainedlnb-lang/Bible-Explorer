@@ -92,6 +92,97 @@ function PillarModal({ article, onClose, onAssigned }) {
   );
 }
 
+function DiagnosticsPanel() {
+  const [diag,    setDiag]    = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState('');
+
+  async function run() {
+    setLoading(true); setError(''); setDiag(null);
+    try {
+      const res  = await fetch('/api/admin/diagnostics');
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Failed'); return; }
+      setDiag(data);
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  }
+
+  const ALL_CATS = ['bible-verses', 'bible-characters', 'questions', 'guides', 'topics'];
+
+  return (
+    <div style={{ ...S.card, marginTop: '2rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <p style={{ margin: 0, fontWeight: '700', fontSize: '1rem', color: '#1e2d4a' }}>Database Diagnostics</p>
+        <button onClick={run} disabled={loading} style={{ ...S.btn, fontSize: '0.78rem' }}>
+          {loading ? '⟳ Checking…' : '▶ Run Check'}
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '6px', padding: '0.65rem 1rem', fontSize: '0.85rem' }}>
+          {error}
+        </div>
+      )}
+
+      {diag && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            {[
+              { label: 'Total Topics',     value: diag.summary.total_topics },
+              { label: 'Total Articles',   value: diag.summary.total_articles },
+              { label: 'No Topic ID',      value: diag.summary.articles_null_topic_id,  warn: diag.summary.articles_null_topic_id > 0 },
+              { label: 'Published w/ No Topic', value: diag.summary.published_null_topic_id, warn: diag.summary.published_null_topic_id > 0 },
+            ].map(c => (
+              <div key={c.label} style={{ background: c.warn ? '#fff8e1' : '#f9f5ee', border: `1px solid ${c.warn ? '#ffc107' : '#e8dfc8'}`, borderRadius: '0.625rem', padding: '0.75rem 1rem' }}>
+                <p style={{ ...S.label, margin: '0 0 0.25rem', color: c.warn ? '#856404' : '#8b7355' }}>{c.label}</p>
+                <p style={{ margin: 0, fontSize: '1.6rem', fontWeight: 'bold', color: c.warn ? '#b8860b' : '#1e2d4a' }}>{c.value ?? 0}</p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ ...S.label, margin: '0 0 0.5rem' }}>Per-Category Breakdown</p>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ background: '#f9f5ee' }}>
+                  {['Category', 'Topics', 'Total Articles', 'Published', 'Draft'].map(h => (
+                    <th key={h} style={S.th}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ALL_CATS.map(cat => {
+                  const s = diag.by_category[cat] || {};
+                  const warn = s.articles_published === 0;
+                  return (
+                    <tr key={cat} style={{ background: warn ? '#fffdf5' : undefined }}>
+                      <td style={{ ...S.td, fontWeight: '600', color: '#1e2d4a' }}>{cat}</td>
+                      <td style={S.td}>{s.topics ?? 0}</td>
+                      <td style={S.td}>{s.articles_total ?? 0}</td>
+                      <td style={{ ...S.td, color: (s.articles_published ?? 0) > 0 ? '#1b5e20' : '#856404', fontWeight: '600' }}>
+                        {s.articles_published ?? 0}
+                      </td>
+                      <td style={S.td}>{s.articles_draft ?? 0}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {diag.summary.articles_null_topic_id > 0 && (
+            <p style={{ margin: '1rem 0 0', fontSize: '0.82rem', color: '#856404', background: '#fff8e1', border: '1px solid #ffc107', borderRadius: '0.5rem', padding: '0.6rem 0.9rem' }}>
+              ⚠ {diag.summary.articles_null_topic_id} article(s) have no topic_id and will not appear on any category page.
+              Assign them to a topic via the Articles tab → Edit → Topic, or delete and regenerate them from a topic.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [stats,        setStats]        = useState(null);
   const [articles,     setArticles]     = useState([]);
@@ -246,6 +337,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <DiagnosticsPanel />
     </div>
   );
 }
