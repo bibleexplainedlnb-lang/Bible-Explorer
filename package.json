@@ -5,7 +5,7 @@
   "packageManager": "npm@10.9.2",
   "scripts": {
     "dev": "next dev -p 5000 -H 0.0.0.0",
-    "build": "next build",
+    "build": "npm rebuild better-sqlite3 --build-from-source && next build",
     "start": "next start -p 5000 -H 0.0.0.0",
     "seed": "node prisma/seed.mjs"
   },
