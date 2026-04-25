@@ -1,0 +1,135 @@
+Update my Next.js + Supabase project to use a strict hierarchical SEO structure for Bible content.
+
+## 1. URL STRUCTURE (MANDATORY)
+
+Implement hierarchical routing:
+
+* Parent page:
+  /bible-verses-about-[parent]/
+
+* Child page:
+  /bible-verses-about-[parent]/[child]/
+
+Examples:
+
+* /bible-verses-about-love/
+* /bible-verses-about-love/love-in-marriage/
+
+Do NOT use flat URLs like:
+
+* /bible-verses-about-love-in-marriage/
+
+---
+
+## 2. DATA FETCHING LOGIC
+
+* Fetch topics from Supabase using:
+
+  * parent_id = null → parent topics
+  * parent_id = parent.id → child topics
+
+* Fetch articles using topic_id
+
+* Always filter:
+  status = 'published'
+
+---
+
+## 3. PARENT PAGE (CATEGORY PAGE)
+
+For /bible-verses-about-[parent]:
+
+* Show:
+
+  * H1: "Bible Verses About {Parent}"
+  * List all child topics (with links)
+  * Short intro content (static or generated)
+
+* Add internal links to:
+
+  * all child pages
+  * 2–3 related parent topics
+
+---
+
+## 4. CHILD PAGE (SUBTOPIC PAGE)
+
+For /bible-verses-about-[parent]/[child]:
+
+* Show:
+
+  * H1: "Bible Verses About {Child}"
+  * Article content (from database)
+  * Internal links to:
+
+    * parent page
+    * sibling topics (same parent)
+    * 1–2 related categories
+
+---
+
+## 5. SEO TAGS (VERY IMPORTANT)
+
+Every page MUST include:
+
+### Canonical
+
+Set canonical URL dynamically:
+
+* Parent:
+  https://yourdomain.com/bible-verses-about-love/
+
+* Child:
+  https://yourdomain.com/bible-verses-about-love/love-in-marriage/
+
+### Meta Robots
+
+Always set:
+
+<meta name="robots" content="index, follow">
+
+Ensure:
+
+* No page is accidentally set to noindex
+* Draft pages are NOT rendered publicly
+
+---
+
+## 6. SLUG RULES
+
+* lowercase
+* hyphen-separated
+* remove special characters
+
+Examples:
+
+* "Love in Marriage" → love-in-marriage
+* "God's Love" → gods-love
+
+---
+
+## 7. SAFETY RULES
+
+* Do NOT create duplicate routes
+* Do NOT render draft articles
+* Ensure canonical always matches the current URL
+* No trailing slash mismatch issues
+
+---
+
+## 8. CLEAN IMPLEMENTATION
+
+* Keep code minimal and clean
+* Do not create duplicate files
+* Update existing routes instead of creating parallel ones
+
+---
+
+## GOAL
+
+Build a scalable, SEO-optimized hierarchical system where:
+
+* Topics = parents
+* Subtopics = children
+* Each page is indexable, canonicalized, and internally linked
+* Structure supports 1000+ pages without breaking SEO

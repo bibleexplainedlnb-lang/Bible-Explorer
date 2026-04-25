@@ -18,6 +18,7 @@ function getSupabase() {
 export const metadata = {
   title: 'Bible Verses | Bible Verse Insights',
   description: 'Browse Bible verse collections organised by topic.',
+  robots: { index: true, follow: true },
 };
 
 export default async function BibleVersesPage() {
@@ -66,7 +67,7 @@ export default async function BibleVersesPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
           {parentTopics.map(topic => (
-            <Link key={topic.id} href={`/bible-verses/${topicSlug(topic.name)}`} style={{ textDecoration: 'none' }}>
+            <Link key={topic.id} href={`/bible-verses-about-${topicSlug(topic.name)}/`} style={{ textDecoration: 'none' }}>
               <div style={{
                 backgroundColor: 'white', border: '1px solid #e8dfc8',
                 borderRadius: '0.875rem', padding: '1.25rem', cursor: 'pointer',
