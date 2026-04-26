@@ -67,9 +67,10 @@ HARD RULES:
 export async function POST(request) {
   const body = await request.json();
 
-  const topicIds  = Array.isArray(body.topicIds) ? body.topicIds : [];
-  const category  = body.category || 'questions';
-  const safeLimit = Math.min(Math.max(parseInt(body.limit ?? body.count ?? 20, 10) || 20, 1), 50);
+  const topicIds   = Array.isArray(body.topicIds) ? body.topicIds : [];
+  const category   = body.category || 'questions';
+  const safeLimit  = Math.min(Math.max(parseInt(body.limit ?? body.count ?? 20, 10) || 20, 1), 50);
+  const saveStatus = body.saveAsDraft === true ? 'draft' : 'published';
 
   const encoder = new TextEncoder();
 
@@ -161,6 +162,7 @@ export async function POST(request) {
 
             const { html: enrichedHtml } = await enrichContent(article.content);
             article.content = enrichedHtml;
+            article.status  = saveStatus;
 
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();
 
@@ -169,7 +171,7 @@ export async function POST(request) {
               send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason });
               skipped++;
             } else {
-              send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug });
+              send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug, status: saveStatus });
               generated++;
             }
           } catch (err) {

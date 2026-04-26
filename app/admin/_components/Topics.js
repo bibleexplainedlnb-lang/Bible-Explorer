@@ -41,7 +41,7 @@ function TopicRow({ t, indent = false, pillarLoading, onTogglePillar, query }) {
       background: indent ? '#fdfaf4' : '#f9f5ee',
       borderRadius: '0.5rem',
       border: `1px solid ${indent ? '#ede8dc' : '#e8dfc8'}`,
-      opacity: t.article_created ? 0.78 : 1,
+      opacity: t.is_created ? 0.78 : 1,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
         {indent && <span style={{ color: '#b8a07a', fontSize: '0.8rem', flexShrink: 0 }}>└─</span>}
@@ -57,8 +57,10 @@ function TopicRow({ t, indent = false, pillarLoading, onTogglePillar, query }) {
         {t._orphan && <span style={{ fontSize: '0.7rem', color: '#c00', background: '#fff0f0', padding: '0.1rem 0.4rem', borderRadius: '1rem', border: '1px solid #f5c6c6' }}>orphan</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
-        <span style={t.article_created ? S.createdBadge : S.pendingBadge}>
-          {t.article_created ? '✔ Created' : '⬜'}
+        <span style={t.is_created ? S.createdBadge : S.pendingBadge}>
+          {t.is_created
+            ? `✔ ${t.article_count > 1 ? `${t.article_count} articles` : 'Created'}`
+            : '⬜'}
         </span>
         <button
           onClick={() => onTogglePillar(t)}
@@ -174,9 +176,9 @@ export default function Topics() {
       nodes = nodes
         .map(n => ({
           ...n,
-          children: n.children.filter(c => !c.article_created),
+          children: n.children.filter(c => !c.is_created),
         }))
-        .filter(n => !n.article_created || n.children.length > 0);
+        .filter(n => !n.is_created || n.children.length > 0);
     }
 
     if (q) {
@@ -194,8 +196,8 @@ export default function Topics() {
   }, [tabNodes, filterParent, showCreated, q]);
 
   const totalInTab  = tabNodes.length + tabNodes.reduce((s, n) => s + n.children.length, 0);
-  const createdInTab = tabNodes.filter(n => n.article_created).length
-    + tabNodes.flatMap(n => n.children).filter(c => c.article_created).length;
+  const createdInTab = tabNodes.filter(n => n.is_created).length
+    + tabNodes.flatMap(n => n.children).filter(c => c.is_created).length;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1.5rem', alignItems: 'start' }}>

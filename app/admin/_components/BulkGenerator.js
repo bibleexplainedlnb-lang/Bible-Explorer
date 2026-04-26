@@ -16,14 +16,23 @@ const S = {
   }),
   badge: (s) => ({
     display: 'inline-block', padding: '0.2rem 0.65rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: '600',
-    background: s === 'saved'   ? '#dcf5e7' : s === 'skipped' ? '#fff3cd' : s === 'pending' ? '#eef2ff' : '#f5f0e8',
-    color:      s === 'saved'   ? '#1b5e20' : s === 'skipped' ? '#856404' : s === 'pending' ? '#3730a3' : '#8b7355',
+    background: s === 'saved'   ? '#dcf5e7' : s === 'skipped' ? '#fff3cd' : s === 'pending' ? '#eef2ff'
+              : s === 'draft'   ? '#fff3cd' : s === 'published' ? '#dcf5e7' : '#f5f0e8',
+    color:      s === 'saved'   ? '#1b5e20' : s === 'skipped' ? '#856404' : s === 'pending' ? '#3730a3'
+              : s === 'draft'   ? '#856404' : s === 'published' ? '#1b5e20' : '#8b7355',
   }),
   radio: { display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.6rem 0.875rem', borderRadius: '0.5rem', border: '1px solid #e8dfc8', background: '#f9f5ee', marginBottom: '0.4rem' },
 };
 
 function toSlug(name = '') {
   return name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+}
+
+function strengthLabel(count) {
+  if (count >= 6) return { label: 'Strong',  color: '#1b5e20', bg: '#dcf5e7' };
+  if (count >= 3) return { label: 'Growing', color: '#856404', bg: '#fff3cd' };
+  if (count >= 1) return { label: 'Weak',    color: '#92400e', bg: '#fef3c7' };
+  return null;
 }
 
 const SCOPES = [
@@ -40,6 +49,7 @@ export default function BulkGenerator({ onSaved }) {
   const [childId,       setChildId]       = useState('');
   const [scope,         setScope]         = useState('children');
   const [limit,         setLimit]         = useState(10);
+  const [saveAsDraft,   setSaveAsDraft]   = useState(false);
   const [phase,         setPhase]         = useState('config');
   const [status,        setStatus]        = useState('idle');
   const [progress,      setProgress]      = useState({ current: 0, total: 0, topic: '' });
@@ -61,6 +71,17 @@ export default function BulkGenerator({ onSaved }) {
       console.error('[BulkGenerator] hierarchy load error:', err);
     }
     setLoadingH(false);
+  }
+
+  // Refresh hierarchy without clearing selections (used after generation)
+  async function refreshHierarchy(cat) {
+    try {
+      const res = await fetch(`/api/topics/hierarchy?category=${cat}`);
+      const d   = await res.json();
+      if (Array.isArray(d)) setHierarchy(d);
+    } catch (err) {
+      console.error('[BulkGenerator] hierarchy refresh error:', err);
+    }
   }
 
   useEffect(() => { loadHierarchy(category); }, [category]);
@@ -102,7 +123,7 @@ export default function BulkGenerator({ onSaved }) {
       const res = await fetch('/api/admin/bulk-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topicIds, category, limit }),
+        body: JSON.stringify({ topicIds, category, limit, saveAsDraft }),
       });
 
       if (!res.ok) {
@@ -136,12 +157,14 @@ export default function BulkGenerator({ onSaved }) {
           } else if (event.type === 'progress') {
             setProgress({ current: event.current, total: event.total, topic: event.topic });
           } else if (event.type === 'saved') {
-            setLog(prev => [...prev, { kind: 'saved',   title: event.title, slug: event.slug, n: event.current, total: event.total }]);
+            setLog(prev => [...prev, { kind: 'saved', title: event.title, slug: event.slug, articleStatus: event.status, n: event.current, total: event.total }]);
           } else if (event.type === 'skipped') {
             setLog(prev => [...prev, { kind: 'skipped', title: event.topic, reason: event.reason, n: event.current, total: event.total }]);
           } else if (event.type === 'done') {
             setSummary({ generated: event.generated, skipped: event.skipped });
             setStatus('done');
+            // Refresh hierarchy so is_created / article_count reflect DB truth
+            refreshHierarchy(category);
             onSaved?.();
           } else if (event.type === 'error') {
             setError(event.message);
@@ -198,6 +221,7 @@ export default function BulkGenerator({ onSaved }) {
                 {hierarchy.map(n => (
                   <option key={n.id} value={n.id}>
                     {n.name}{n.children.length ? ` (${n.children.length} children)` : ''}
+                    {n.is_created ? ` ✔` : ''}
                   </option>
                 ))}
               </select>
@@ -212,13 +236,15 @@ export default function BulkGenerator({ onSaved }) {
               >
                 <option value="">— {childOptions.length ? 'Select child topic' : 'No children available'} —</option>
                 {childOptions.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}{c.article_created ? ' ✔' : ''}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}{c.is_created ? ` ✔ (${c.article_count})` : ''}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div style={{ marginBottom: '1.75rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <label style={S.label}>Generate for</label>
             {SCOPES.map(s => {
               const disabled =
@@ -244,6 +270,29 @@ export default function BulkGenerator({ onSaved }) {
                 </label>
               );
             })}
+          </div>
+
+          {/* ── Publish / Draft toggle ── */}
+          <div style={{ marginBottom: '1.75rem' }}>
+            <label style={S.label}>Save mode</label>
+            <label style={{ ...S.radio, cursor: 'pointer', background: !saveAsDraft ? '#f0fdf4' : '#f9f5ee', borderColor: !saveAsDraft ? '#86efac' : '#e8dfc8', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={saveAsDraft}
+                onChange={e => setSaveAsDraft(e.target.checked)}
+                style={{ accentColor: '#1e2d4a', width: '1rem', height: '1rem' }}
+              />
+              <div>
+                <div style={{ fontWeight: '600', color: '#1e2d4a', fontSize: '0.9rem' }}>
+                  {saveAsDraft ? '📄 Save as Draft' : '🟢 Publish immediately'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#8b7355' }}>
+                  {saveAsDraft
+                    ? 'Articles are saved as drafts — review them in the Articles tab before publishing.'
+                    : 'Articles go live immediately and will appear on your site.'}
+                </div>
+              </div>
+            </label>
           </div>
 
           <button
@@ -275,40 +324,62 @@ export default function BulkGenerator({ onSaved }) {
                   Scope: <strong>{SCOPES.find(s => s.value === scope)?.label}</strong>
                   {selectedParent && <> · Parent: <strong>{selectedParent.name}</strong></>}
                   {selectedChild  && scope === 'child' && <> · Child: <strong>{selectedChild.name}</strong></>}
+                  {' · '}
+                  <span style={{ color: saveAsDraft ? '#856404' : '#1b5e20', fontWeight: '700' }}>
+                    {saveAsDraft ? '📄 Draft' : '🟢 Publish immediately'}
+                  </span>
                 </p>
               </div>
               <button onClick={backToConfig} style={S.btn('ghost')}>← Edit</button>
             </div>
 
             <div style={{ border: '1px solid #e8dfc8', borderRadius: '0.75rem', overflow: 'hidden' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', padding: '0.5rem 1rem', background: '#f5f0e8', fontSize: '0.78rem', fontWeight: '700', color: '#8b7355', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.75rem', padding: '0.5rem 1rem', background: '#f5f0e8', fontSize: '0.78rem', fontWeight: '700', color: '#8b7355', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <span>Topic</span>
+                <span>Strength</span>
                 <span>Status</span>
               </div>
-              {previewTopics.map((t, i) => (
-                <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem', alignItems: 'center', padding: '0.75rem 1rem', borderTop: i > 0 ? '1px solid #f0ebe0' : 'none', background: '#fff' }}>
-                  <div>
-                    <div style={{ fontWeight: '600', color: '#1e2d4a', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{t.name}</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#8b7355' }}>
-                      slug preview: {toSlug(t.name)}
+              {previewTopics.map((t, i) => {
+                const strength = strengthLabel(t.article_count || 0);
+                return (
+                  <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.75rem', alignItems: 'center', padding: '0.75rem 1rem', borderTop: i > 0 ? '1px solid #f0ebe0' : 'none', background: '#fff' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', color: '#1e2d4a', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{t.name}</div>
+                      <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#8b7355' }}>
+                        slug: {toSlug(t.name)}
+                      </div>
+                    </div>
+                    <div>
+                      {strength ? (
+                        <span style={{ display: 'inline-block', padding: '0.15rem 0.55rem', borderRadius: '1rem', fontSize: '0.72rem', fontWeight: '700', background: strength.bg, color: strength.color }}>
+                          {strength.label} ({t.article_count})
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#ccc' }}>—</span>
+                      )}
+                    </div>
+                    <div>
+                      {t.is_created ? (
+                        <span style={S.badge('published')}>✔ {t.article_count} article{t.article_count !== 1 ? 's' : ''}</span>
+                      ) : (
+                        <span style={S.badge('pending')}>Pending</span>
+                      )}
                     </div>
                   </div>
-                  <span style={S.badge(t.article_created ? 'done' : 'pending')}>
-                    {t.article_created ? 'Has article' : 'Pending'}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {previewTopics.some(t => t.article_created) && (
+            {previewTopics.some(t => t.is_created) && (
               <p style={{ margin: '0.875rem 0 0', fontSize: '0.82rem', color: '#856404', background: '#fff3cd', border: '1px solid #ffc107', padding: '0.5rem 0.75rem', borderRadius: '0.5rem' }}>
-                Topics marked "Has article" will be skipped (already have a published article).
+                Topics marked "✔ articles" already have published articles and will be skipped.
               </p>
             )}
           </div>
 
           <button onClick={handleGenerate} style={S.btn('primary')}>
             ✦ Generate {previewTopics.length} Article{previewTopics.length !== 1 ? 's' : ''}
+            {saveAsDraft ? ' (as drafts)' : ' (publish immediately)'}
           </button>
         </div>
       )}
@@ -346,10 +417,12 @@ export default function BulkGenerator({ onSaved }) {
           {summary && (
             <div style={{ ...S.card, marginBottom: '1.25rem', background: '#f3fbf6', border: '1px solid #b7dfc8' }}>
               <p style={{ margin: '0 0 0.25rem', fontWeight: '700', color: '#1b5e20', fontSize: '1rem' }}>
-                ✓ Done — {summary.generated} saved, {summary.skipped} skipped
+                ✓ Done — {summary.generated} {saveAsDraft ? 'saved as drafts' : 'published'}, {summary.skipped} skipped
               </p>
               <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#4a7c59' }}>
-                All saved as drafts. Go to the Dashboard tab to review and publish.
+                {saveAsDraft
+                  ? 'Articles saved as drafts. Go to the Articles tab to review and publish.'
+                  : 'Articles are live on your site. Topic statuses have been refreshed.'}
               </p>
               <div style={{ display: 'flex', gap: '0.75rem' }}>
                 <button onClick={backToConfig} style={S.btn('secondary')}>← New batch</button>
@@ -371,7 +444,12 @@ export default function BulkGenerator({ onSaved }) {
                       {item.kind === 'saved'   && item.slug   && <span style={{ display: 'block', fontSize: '0.75rem', color: '#8b7355', fontFamily: 'monospace', marginTop: '0.1rem' }}>{item.slug}</span>}
                       {item.kind === 'skipped' && item.reason && <span style={{ display: 'block', fontSize: '0.75rem', color: '#856404', marginTop: '0.1rem' }}>{item.reason}</span>}
                     </div>
-                    <span style={S.badge(item.kind)}>{item.kind === 'saved' ? 'Saved' : 'Skipped'}</span>
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexShrink: 0 }}>
+                      {item.kind === 'saved' && item.articleStatus && (
+                        <span style={S.badge(item.articleStatus)}>{item.articleStatus === 'published' ? '🟢 Published' : '📄 Draft'}</span>
+                      )}
+                      <span style={S.badge(item.kind)}>{item.kind === 'saved' ? 'Saved' : 'Skipped'}</span>
+                    </div>
                   </div>
                 ))}
               </div>
