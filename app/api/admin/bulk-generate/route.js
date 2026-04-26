@@ -128,8 +128,17 @@ export async function POST(request) {
           .eq('status', 'published')
           .limit(5000);
 
-        const usedTopicIds   = new Set((publishedArticles || []).map(a => a.topic_id).filter(Boolean));
-        const existingSlugs  = new Set((publishedArticles || []).map(a => a.slug));
+        // Also fetch drafts so we don't regenerate topics that already have any article
+        const { data: draftArticles } = await supabase
+          .from('articles')
+          .select('slug, topic_id')
+          .eq('status', 'draft')
+          .limit(5000);
+
+        const allExisting = [...(publishedArticles || []), ...(draftArticles || [])];
+
+        const usedTopicIds   = new Set(allExisting.map(a => a.topic_id).filter(Boolean));
+        const existingSlugs  = new Set(allExisting.map(a => a.slug));
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
         const toProcess = orderedTopics.filter(t => !usedTopicIds.has(t.id));

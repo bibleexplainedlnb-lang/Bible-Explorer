@@ -60,7 +60,7 @@ export async function POST(request) {
         // Smart interlinking
         if (smart) {
           const { html: linked, linksAdded: n } = interlinkArticle(
-            { ...full, content: stripped, category: article.category },
+            { ...full, content: stripped, category: article.category, parentTopicId: article.parent_topic_id || null },
             pool
           );
           html       = linked;
@@ -112,7 +112,7 @@ async function fetchPool() {
   while (true) {
     const { data, error } = await supabase
       .from('articles')
-      .select('id, slug, title, topic_id, link_count, status, topics(category, is_pillar)')
+      .select('id, slug, title, topic_id, link_count, status, topics(category, is_pillar, parent_id)')
       .neq('status', 'rejected')
       .range(from, from + 999);
 
@@ -120,14 +120,15 @@ async function fetchPool() {
 
     for (const row of data) {
       all.push({
-        id:        row.id,
-        slug:      row.slug,
-        title:     row.title,
-        topic_id:  row.topic_id,
-        category:  row.topics?.category || '',
-        is_pillar: !!row.topics?.is_pillar,
-        link_count: row.link_count || 0,
-        status:    row.status,
+        id:              row.id,
+        slug:            row.slug,
+        title:           row.title,
+        topic_id:        row.topic_id,
+        parent_topic_id: row.topics?.parent_id || null,
+        category:        row.topics?.category || '',
+        is_pillar:       !!row.topics?.is_pillar,
+        link_count:      row.link_count || 0,
+        status:          row.status,
       });
     }
 

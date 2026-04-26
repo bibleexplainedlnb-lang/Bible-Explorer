@@ -31,15 +31,20 @@ export async function POST(_req, { params }) {
       return NextResponse.json({ error: artErr?.message || 'Article not found' }, { status: 404 });
     }
 
-    // 2. Fetch pool (all published articles with category + pillar info)
+    // 2. Fetch pool (all published articles with category + pillar + parent_id info)
     const pool = await fetchPool();
 
     // 3. Strip all old links (article-links AND verse-refs — both will be re-added)
     const stripped = stripArticleLinks(article.content || '');
 
-    // 4. Smart interlinking
+    // 4. Resolve category and parent topic id for hierarchy-aware linking
+    const poolEntry = pool.find(p => p.id === article.id);
+    const category  = poolEntry?.category || '';
+    const parentTopicId = poolEntry?.parent_topic_id || null;
+
+    // 5. Smart interlinking
     const { html: linked, linksAdded } = interlinkArticle(
-      { ...article, content: stripped, category: resolveCategory(article, pool) },
+      { ...article, content: stripped, category, parentTopicId },
       pool
     );
 
@@ -83,7 +88,7 @@ async function fetchPool() {
   while (true) {
     const { data, error } = await supabase
       .from('articles')
-      .select('id, slug, title, topic_id, link_count, topics(category, is_pillar)')
+      .select('id, slug, title, topic_id, link_count, topics(category, is_pillar, parent_id)')
       .eq('status', 'published')
       .range(from, from + 999);
 
@@ -91,13 +96,14 @@ async function fetchPool() {
 
     for (const row of data) {
       all.push({
-        id:        row.id,
-        slug:      row.slug,
-        title:     row.title,
-        topic_id:  row.topic_id,
-        category:  row.topics?.category || '',
-        is_pillar: !!row.topics?.is_pillar,
-        link_count: row.link_count || 0,
+        id:              row.id,
+        slug:            row.slug,
+        title:           row.title,
+        topic_id:        row.topic_id,
+        parent_topic_id: row.topics?.parent_id || null,
+        category:        row.topics?.category || '',
+        is_pillar:       !!row.topics?.is_pillar,
+        link_count:      row.link_count || 0,
       });
     }
 

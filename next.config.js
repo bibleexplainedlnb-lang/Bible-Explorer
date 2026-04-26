@@ -17,6 +17,9 @@ const nextConfig = {
       // Topic slug corrections
       { source: '/topics/god-response-to-repentance',  destination: '/topics/gods-response-to-repentance', permanent: true },
       { source: '/topics/god-response-to-repentance/', destination: '/topics/gods-response-to-repentance', permanent: true },
+      // Bible-character duplicate slug corrections
+      { source: '/bible-characters/who-was-titus-bible-in-the-bible',  destination: '/bible-characters/who-was-titus-in-the-bible', permanent: true },
+      { source: '/bible-characters/who-was-titus-bible-in-the-bible/', destination: '/bible-characters/who-was-titus-in-the-bible', permanent: true },
       // Old -2 slug URLs → correct /bible-verses/ paths
       ...slugPairs.flatMap(([old, next]) => [
         { source: `/guides/${old}`,  destination: `/bible-verses/${next}`, permanent: true },
