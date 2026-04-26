@@ -35,15 +35,28 @@ HARD RULES:
 - content field: valid HTML string, all double-quotes inside escaped as \\"
 - Return ONLY the JSON — nothing before or after it`;
 
-  const raw = await callOpenRouter([
+  const MESSAGES = [
     {
       role: 'system',
       content: `You are a senior Christian content writer with 15 years of experience writing for major Bible study publications. Your writing is known for being human, direct, and grounded in Scripture without being preachy. You write for real people dealing with real struggles — not for bots or algorithms. You always respond with valid JSON only, exactly as specified.`,
     },
     { role: 'user', content: prompt },
-  ]);
+  ];
 
-  const generated = JSON.parse(raw);
+  // Attempt once, retry once on any failure (truncation, parse error, transient network)
+  let raw;
+  let generated;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      raw       = await callOpenRouter(MESSAGES);
+      generated = JSON.parse(raw);
+      break; // success
+    } catch (err) {
+      if (attempt === 2) throw err; // re-throw on second failure
+      // Brief pause before retry to avoid hammering the API
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
 
   // Enforce deterministic title/slug for strict-format categories
   const enforced   = enforceArticleMeta(category, topic.name.trim());
