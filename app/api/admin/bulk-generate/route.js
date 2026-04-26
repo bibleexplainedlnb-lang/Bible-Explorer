@@ -10,7 +10,7 @@ function sseEvent(data) {
 
 async function generateArticle(topic, category, existingSlugs, existingTitles) {
   const contentPrompt = getPrompt(category, topic.name.trim(), '');
-  const titleHint = buildTitleHint(category, topic.name.trim());
+  const titleHint     = buildTitleHint(category, topic.name.trim());
 
   const prompt = `EXISTING ARTICLES — do NOT write a duplicate of any of these:
 ${existingTitles || '  (none yet)'}
@@ -24,7 +24,7 @@ Return ONLY this JSON object (no markdown, no code fences, no commentary outside
   "meta_title":       "SEO title under 60 chars",
   "meta_description": "140-155 char meta description that makes someone want to click",
   "keywords":         ["3-5 keyword strings"],
-  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\"Verse text\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
+  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\\"Verse text\\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
 }
 
 HARD RULES:
@@ -42,7 +42,6 @@ HARD RULES:
   ]);
 
   const generated = JSON.parse(raw);
-
   const slug = sanitiseSlug(generated.slug || generated.title || '');
   if (!slug) throw new Error('Could not generate a valid slug');
 
@@ -53,14 +52,17 @@ HARD RULES:
     meta_description: generated.meta_description || null,
     keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
     content:          generated.content || '',
-    topic_id:         topic.id || null,
+    topic_id:         topic.id,
     status:           'draft',
   };
 }
 
 export async function POST(request) {
-  const { category, count = 5 } = await request.json();
-  const safeCount = Math.min(Math.max(parseInt(count, 10) || 5, 1), 20);
+  const body = await request.json();
+
+  const topicIds  = Array.isArray(body.topicIds) ? body.topicIds : [];
+  const category  = body.category || 'questions';
+  const safeLimit = Math.min(Math.max(parseInt(body.limit ?? body.count ?? 20, 10) || 20, 1), 50);
 
   const encoder = new TextEncoder();
 
@@ -72,67 +74,78 @@ export async function POST(request) {
 
       try {
         if (!supabase) {
-          send({ type: 'error', message: 'Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' });
+          send({ type: 'error', message: 'Supabase is not configured.' });
           controller.close();
           return;
         }
 
-        const [{ data: topicsData, error: topicsError }, { data: publishedArticles }] = await Promise.all([
-          supabase.from('topics').select('id, name, category').eq('category', category || 'questions'),
-          // Only published articles — drafts should NOT block new generation
-          supabase.from('articles').select('slug, title, topic_id').eq('status', 'published').limit(2000),
-        ]);
+        if (!topicIds.length) {
+          send({ type: 'error', message: 'No topics selected. Choose a parent, child, or scope in the form.' });
+          controller.close();
+          return;
+        }
+
+        const { data: topicsData, error: topicsError } = await supabase
+          .from('topics')
+          .select('id, name, category')
+          .in('id', topicIds);
 
         if (topicsError || !topicsData?.length) {
-          send({ type: 'error', message: `No topics found for category "${category}". Add topics first in the Topics tab.` });
+          send({ type: 'error', message: 'Could not load the selected topics from the database.' });
           controller.close();
           return;
         }
 
-        const usedTopicIds = new Set(
-          (publishedArticles || [])
-            .map(a => a.topic_id)
-            .filter(Boolean)
-        );
+        const orderedTopics = topicIds
+          .map(id => topicsData.find(t => t.id === id))
+          .filter(Boolean)
+          .slice(0, safeLimit);
 
-        const availableTopics = topicsData.filter(t => !usedTopicIds.has(t.id));
+        const { data: publishedArticles } = await supabase
+          .from('articles')
+          .select('slug, title, topic_id')
+          .eq('status', 'published')
+          .limit(5000);
 
-        if (!availableTopics.length) {
-          send({ type: 'error', message: `All topics in "${category}" already have published articles. Add more topics first.` });
-          controller.close();
-          return;
-        }
-
+        const usedTopicIds   = new Set((publishedArticles || []).map(a => a.topic_id).filter(Boolean));
         const existingSlugs  = new Set((publishedArticles || []).map(a => a.slug));
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
-        const shuffled = [...availableTopics].sort(() => Math.random() - 0.5);
-        const pickedTopics = Array.from({ length: safeCount }, (_, i) => shuffled[i % shuffled.length]);
+        const toProcess = orderedTopics.filter(t => !usedTopicIds.has(t.id));
+        const preSkipped = orderedTopics.length - toProcess.length;
+
+        const total = toProcess.length;
+
+        if (!total) {
+          send({ type: 'error', message: `All ${orderedTopics.length} selected topic(s) already have published articles.` });
+          controller.close();
+          return;
+        }
+
+        send({ type: 'start', total, preSkipped });
 
         let generated = 0;
-        let skipped   = 0;
+        let skipped   = preSkipped;
 
-        for (let i = 0; i < pickedTopics.length; i++) {
-          const topic = pickedTopics[i];
-          send({ type: 'progress', current: i + 1, total: safeCount, topic: topic.name });
+        for (let i = 0; i < toProcess.length; i++) {
+          const topic = toProcess[i];
+          send({ type: 'progress', current: i + 1, total, topic: topic.name });
 
           try {
             const article = await generateArticle(topic, category, existingSlugs, existingTitles);
 
-            // Deduplicate slug (against published + already-generated-this-run)
             if (existingSlugs.has(article.slug)) {
               let n = 2;
               while (existingSlugs.has(`${article.slug}-${n}`)) n++;
               article.slug = `${article.slug}-${n}`;
             }
 
-            // Check for exact duplicate title among published articles only (in-memory)
             const titleLower = (article.title || '').toLowerCase().trim();
             const titleConflict = (publishedArticles || []).some(
               a => (a.title || '').toLowerCase().trim() === titleLower
             );
             if (titleConflict) {
-              send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: 'Published article with identical title already exists' });
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: 'Identical title already published' });
               skipped++;
               continue;
             }
@@ -145,25 +158,21 @@ export async function POST(request) {
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();
 
             if (insertError) {
-              if (insertError.code === '23505') {
-                send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: 'Duplicate slug' });
-                skipped++;
-              } else {
-                send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: insertError.message });
-                skipped++;
-              }
+              const reason = insertError.code === '23505' ? 'Duplicate slug' : insertError.message;
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason });
+              skipped++;
             } else {
-              send({ type: 'saved', current: i + 1, total: safeCount, title: article.title, slug: article.slug });
+              send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug });
               generated++;
             }
           } catch (err) {
-            console.error(`[bulk-generate] article ${i + 1} failed:`, err.message);
-            send({ type: 'skipped', current: i + 1, total: safeCount, topic: topic.name, reason: err.message });
+            console.error(`[bulk-generate] topic "${topic.name}" failed:`, err.message);
+            send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: err.message });
             skipped++;
           }
         }
 
-        send({ type: 'done', generated, skipped, total: safeCount });
+        send({ type: 'done', generated, skipped });
       } catch (err) {
         console.error('[bulk-generate]', err);
         send({ type: 'error', message: err.message });
