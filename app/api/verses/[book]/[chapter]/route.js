@@ -10,7 +10,7 @@ import prisma from '../../../../../lib/prisma.js';
  * Returns a single verse by book, chapter, and verse number.
  */
 export async function GET(request, { params }) {
-  const { book, chapter } = params;
+  const { book, chapter } = await params;
   const chapterNum = parseInt(chapter, 10);
   const { searchParams } = new URL(request.url);
   const verseParam = searchParams.get('verse');

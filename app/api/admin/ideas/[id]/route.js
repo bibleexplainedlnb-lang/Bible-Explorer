@@ -5,7 +5,7 @@ import { supabaseAdmin as supabase } from '../../../../../lib/supabaseAdmin.js';
 
 export async function PATCH(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json().catch(() => ({}));
     const used = body.used !== undefined ? body.used : true;
 

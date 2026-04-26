@@ -27,9 +27,7 @@ const nextConfig = {
       ]),
     ];
   },
-  experimental: {
-    serverComponentsExternalPackages: ['better-sqlite3', '@prisma/client', 'prisma'],
-  },
+  serverExternalPackages: ['better-sqlite3', '@prisma/client', 'prisma'],
   allowedDevOrigins: [
     'localhost',
     '127.0.0.1',

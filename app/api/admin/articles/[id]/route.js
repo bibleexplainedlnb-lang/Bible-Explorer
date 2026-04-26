@@ -10,10 +10,11 @@ function isSchemaError(msg = '') {
 }
 
 export async function GET(request, { params }) {
+  const { id } = await params;
   const { data, error } = await supabase
     .from('articles')
     .select('*, topics(name, category)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 404 });
@@ -22,6 +23,7 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const allowed = ['title', 'slug', 'content', 'meta_title', 'meta_description', 'keywords', 'related_slugs', 'status', 'topic_id'];
     const updates = {};
@@ -35,7 +37,7 @@ export async function PATCH(request, { params }) {
       const { data: current } = await supabase
         .from('articles')
         .select('slug')
-        .eq('id', params.id)
+        .eq('id', id)
         .single();
       if (current && current.slug !== updates.slug) {
         oldSlug = current.slug;
@@ -45,7 +47,7 @@ export async function PATCH(request, { params }) {
     let { data, error } = await supabase
       .from('articles')
       .update(updates)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -53,7 +55,7 @@ export async function PATCH(request, { params }) {
       console.warn('[articles PATCH] schema fallback — retrying without optional SEO columns');
       const safeUpdates = { ...updates };
       for (const k of OPTIONAL_COLS) delete safeUpdates[k];
-      ({ data, error } = await supabase.from('articles').update(safeUpdates).eq('id', params.id).select().single());
+      ({ data, error } = await supabase.from('articles').update(safeUpdates).eq('id', id).select().single());
     }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -75,7 +77,8 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const { error } = await supabase.from('articles').delete().eq('id', params.id);
+  const { id } = await params;
+  const { error } = await supabase.from('articles').delete().eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

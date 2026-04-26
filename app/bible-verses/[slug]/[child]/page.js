@@ -57,11 +57,12 @@ async function resolveChild(parentSlug, childSlug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { articles, parentTopic, childTopic } = await resolveChild(params.slug, params.child);
+  const { slug, child } = await params;
+  const { articles, parentTopic, childTopic } = await resolveChild(slug, child);
 
   if (!parentTopic || !childTopic) return { title: 'Not Found', robots: { index: false } };
 
-  const canonical = `${SITE_URL}/bible-verses-about-${params.slug}/${params.child}/`;
+  const canonical = `${SITE_URL}/bible-verses-about-${slug}/${child}/`;
   const primary   = articles[0];
 
   return {
@@ -86,11 +87,10 @@ const RELATED_CATEGORIES = [
 ];
 
 export default async function BibleVersesChildPage({ params }) {
-  const { articles, parentTopic, childTopic, siblings } = await resolveChild(params.slug, params.child);
+  const { slug, child } = await params;
+  const { articles, parentTopic, childTopic, siblings } = await resolveChild(slug, child);
 
   if (!parentTopic || !childTopic) notFound();
-
-  const { slug, child } = params;
   const hasArticles = articles.length > 0;
   const singleArticle = articles.length === 1 ? articles[0] : null;
 

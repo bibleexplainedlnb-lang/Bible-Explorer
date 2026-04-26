@@ -18,7 +18,7 @@ import { stripArticleLinks, enrichContent } from '../../../../../../lib/seoEnric
  */
 export async function POST(_req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 1. Fetch the target article
     const { data: article, error: artErr } = await supabase

@@ -7,12 +7,13 @@ import { findBook, BIBLE_BOOKS } from '../../../../lib/bible.js';
 import { bibleNotes } from '../../../../lib/db.js';
 import { addLinksToText } from '../../../../lib/internalLinks.js';
 
-export function generateMetadata({ params }) {
-  const book = findBook(params.book);
+export async function generateMetadata({ params }) {
+  const { book: bookParam, chapter } = await params;
+  const book = findBook(bookParam);
   if (!book) return { title: 'Not Found' };
   return {
-    title: `${book.name} ${params.chapter}`,
-    alternates: { canonical: `/bible/${params.book}/${params.chapter}/` },
+    title: `${book.name} ${chapter}`,
+    alternates: { canonical: `/bible/${bookParam}/${chapter}/` },
   };
 }
 
@@ -121,10 +122,11 @@ function ExplanationPanel({ notes }) {
 }
 
 export default async function BibleChapterPage({ params }) {
-  const book = findBook(params.book);
+  const { book: bookParam, chapter: chapterParam } = await params;
+  const book = findBook(bookParam);
   if (!book) notFound();
 
-  const chapter = parseInt(params.chapter, 10);
+  const chapter = parseInt(chapterParam, 10);
   if (isNaN(chapter) || chapter < 1 || chapter > book.chapters) notFound();
 
   const [data, notes] = await Promise.all([

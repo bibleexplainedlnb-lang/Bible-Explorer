@@ -53,9 +53,10 @@ async function resolveParent(slug) {
 }
 
 export async function generateMetadata({ params }) {
-  const { parentTopic } = await resolveParent(params.slug);
+  const { slug } = await params;
+  const { parentTopic } = await resolveParent(slug);
   if (!parentTopic) return { title: 'Not Found' };
-  const canonical = `${SITE_URL}/bible-verses-about-${params.slug}/`;
+  const canonical = `${SITE_URL}/bible-verses-about-${slug}/`;
   return {
     title: `Bible Verses About ${parentTopic.name} | Bible Verse Insights`,
     description: `Explore Bible verses and scripture about ${parentTopic.name}. Browse all subtopics and articles.`,
@@ -72,10 +73,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function BibleVersesTopicPage({ params }) {
-  const { parentTopic, childTopics, articles, related } = await resolveParent(params.slug);
+  const { slug } = await params;
+  const { parentTopic, childTopics, articles, related } = await resolveParent(slug);
   if (!parentTopic) notFound();
-
-  const { slug } = params;
   const topicById = Object.fromEntries(childTopics.map(t => [t.id, t]));
 
   return (

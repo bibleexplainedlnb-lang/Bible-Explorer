@@ -3,8 +3,9 @@ import prisma from '../../../../lib/prisma.js';
 
 export async function GET(request, { params }) {
   try {
+    const { slug } = await params;
     const topic = await prisma.topic.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         questions: {
           select: {

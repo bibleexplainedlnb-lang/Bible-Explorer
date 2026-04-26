@@ -49,12 +49,13 @@ RETURN: The improved article as a valid HTML string only. No JSON wrapper. No ex
 
 export async function POST(request, { params }) {
   try {
+    const { id } = await params;
     if (!supabase) {
       return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 });
     }
 
     const { data: article, error: articleError } = await supabase
-      .from('articles').select('*, topics(name, category)').eq('id', params.id).single();
+      .from('articles').select('*, topics(name, category)').eq('id', id).single();
 
     if (articleError || !article) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
