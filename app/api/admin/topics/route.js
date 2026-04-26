@@ -50,24 +50,29 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { name, category, is_pillar = false } = await request.json();
+    const { name, category, is_pillar = false, parent_id = null } = await request.json();
     if (!name?.trim()) return NextResponse.json({ error: 'name is required' }, { status: 400 });
     if (!CATEGORY_VALUES.includes(category)) {
       return NextResponse.json({ error: `category must be one of: ${CATEGORY_VALUES.join(', ')}` }, { status: 400 });
     }
 
+    const row = { name: name.trim(), category, is_pillar: !!is_pillar };
+    if (parent_id) row.parent_id = parent_id;
+
     // Try with is_pillar first; fall back to without it if column doesn't exist
     let { data, error } = await supabase
       .from('topics')
-      .insert({ name: name.trim(), category, is_pillar: !!is_pillar })
+      .insert(row)
       .select()
       .single();
 
     if (error && isSchemaError(error.message)) {
       console.warn('[topics POST] is_pillar column absent — retrying without it');
+      const fallbackRow = { name: name.trim(), category };
+      if (parent_id) fallbackRow.parent_id = parent_id;
       ({ data, error } = await supabase
         .from('topics')
-        .insert({ name: name.trim(), category })
+        .insert(fallbackRow)
         .select()
         .single());
     }
