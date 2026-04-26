@@ -34,6 +34,23 @@ export default function AdminPage() {
             <h1 style={{ margin:'0.25rem 0 0', fontSize:'1.5rem', fontWeight:'bold' }}>Bible Explorer Admin</h1>
             <p style={{ margin:'0.2rem 0 0', color:'#a8b8cc', fontSize:'0.85rem' }}>Content Management & SEO Generator</p>
           </div>
+          <form action="/api/auth/logout" method="POST">
+            <button
+              type="submit"
+              style={{
+                background: 'transparent',
+                border: '1px solid #4a6080',
+                color: '#a8b8cc',
+                borderRadius: '0.375rem',
+                padding: '0.4rem 0.9rem',
+                fontSize: '0.8rem',
+                fontFamily: 'Georgia, serif',
+                cursor: 'pointer',
+              }}
+            >
+              Sign out
+            </button>
+          </form>
         </div>
 
         {/* Tab bar */}

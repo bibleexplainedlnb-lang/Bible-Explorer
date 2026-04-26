@@ -12,6 +12,8 @@ Bible Explorer — Next.js 14 (App Router, JavaScript) KJV Bible study site, mig
 - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL (admin article management; optional)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (admin article management; optional)
 - `NEXT_PUBLIC_SITE_URL` — Public site URL for sitemap/canonical (defaults to Vercel URL if not set)
+- `ADMIN_EMAIL` — Admin login email (secret; required for admin auth)
+- `ADMIN_PASSWORD` — Admin login password (secret; required for admin auth)
 
 ## Stack
 
