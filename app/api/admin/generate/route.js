@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, uniqueSlug, getPrompt, buildTitleHint, callOpenRouter } from '../../../../lib/generator.js';
+import { sanitiseSlug, uniqueSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 const AUTHOR_NAME = 'BVI Team';
@@ -93,8 +93,13 @@ HARD RULES:
     try { generated = JSON.parse(raw); }
     catch { return NextResponse.json({ error: 'AI returned invalid JSON', raw }, { status: 500 }); }
 
+    // Enforce deterministic title/slug for strict-format categories
+    const enforced = enforceArticleMeta(category, topicName.trim());
+    const finalTitle = enforced?.title ?? generated.title ?? topicName.trim();
+
     // Sanitise and deduplicate slug
-    const baseSlug = sanitiseSlug(generated.slug || generated.title || topicName.trim());
+    const rawSlug  = enforced?.slug ?? sanitiseSlug(generated.slug || generated.title || topicName.trim());
+    const baseSlug = sanitiseSlug(rawSlug);
     if (!baseSlug) return NextResponse.json({ error: 'Could not generate a valid slug' }, { status: 422 });
     const finalSlug = uniqueSlug(baseSlug, existingSlugs);
 
@@ -102,7 +107,7 @@ HARD RULES:
     const { html: enrichedContent } = await enrichContent(generated.content || '');
 
     return NextResponse.json({
-      title:            generated.title,
+      title:            finalTitle,
       slug:             finalSlug,
       meta_title:       generated.meta_title,
       meta_description: generated.meta_description,

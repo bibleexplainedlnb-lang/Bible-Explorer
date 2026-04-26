@@ -239,6 +239,7 @@ export default function Articles() {
   const [improving,     setImproving]     = useState(new Set());
   const [relinking,     setRelinking]     = useState(false);
   const [importing,     setImporting]     = useState(false);
+  const [fixingDrafts,  setFixingDrafts]  = useState(false);
   const [toast,         setToast]         = useState(null);
 
   const [interlinking,  setInterlinking]  = useState(new Set());
@@ -404,6 +405,25 @@ export default function Articles() {
     finally { setImporting(false); }
   }
 
+  async function fixDraftTitles(dryRun = false) {
+    setFixingDrafts(true); setToast(null);
+    try {
+      const res  = await fetch('/api/admin/articles/fix-drafts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dryRun }) });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'Fix failed' });
+      } else if (dryRun) {
+        const n = data.wouldFix || 0;
+        setToast({ status: 'success', message: n === 0 ? 'All draft titles are already correct.' : `Dry run: ${n} draft(s) would be fixed.` });
+      } else {
+        const n = data.fixed || 0;
+        setToast({ status: 'success', message: n === 0 ? 'All draft titles were already correct — nothing changed.' : `Fixed ${n} draft title(s) and slug(s).` });
+        if (n > 0) loadArticles();
+      }
+    } catch (err) { setToast({ status: 'error', message: err.message }); }
+    finally { setFixingDrafts(false); }
+  }
+
   const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
   return (
@@ -470,6 +490,14 @@ export default function Articles() {
           style={{ ...S.btn('import'), padding: '0.4rem 0.85rem', opacity: importing ? 0.6 : 1 }}
         >
           {importing ? '⟳ Importing…' : '⬇ Import Legacy'}
+        </button>
+
+        <button
+          onClick={() => fixDraftTitles(false)} disabled={fixingDrafts}
+          title="Fix titles and slugs of all draft articles to match the correct format for their category (e.g. 'Bible Verses About X')"
+          style={{ ...S.btn('upgrade'), padding: '0.4rem 0.85rem', opacity: fixingDrafts ? 0.6 : 1 }}
+        >
+          {fixingDrafts ? '⟳ Fixing…' : '✎ Fix Draft Titles'}
         </button>
       </div>
 

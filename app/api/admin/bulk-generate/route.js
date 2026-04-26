@@ -1,14 +1,16 @@
 export const dynamic = 'force-dynamic';
 
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter } from '../../../../lib/generator.js';
+import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 function sseEvent(data) {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-async function generateArticle(topic, category, existingSlugs, existingTitles) {
+async function generateArticle(topic, _categoryFallback, existingSlugs, existingTitles) {
+  // Always use the topic's own category from the DB — never trust the caller's fallback
+  const category      = topic.category || _categoryFallback || 'questions';
   const contentPrompt = getPrompt(category, topic.name.trim(), '');
   const titleHint     = buildTitleHint(category, topic.name.trim());
 
@@ -42,11 +44,16 @@ HARD RULES:
   ]);
 
   const generated = JSON.parse(raw);
-  const slug = sanitiseSlug(generated.slug || generated.title || '');
+
+  // Enforce deterministic title/slug for strict-format categories
+  const enforced   = enforceArticleMeta(category, topic.name.trim());
+  const finalTitle = enforced?.title ?? generated.title ?? topic.name;
+  const rawSlug    = enforced?.slug  ?? sanitiseSlug(generated.slug || generated.title || topic.name);
+  const slug       = sanitiseSlug(rawSlug);
   if (!slug) throw new Error('Could not generate a valid slug');
 
   return {
-    title:            generated.title || topic.name,
+    title:            finalTitle,
     slug,
     meta_title:       generated.meta_title || generated.title || null,
     meta_description: generated.meta_description || null,
