@@ -13,10 +13,16 @@ const nextConfig = {
       ['bible-verses-about-anxiety-2',          'bible-verses-about-anxiety'],
       ['bible-verses-about-being-thankful-2',   'bible-verses-about-being-thankful'],
     ];
-    return slugPairs.flatMap(([old, next]) => [
-      { source: `/guides/${old}`,  destination: `/bible-verses/${next}`, permanent: true },
-      { source: `/guides/${old}/`, destination: `/bible-verses/${next}`, permanent: true },
-    ]);
+    return [
+      // Topic slug corrections
+      { source: '/topics/god-response-to-repentance',  destination: '/topics/gods-response-to-repentance', permanent: true },
+      { source: '/topics/god-response-to-repentance/', destination: '/topics/gods-response-to-repentance', permanent: true },
+      // Old -2 slug URLs → correct /bible-verses/ paths
+      ...slugPairs.flatMap(([old, next]) => [
+        { source: `/guides/${old}`,  destination: `/bible-verses/${next}`, permanent: true },
+        { source: `/guides/${old}/`, destination: `/bible-verses/${next}`, permanent: true },
+      ]),
+    ];
   },
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3', '@prisma/client', 'prisma'],
