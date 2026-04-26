@@ -100,57 +100,85 @@ export async function POST(request) {
           return;
         }
 
-        if (!topicIds.length) {
-          send({ type: 'error', message: 'No topics selected. Choose a parent, child, or scope in the form.' });
-          controller.close();
-          return;
-        }
-
-        const { data: topicsData, error: topicsError } = await supabase
-          .from('topics')
-          .select('id, name, category')
-          .in('id', topicIds);
-
-        if (topicsError || !topicsData?.length) {
-          send({ type: 'error', message: 'Could not load the selected topics from the database.' });
-          controller.close();
-          return;
-        }
-
-        const orderedTopics = topicIds
-          .map(id => topicsData.find(t => t.id === id))
-          .filter(Boolean)
-          .slice(0, safeLimit);
-
+        // Fetch existing articles for deduplication
         const { data: publishedArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'published')
           .limit(5000);
 
-        // Fetch draft slugs separately — used only to avoid slug collisions, not to skip topics
+        // Fetch draft slugs — used only to avoid slug collisions, NOT to skip topics
         const { data: draftArticles } = await supabase
           .from('articles')
           .select('slug')
           .eq('status', 'draft')
           .limit(5000);
 
-        // Topics that already have a PUBLISHED article are skipped (same behaviour as before)
+        // Topics that already have a PUBLISHED article are skipped
         const usedTopicIds  = new Set((publishedArticles || []).map(a => a.topic_id).filter(Boolean));
-        // Slugs include both published AND draft so we never produce a duplicate URL
+        // Slugs from both published + draft to prevent duplicate URLs
         const existingSlugs = new Set([
           ...(publishedArticles || []).map(a => a.slug),
           ...(draftArticles     || []).map(a => a.slug),
         ]);
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
-        const toProcess = orderedTopics.filter(t => !usedTopicIds.has(t.id));
+        // Resolve the ordered list of topics to process
+        let orderedTopics;
+
+        if (topicIds.length > 0) {
+          // Specific topic IDs provided (advanced mode)
+          const { data: topicsData, error: topicsError } = await supabase
+            .from('topics')
+            .select('id, name, category')
+            .in('id', topicIds);
+
+          if (topicsError || !topicsData?.length) {
+            send({ type: 'error', message: 'Could not load the selected topics from the database.' });
+            controller.close();
+            return;
+          }
+
+          orderedTopics = topicIds
+            .map(id => topicsData.find(t => t.id === id))
+            .filter(Boolean)
+            .slice(0, safeLimit);
+        } else {
+          // Category-based auto-selection (simple mode)
+          const { data: categoryTopics, error: catErr } = await supabase
+            .from('topics')
+            .select('id, name, category')
+            .eq('category', category)
+            .order('name')
+            .limit(safeLimit * 5); // fetch extra so we can filter out already-created ones
+
+          if (catErr || !categoryTopics?.length) {
+            send({ type: 'error', message: `No topics found for category "${category}". Add topics first.` });
+            controller.close();
+            return;
+          }
+
+          // Only pick topics that don't have a published article yet
+          orderedTopics = categoryTopics
+            .filter(t => !usedTopicIds.has(t.id))
+            .slice(0, safeLimit);
+        }
+
+        if (!orderedTopics.length) {
+          send({ type: 'error', message: 'All topics in this category already have published articles.' });
+          controller.close();
+          return;
+        }
+
+        // toProcess = same as orderedTopics (usedTopicIds already filtered above for auto mode;
+        // for explicit topicIds mode we still apply the filter for safety)
+        const toProcess  = orderedTopics.filter(t => !usedTopicIds.has(t.id));
         const preSkipped = orderedTopics.length - toProcess.length;
 
         const total = toProcess.length;
 
         if (!total) {
-          send({ type: 'error', message: `All ${orderedTopics.length} selected topic(s) already have published articles.` });
+          send({ type: 'error', message: 'All selected topics already have published articles.' });
           controller.close();
           return;
         }
