@@ -128,17 +128,20 @@ export async function POST(request) {
           .eq('status', 'published')
           .limit(5000);
 
-        // Also fetch drafts so we don't regenerate topics that already have any article
+        // Fetch draft slugs separately — used only to avoid slug collisions, not to skip topics
         const { data: draftArticles } = await supabase
           .from('articles')
-          .select('slug, topic_id')
+          .select('slug')
           .eq('status', 'draft')
           .limit(5000);
 
-        const allExisting = [...(publishedArticles || []), ...(draftArticles || [])];
-
-        const usedTopicIds   = new Set(allExisting.map(a => a.topic_id).filter(Boolean));
-        const existingSlugs  = new Set(allExisting.map(a => a.slug));
+        // Topics that already have a PUBLISHED article are skipped (same behaviour as before)
+        const usedTopicIds  = new Set((publishedArticles || []).map(a => a.topic_id).filter(Boolean));
+        // Slugs include both published AND draft so we never produce a duplicate URL
+        const existingSlugs = new Set([
+          ...(publishedArticles || []).map(a => a.slug),
+          ...(draftArticles     || []).map(a => a.slug),
+        ]);
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
         const toProcess = orderedTopics.filter(t => !usedTopicIds.has(t.id));
