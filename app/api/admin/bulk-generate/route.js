@@ -100,34 +100,33 @@ export async function POST(request) {
           return;
         }
 
-        // Fetch ALL existing articles (published + draft) for full deduplication
+        // Fetch published articles — only these block generation (no duplicates of live content)
         const { data: publishedArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'published')
           .limit(5000);
 
+        // Also fetch draft slugs/titles to avoid URL and title collisions within this run
         const { data: draftArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'draft')
           .limit(5000);
 
-        // Topics that already have ANY article (published OR draft) are skipped
-        const usedTopicIds = new Set([
-          ...(publishedArticles || []).map(a => a.topic_id).filter(Boolean),
-          ...(draftArticles     || []).map(a => a.topic_id).filter(Boolean),
-        ]);
+        // Only PUBLISHED topics are skipped — topics with only a draft can be regenerated
+        const usedTopicIds = new Set(
+          (publishedArticles || []).map(a => a.topic_id).filter(Boolean)
+        );
         // All slugs (published + draft) to prevent URL collisions
         const existingSlugs = new Set([
           ...(publishedArticles || []).map(a => a.slug),
           ...(draftArticles     || []).map(a => a.slug),
         ]);
-        // All titles (published + draft) to prevent identical-title duplicates
-        const allTitlesLower = new Set([
-          ...(publishedArticles || []).map(a => (a.title || '').toLowerCase().trim()),
-          ...(draftArticles     || []).map(a => (a.title || '').toLowerCase().trim()),
-        ]);
+        // Only published titles are off-limits for the AI uniqueness hint
+        const allTitlesLower = new Set(
+          (publishedArticles || []).map(a => (a.title || '').toLowerCase().trim())
+        );
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
         // Resolve the ordered list of topics to process

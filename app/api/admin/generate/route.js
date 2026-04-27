@@ -26,13 +26,15 @@ async function fetchAllSlugs() {
   return slugs;
 }
 
-// Returns true if this topic already has any article (draft or published).
-async function topicHasArticle(topicId) {
+// Returns true if this topic already has a PUBLISHED article.
+// Drafts do NOT count — a topic with only a draft can still be regenerated.
+async function topicHasPublishedArticle(topicId) {
   if (!topicId) return false;
   const { data } = await supabase
     .from('articles')
     .select('id')
     .eq('topic_id', topicId)
+    .eq('status', 'published')
     .limit(1);
   return (data?.length ?? 0) > 0;
 }
@@ -59,10 +61,10 @@ export async function POST(request) {
       if (topic?.article_created) articleCreated = true;
     }
 
-    // HARD BLOCK — refuse to generate if this topic already has any article (draft or published).
-    // This is the primary safeguard against duplicates.
-    if (topicId && await topicHasArticle(topicId)) {
-      return NextResponse.json({ error: 'An article already exists for this topic. Delete it first before regenerating.' }, { status: 409 });
+    // Block generation only if a PUBLISHED article already exists for this topic.
+    // Draft articles are ignored — topics with only drafts can be regenerated freely.
+    if (topicId && await topicHasPublishedArticle(topicId)) {
+      return NextResponse.json({ error: 'A published article already exists for this topic.' }, { status: 409 });
     }
 
     // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
