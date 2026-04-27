@@ -1,0 +1,120 @@
+Upgrade homepage into a high-conversion SEO authority hub.
+
+IMPORTANT:
+
+* Do NOT remove existing sections
+* Maintain current UI design system
+* Only ADD new sections strategically
+
+==================================
+
+1. TRENDING NOW SECTION
+   ==================================
+
+Title: "Trending Now"
+
+* Fetch:
+  Most viewed OR latest high-engagement articles
+* Limit: 5–6
+* Place below hero
+
+==================================
+2. RECENTLY ADDED
+=================
+
+Title: "Recently Added"
+
+* Fetch:
+  Articles from last 72 hours
+* Order: newest first
+* Limit: 6
+
+==================================
+3. EXPLORE TOPICS
+=================
+
+* Fetch:
+  Topics with most articles OR latest
+* Limit: 6
+* Link to topic pages
+
+==================================
+4. BIBLE VERSES SECTION
+=======================
+
+* Fetch latest 6 articles
+* category = 'bible-verse'
+
+==================================
+5. BIBLE CHARACTERS
+===================
+
+* Fetch latest 6
+* category = 'bible-character'
+
+==================================
+6. POPULAR TOPICS (HIGH SEO)
+============================
+
+Title: "Popular Topics"
+
+* Fetch topics with:
+  highest article count OR views
+* Examples:
+  Love, Faith, Hope, Forgiveness
+
+==================================
+7. INTERNAL LINK BOOST
+======================
+
+Title: "You May Also Like"
+
+* Show related:
+
+  * topics
+  * guides
+  * questions
+
+==================================
+8. ORDER (FINAL)
+================
+
+1. Hero
+2. Trending Now
+3. Recently Added
+4. Featured Passages
+5. Study Guides
+6. Questions Answered
+7. Explore Topics
+8. Bible Verses
+9. Bible Characters
+10. Popular Topics
+11. You May Also Like
+12. CTA
+
+==================================
+9. PERFORMANCE
+==============
+
+* Max 6 items per section
+* Avoid duplicate queries
+* Use caching if possible
+
+==================================
+10. GOAL
+========
+
+Transform homepage into:
+
+* SEO authority hub
+* High CTR page
+* Deep navigation system
+
+==================================
+RULE
+====
+
+Do NOT break:
+
+* existing interlinking
+* existing UI structure
