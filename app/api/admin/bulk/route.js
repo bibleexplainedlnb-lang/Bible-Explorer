@@ -32,18 +32,27 @@ export async function POST(request) {
     }
 
     if (action === 'delete') {
-      const { error } = await supabase
+      const { data: deleted, error } = await supabase
         .from('articles')
         .delete()
-        .in('id', ids);
+        .in('id', ids)
+        .select('id');
 
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
+      const actualCount = deleted?.length ?? 0;
+      if (actualCount === 0) {
+        return NextResponse.json(
+          { error: 'Delete was blocked by the database. Add SUPABASE_SERVICE_ROLE_KEY to your secrets to enable admin deletes.' },
+          { status: 403 }
+        );
+      }
+
       return NextResponse.json({
-        message: `${ids.length} article${ids.length !== 1 ? 's' : ''} deleted.`,
-        deleted: ids.length,
+        message: `${actualCount} article${actualCount !== 1 ? 's' : ''} deleted.`,
+        deleted: actualCount,
       });
     }
 

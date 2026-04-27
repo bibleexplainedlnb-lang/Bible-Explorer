@@ -333,9 +333,14 @@ export default function Articles() {
 
   async function confirmDelete() {
     if (!deleting) return;
-    await fetch(`/api/admin/articles/${deleting.id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/articles/${deleting.id}`, { method: 'DELETE' });
     setDeleting(null);
-    loadArticles();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setToast({ status: 'error', message: body.error || 'Delete failed.' });
+    } else {
+      loadArticles();
+    }
   }
 
   function handleEditSaved(updated) {

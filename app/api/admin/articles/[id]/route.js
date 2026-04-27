@@ -84,7 +84,14 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
   const { id } = await params;
-  const { error } = await supabase.from('articles').delete().eq('id', id);
+  // Use .select('id') so we can detect if RLS silently blocked the delete (0 rows returned = not deleted)
+  const { data, error } = await supabase.from('articles').delete().eq('id', id).select('id');
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data?.length) {
+    return NextResponse.json(
+      { error: 'Delete was blocked — the database did not remove this article. Add SUPABASE_SERVICE_ROLE_KEY to your secrets to enable admin deletes.' },
+      { status: 403 }
+    );
+  }
   return NextResponse.json({ success: true });
 }

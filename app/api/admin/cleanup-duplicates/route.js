@@ -32,35 +32,49 @@ export async function POST() {
       byTopic[a.topic_id].push(a);
     }
 
+    // Collect IDs to delete — NEVER delete published articles
     const toDelete = [];
-    const kept = [];
-
     for (const [, arts] of Object.entries(byTopic)) {
       if (arts.length <= 1) continue;
-      // Sort: published first, then newest
       arts.sort((a, b) => {
         const sr = (STATUS_RANK[a.status] ?? 99) - (STATUS_RANK[b.status] ?? 99);
         if (sr !== 0) return sr;
         return new Date(b.created_at) - new Date(a.created_at);
       });
-      kept.push({ id: arts[0].id, slug: arts[0].slug, status: arts[0].status });
-      for (const dup of arts.slice(1)) toDelete.push(dup.id);
+      for (const dup of arts.slice(1)) {
+        if (dup.status !== 'published') toDelete.push(dup.id);
+      }
     }
 
-    // Delete one-by-one (most reliable with RLS)
+    if (!toDelete.length) {
+      return NextResponse.json({ scanned: all.length, duplicatesFound: 0, deleted: 0, errors: [] });
+    }
+
+    // Delete in batches of 100
     let deleted = 0;
     const errors = [];
-    for (const id of toDelete) {
-      const { error } = await supabase.from('articles').delete().eq('id', id);
-      if (error) errors.push(id + ': ' + error.message);
-      else deleted++;
+    for (let i = 0; i < toDelete.length; i += 100) {
+      const batch = toDelete.slice(i, i + 100);
+      const { data: deletedRows, error } = await supabase
+        .from('articles').delete().in('id', batch).select('id');
+      if (error) {
+        errors.push(error.message);
+      } else {
+        deleted += deletedRows?.length ?? 0;
+      }
     }
+
+    const blocked = toDelete.length - deleted - errors.length;
 
     return NextResponse.json({
       scanned: all.length,
       duplicatesFound: toDelete.length,
       deleted,
+      blocked: blocked > 0 ? blocked : 0,
       errors,
+      note: blocked > 0
+        ? 'Some deletes were silently blocked by RLS. Add SUPABASE_SERVICE_ROLE_KEY to your secrets to enable full cleanup.'
+        : undefined,
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
