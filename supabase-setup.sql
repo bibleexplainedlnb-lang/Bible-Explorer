@@ -91,3 +91,6 @@ INSERT INTO topics (name, category) VALUES
   ('Bible Reading',  'guides'),
   ('Christian Life', 'guides')
 ON CONFLICT DO NOTHING;
+
+-- 6. New-URLs export tracking
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS exported BOOLEAN NOT NULL DEFAULT false;

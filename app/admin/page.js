@@ -16,6 +16,7 @@ const TABS = [
   { id: 'generate',  label: '✦ Generate' },
   { id: 'bulk',      label: '⚡ Bulk Generate' },
   { id: 'topics',    label: '🗂 Topics' },
+  { id: 'new-urls',  label: '🔗 New URLs', href: '/admin/new-urls/' },
 ];
 
 export default function AdminPage() {
@@ -55,26 +56,34 @@ export default function AdminPage() {
 
         {/* Tab bar */}
         <div style={{ maxWidth:'72rem', margin:'0 auto', display:'flex', gap:'0', marginTop:'1.25rem', flexWrap:'wrap' }}>
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                background:    activeTab === tab.id ? '#faf7f2' : 'transparent',
-                color:         activeTab === tab.id ? '#1e2d4a' : '#a8b8cc',
-                border:        'none',
-                borderRadius:  '0.5rem 0.5rem 0 0',
-                padding:       '0.65rem 1.25rem',
-                fontSize:      '0.875rem',
-                fontWeight:    activeTab === tab.id ? '700' : '400',
-                cursor:        'pointer',
-                fontFamily:    'inherit',
-                transition:    'all 0.15s',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
+          {TABS.map(tab => {
+            const tabStyle = {
+              background:   activeTab === tab.id ? '#faf7f2' : 'transparent',
+              color:        activeTab === tab.id ? '#1e2d4a' : '#a8b8cc',
+              border:       'none',
+              borderRadius: '0.5rem 0.5rem 0 0',
+              padding:      '0.65rem 1.25rem',
+              fontSize:     '0.875rem',
+              fontWeight:   activeTab === tab.id ? '700' : '400',
+              cursor:       'pointer',
+              fontFamily:   'inherit',
+              transition:   'all 0.15s',
+              textDecoration: 'none',
+              display:      'inline-block',
+            };
+            if (tab.href) {
+              return (
+                <Link key={tab.id} href={tab.href} style={{ ...tabStyle, color: '#a8b8cc' }}>
+                  {tab.label}
+                </Link>
+              );
+            }
+            return (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={tabStyle}>
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

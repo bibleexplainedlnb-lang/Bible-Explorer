@@ -189,7 +189,9 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - Generate: tab-based topic selector (5 category tabs), pillar-first sorting, created/not-created status, duplicate-prevention warning, content ideas panel
 - Bulk Generate: 5-category dropdown, streaming progress log
 - Topics: add topics with is_pillar checkbox, toggle pillar on any topic, show ✔ Created / ⬜ status, show/hide created topics toggle
-- API routes: `/api/admin/topics` (GET/POST), `/api/admin/topics/[id]` (PATCH/DELETE), `/api/admin/articles` (GET/POST), `/api/admin/articles/[id]` (PATCH/DELETE), `/api/admin/generate`, `/api/admin/bulk-generate`, `/api/admin/generate-ideas`, `/api/admin/ideas`, `/api/admin/ideas/[id]`, `/api/admin/stats`, `/api/admin/suggest-pillar` (AI pillar suggestion)
+- API routes: `/api/admin/topics` (GET/POST), `/api/admin/topics/[id]` (PATCH/DELETE), `/api/admin/articles` (GET/POST), `/api/admin/articles/[id]` (PATCH/DELETE), `/api/admin/generate`, `/api/admin/bulk-generate`, `/api/admin/generate-ideas`, `/api/admin/ideas`, `/api/admin/ideas/[id]`, `/api/admin/stats`, `/api/admin/suggest-pillar` (AI pillar suggestion), `/api/admin/new-urls` (GET — published+unexported URLs), `/api/admin/mark-exported` (POST — mark all as exported)
+- **New URLs page** at `/admin/new-urls/`: shows all published articles with `exported=false`. Supports filter (all/today/3 days), Copy All URLs, Export CSV, Mark as Exported. Linked from admin tab bar.
+- **DB migration required**: `ALTER TABLE articles ADD COLUMN IF NOT EXISTS exported BOOLEAN NOT NULL DEFAULT false;` — run once in Supabase SQL Editor. The UI shows this SQL automatically if the column is missing.
 
 ### `scripts` (`@workspace/scripts`)
 
