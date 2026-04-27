@@ -81,6 +81,21 @@ export async function POST(request) {
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
 
+    // Guard: refuse to create a second article for the same topic
+    if (topic_id) {
+      const { data: existing } = await supabase
+        .from('articles')
+        .select('id, title, status')
+        .eq('topic_id', topic_id)
+        .limit(1);
+      if (existing?.length > 0) {
+        return NextResponse.json(
+          { error: `Topic already has an article ("${existing[0].title}", ${existing[0].status}). Delete it first.` },
+          { status: 409 }
+        );
+      }
+    }
+
     const insertData = {
       title:            title.trim(),
       slug:             slug.trim(),

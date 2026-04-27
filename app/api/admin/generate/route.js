@@ -8,9 +8,7 @@ import { enrichContent } from '../../../../lib/seoEnrich.js';
 const AUTHOR_NAME = 'BVI Team';
 const AUTHOR_SLUG = 'bvi-team';
 
-// Paginate through PUBLISHED article slugs only.
-// Drafts are excluded because old/stale drafts should not block new article generation.
-// A unique-constraint error at insert time (code 23505) catches any remaining conflicts.
+// Paginate through ALL article slugs (published + draft) to prevent any slug collision.
 async function fetchAllSlugs() {
   const batchSize = 1000;
   const slugs = new Set();
@@ -19,7 +17,6 @@ async function fetchAllSlugs() {
     const { data, error } = await supabase
       .from('articles')
       .select('slug')
-      .eq('status', 'published')
       .range(from, from + batchSize - 1);
     if (error || !data?.length) break;
     data.forEach(a => slugs.add(a.slug));
@@ -27,6 +24,17 @@ async function fetchAllSlugs() {
     from += batchSize;
   }
   return slugs;
+}
+
+// Returns true if this topic already has any article (draft or published).
+async function topicHasArticle(topicId) {
+  if (!topicId) return false;
+  const { data } = await supabase
+    .from('articles')
+    .select('id')
+    .eq('topic_id', topicId)
+    .limit(1);
+  return (data?.length ?? 0) > 0;
 }
 
 export async function POST(request) {
@@ -51,11 +59,13 @@ export async function POST(request) {
       if (topic?.article_created) articleCreated = true;
     }
 
-    // PRE-GENERATION CHECK — surface to caller so UI can confirm regeneration
-    // (The UI already handles this, but we double-check server-side for safety)
-    // We do NOT block here — if the user confirmed regeneration in the UI, we proceed.
+    // HARD BLOCK — refuse to generate if this topic already has any article (draft or published).
+    // This is the primary safeguard against duplicates.
+    if (topicId && await topicHasArticle(topicId)) {
+      return NextResponse.json({ error: 'An article already exists for this topic. Delete it first before regenerating.' }, { status: 409 });
+    }
 
-    // Fetch ALL existing slugs for complete duplicate prevention
+    // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
     const existingSlugs = await fetchAllSlugs();
 
     const contentPrompt = getPrompt(category, topicName.trim(), idea);

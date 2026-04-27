@@ -100,26 +100,33 @@ export async function POST(request) {
           return;
         }
 
-        // Fetch existing articles for deduplication
+        // Fetch ALL existing articles (published + draft) for full deduplication
         const { data: publishedArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'published')
           .limit(5000);
 
-        // Fetch draft slugs — used only to avoid slug collisions, NOT to skip topics
         const { data: draftArticles } = await supabase
           .from('articles')
-          .select('slug')
+          .select('slug, title, topic_id')
           .eq('status', 'draft')
           .limit(5000);
 
-        // Topics that already have a PUBLISHED article are skipped
-        const usedTopicIds  = new Set((publishedArticles || []).map(a => a.topic_id).filter(Boolean));
-        // Slugs from both published + draft to prevent duplicate URLs
+        // Topics that already have ANY article (published OR draft) are skipped
+        const usedTopicIds = new Set([
+          ...(publishedArticles || []).map(a => a.topic_id).filter(Boolean),
+          ...(draftArticles     || []).map(a => a.topic_id).filter(Boolean),
+        ]);
+        // All slugs (published + draft) to prevent URL collisions
         const existingSlugs = new Set([
           ...(publishedArticles || []).map(a => a.slug),
           ...(draftArticles     || []).map(a => a.slug),
+        ]);
+        // All titles (published + draft) to prevent identical-title duplicates
+        const allTitlesLower = new Set([
+          ...(publishedArticles || []).map(a => (a.title || '').toLowerCase().trim()),
+          ...(draftArticles     || []).map(a => (a.title || '').toLowerCase().trim()),
         ]);
         const existingTitles = (publishedArticles || []).map(a => `  - ${a.title}`).join('\n');
 
@@ -202,9 +209,7 @@ export async function POST(request) {
             }
 
             const titleLower = (article.title || '').toLowerCase().trim();
-            const titleConflict = (publishedArticles || []).some(
-              a => (a.title || '').toLowerCase().trim() === titleLower
-            );
+            const titleConflict = allTitlesLower.has(titleLower);
             if (titleConflict) {
               send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: 'Identical title already published' });
               skipped++;
@@ -224,6 +229,8 @@ export async function POST(request) {
               send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason });
               skipped++;
             } else {
+              // Track newly saved title/slug so the rest of this run won't duplicate them
+              allTitlesLower.add(titleLower);
               send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug, status: saveStatus });
               generated++;
             }
