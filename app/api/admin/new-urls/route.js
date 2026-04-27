@@ -7,6 +7,21 @@ function isSchemaError(msg = '') {
   return msg.includes('schema cache') || msg.includes('column') || msg.includes('does not exist');
 }
 
+function buildUrl(appUrl, slug, category) {
+  switch (category) {
+    case 'questions':        return `${appUrl}/questions/${slug}/`;
+    case 'topics':           return `${appUrl}/topics/${slug}/`;
+    case 'guides':           return `${appUrl}/guides/${slug}/`;
+    case 'bible-characters': return `${appUrl}/bible-characters/${slug}/`;
+    case 'bible-verses':
+      // bible-verses slugs already include the full "bible-verses-about-..." segment
+      // so the public URL is just /{slug}/ (middleware handles the rewrite)
+      return `${appUrl}/${slug}/`;
+    default:
+      return `${appUrl}/${slug}/`;
+  }
+}
+
 export async function GET(request) {
   if (!supabase) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -17,7 +32,7 @@ export async function GET(request) {
 
   let query = supabase
     .from('articles')
-    .select('title, slug, created_at')
+    .select('title, slug, created_at, topics(category)')
     .eq('status', 'published')
     .eq('exported', false)
     .order('created_at', { ascending: false });
@@ -42,14 +57,17 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bibleverseinsights.com';
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://bibleverseinsights.com').replace(/\/$/, '');
 
-  const rows = (data || []).map(row => ({
-    title: row.title,
-    slug: row.slug,
-    url: `${appUrl}/${row.slug}/`,
-    created_at: row.created_at,
-  }));
+  const rows = (data || []).map(row => {
+    const category = row.topics?.category || null;
+    return {
+      title: row.title,
+      slug: row.slug,
+      url: buildUrl(appUrl, row.slug, category),
+      created_at: row.created_at,
+    };
+  });
 
   return NextResponse.json({ data: rows, count: rows.length });
 }
