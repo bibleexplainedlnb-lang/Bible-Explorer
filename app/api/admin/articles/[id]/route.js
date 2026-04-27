@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../../lib/supabaseAdmin.js';
+import { pingSitemaps } from '../../../../../lib/sitemapPing.js';
 
 const OPTIONAL_COLS = ['meta_title', 'meta_description', 'keywords', 'related_slugs'];
 
@@ -59,6 +60,11 @@ export async function PATCH(request, { params }) {
     }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Ping sitemaps when an article is published (fire-and-forget)
+    if (updates.status === 'published') {
+      pingSitemaps().catch(() => {});
+    }
 
     // Record slug redirect so old URLs don't 404
     if (oldSlug && updates.slug) {

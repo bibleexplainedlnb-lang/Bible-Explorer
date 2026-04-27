@@ -240,6 +240,7 @@ export default function Articles() {
   const [relinking,     setRelinking]     = useState(false);
   const [importing,     setImporting]     = useState(false);
   const [fixingDrafts,  setFixingDrafts]  = useState(false);
+  const [pinging,       setPinging]       = useState(false);
   const [toast,         setToast]         = useState(null);
 
   const [interlinking,  setInterlinking]  = useState(new Set());
@@ -424,6 +425,17 @@ export default function Articles() {
     finally { setFixingDrafts(false); }
   }
 
+  async function handlePing() {
+    setPinging(true); setToast(null);
+    try {
+      const res  = await fetch('/api/admin/ping', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) setToast({ status: 'error', message: data.error || 'Ping failed' });
+      else setToast({ status: 'success', message: '✓ Sitemap ping sent to Google (sitemap.xml + sitemap-recent.xml)' });
+    } catch (err) { setToast({ status: 'error', message: err.message }); }
+    finally { setPinging(false); }
+  }
+
   const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
   return (
@@ -498,6 +510,14 @@ export default function Articles() {
           style={{ ...S.btn('upgrade'), padding: '0.4rem 0.85rem', opacity: fixingDrafts ? 0.6 : 1 }}
         >
           {fixingDrafts ? '⟳ Fixing…' : '✎ Fix Draft Titles'}
+        </button>
+
+        <button
+          onClick={handlePing} disabled={pinging}
+          title="Ping Google with sitemap.xml and sitemap-recent.xml to request faster indexing. Does not modify any content."
+          style={{ ...S.btn('default'), padding: '0.4rem 0.85rem', opacity: pinging ? 0.6 : 1, background: '#e0f2fe', color: '#0369a1' }}
+        >
+          {pinging ? '⟳ Pinging…' : '📡 Run Indexing Boost'}
         </button>
       </div>
 

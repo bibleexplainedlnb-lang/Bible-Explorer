@@ -1,0 +1,98 @@
+Enhance SEO automation system WITHOUT overriding existing interlinking logic.
+
+IMPORTANT:
+
+* DO NOT modify or replace existing internal linking system
+* DO NOT remove any current linking rules or prompts
+* Only add non-destructive enhancements
+
+==================================
+
+1. RECENT SITEMAP (ADD ONLY)
+   ==================================
+
+Create new route:
+/sitemap-recent.xml
+
+* Fetch:
+  status = 'published'
+  created_at > NOW() - INTERVAL '72 hours'
+
+* Generate XML dynamically
+
+* Limit 300 URLs
+
+DO NOT modify existing sitemap logic
+
+==================================
+2. AUTO PING SYSTEM (SAFE ADD)
+==============================
+
+After article publish:
+
+Trigger:
+
+https://www.google.com/ping?sitemap=https://yourdomain.com/sitemap.xml
+https://www.google.com/ping?sitemap=https://yourdomain.com/sitemap-recent.xml
+
+This should run AFTER all existing processes complete
+
+==================================
+3. HOMEPAGE / CATEGORY BOOST (NON-DESTRUCTIVE)
+==============================================
+
+* Add latest articles section IF not already present
+* Append new articles, DO NOT overwrite existing layout
+
+==================================
+4. ADMIN BUTTON (OPTIONAL)
+==========================
+
+Add button:
+"Run Indexing Boost"
+
+Function:
+
+* Trigger sitemap ping only
+* DO NOT trigger content regeneration
+* DO NOT modify links
+
+==================================
+5. OPTIONAL CRON (SAFE)
+=======================
+
+Run every 6–12 hours:
+
+* Ping sitemap only
+* DO NOT touch content or links
+
+==================================
+6. ROBOTS.TXT ADDITION
+======================
+
+Append only (do not overwrite):
+
+Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://yourdomain.com/sitemap-recent.xml
+
+==================================
+FINAL RULE
+==========
+
+This system must NOT:
+
+* override internal linking
+* change article content
+* regenerate links
+
+It should ONLY:
+
+* improve indexing signals
+* notify search engines
+* surface fresh content
+
+==================================
+GOAL
+====
+
+Safe SEO enhancement without breaking existing system
