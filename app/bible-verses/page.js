@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { isCategoryActive } from '../../lib/categories.js';
-import { topicSlug } from '../../lib/topicSlug.js';
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,7 +16,7 @@ function getSupabase() {
 
 export const metadata = {
   title: 'Bible Verses | Bible Verse Insights',
-  description: 'Browse Bible verse collections organised by topic.',
+  description: 'Browse Bible verse articles organised by topic.',
   robots: { index: true, follow: true },
 };
 
@@ -25,21 +24,21 @@ export default async function BibleVersesPage() {
   if (!isCategoryActive('bible-verses')) notFound();
 
   const supabase = getSupabase();
-  let parentTopics = [];
+  let articles = [];
 
   if (supabase) {
     const batchSize = 1000;
     let from = 0;
     while (true) {
       const { data, error } = await supabase
-        .from('topics')
-        .select('id, name')
-        .eq('category', 'bible-verses')
-        .is('parent_id', null)
-        .order('name')
+        .from('articles')
+        .select('id, slug, title, meta_description, created_at, topics!inner(category)')
+        .eq('topics.category', 'bible-verses')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
         .range(from, from + batchSize - 1);
       if (error || !data?.length) break;
-      parentTopics = parentTopics.concat(data);
+      articles = articles.concat(data);
       if (data.length < batchSize) break;
       from += batchSize;
     }
@@ -56,26 +55,34 @@ export default async function BibleVersesPage() {
           Bible Verses
         </h1>
         <p style={{ color: '#6b5c45', fontSize: '1rem', lineHeight: 1.7 }}>
-          Browse Bible verse collections organised by topic.
+          Browse Bible verse articles organised by topic.
         </p>
       </div>
 
-      {parentTopics.length === 0 ? (
+      {articles.length === 0 ? (
         <p style={{ color: '#8b7355', fontStyle: 'italic' }}>
-          No topics yet. Add parent topics (with no parent_id) in the admin panel.
+          No published Bible verse articles yet.
         </p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-          {parentTopics.map(topic => (
-            <Link key={topic.id} href={`/bible-verses-about-${topicSlug(topic.name)}/`} style={{ textDecoration: 'none' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          {articles.map(article => (
+            <Link key={article.id} href={`/bible-verses/${article.slug}/`} style={{ textDecoration: 'none' }}>
               <div style={{
                 backgroundColor: 'white', border: '1px solid #e8dfc8',
-                borderRadius: '0.875rem', padding: '1.25rem', cursor: 'pointer',
+                borderRadius: '0.875rem', padding: '1.5rem', cursor: 'pointer',
+                height: '100%', boxSizing: 'border-box',
               }}>
-                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', fontWeight: 'bold', color: '#2c4270', margin: 0 }}>
-                  {topic.name}
+                <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.05rem', fontWeight: 'bold', color: '#2c4270', margin: '0 0 0.5rem' }}>
+                  {article.title}
                 </h2>
-                <p style={{ margin: '0.5rem 0 0', color: '#b8860b', fontSize: '0.85rem' }}>Browse verses →</p>
+                {article.meta_description && (
+                  <p style={{ color: '#6b5c45', fontSize: '0.875rem', lineHeight: 1.6, margin: '0 0 0.75rem' }}>
+                    {article.meta_description.length > 120
+                      ? article.meta_description.slice(0, 120) + '…'
+                      : article.meta_description}
+                  </p>
+                )}
+                <p style={{ margin: 0, color: '#b8860b', fontSize: '0.85rem' }}>Read →</p>
               </div>
             </Link>
           ))}

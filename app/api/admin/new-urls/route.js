@@ -14,9 +14,7 @@ function buildUrl(appUrl, slug, category) {
     case 'guides':           return `${appUrl}/guides/${slug}/`;
     case 'bible-characters': return `${appUrl}/bible-characters/${slug}/`;
     case 'bible-verses':
-      // bible-verses slugs already include the full "bible-verses-about-..." segment
-      // so the public URL is just /{slug}/ (middleware handles the rewrite)
-      return `${appUrl}/${slug}/`;
+      return `${appUrl}/bible-verses/${slug}/`;
     default:
       return `${appUrl}/${slug}/`;
   }

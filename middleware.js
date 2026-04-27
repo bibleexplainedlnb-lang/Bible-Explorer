@@ -51,17 +51,11 @@ export async function middleware(request) {
   }
 
   if (pathname.startsWith('/bible-verses-about-')) {
-    if (!pathname.endsWith('/')) {
-      const url = request.nextUrl.clone();
-      url.pathname = pathname + '/';
-      return NextResponse.redirect(url, { status: 301 });
-    }
-    const remainder = pathname.slice('/bible-verses-about-'.length);
-    const parts = remainder.split('/').filter(Boolean);
-    const internalPath = '/bible-verses/' + parts.join('/') + '/';
+    const withSlash = pathname.endsWith('/') ? pathname : pathname + '/';
+    const slug = withSlash.slice(1, -1);
     const url = request.nextUrl.clone();
-    url.pathname = internalPath;
-    return NextResponse.rewrite(url);
+    url.pathname = '/bible-verses/' + slug + '/';
+    return NextResponse.redirect(url, { status: 301 });
   }
 
   if (!pathname.endsWith('/')) {
