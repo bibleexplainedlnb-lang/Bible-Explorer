@@ -191,13 +191,21 @@ export async function POST(request) {
             .filter(Boolean)
             .slice(0, safeLimit);
         } else {
-          // Auto-mode: pick topics that don't yet have a PUBLISHED article
+          // Auto-mode: pick topics that don't yet have a PUBLISHED article.
+          //
+          // We MUST fetch the entire category (not safeLimit*5) because the
+          // published topics aren't evenly distributed alphabetically — if the
+          // first N alphabetical topics happen to already be published we'd
+          // silently end up with 0 or too few candidates and either lie that
+          // "every topic is published" or generate fewer articles than asked
+          // for. Categories cap out around ~400 topics so a 2000 ceiling is
+          // safe and well under PostgREST's hard limit.
           const { data: categoryTopics, error: catErr } = await supabase
             .from('topics')
             .select('id, name, category')
             .eq('category', category)
             .order('name')
-            .limit(safeLimit * 5);
+            .limit(2000);
 
           if (catErr || !categoryTopics?.length) {
             send({ type: 'error', message: `No topics found for category "${category}". Add topics first.` });
