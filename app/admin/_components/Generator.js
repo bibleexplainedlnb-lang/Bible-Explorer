@@ -442,13 +442,21 @@ export default function Generator({ onSaved }) {
                         {languageLabel(duplicate.existingArticle.language)}
                       </span>
                     )}
+                    {duplicate.existingArticle.id && (
+                      <a
+                        href={`/admin/#articles?article_id=${encodeURIComponent(duplicate.existingArticle.id)}`}
+                        style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                      >
+                        Edit in admin →
+                      </a>
+                    )}
                     {existingArticlePublicUrl(duplicate.existingArticle) && duplicate.existingArticle.status === 'published' && (
                       <a
                         href={existingArticlePublicUrl(duplicate.existingArticle)}
                         target="_blank" rel="noreferrer"
-                        style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                        style={{ color: '#5a4a35', textDecoration: 'underline', fontWeight: '500', fontSize: '0.82rem' }}
                       >
-                        View live →
+                        View live ↗
                       </a>
                     )}
                   </div>

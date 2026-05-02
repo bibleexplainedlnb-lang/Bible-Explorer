@@ -67,13 +67,16 @@ export default function BulkGenerator({ onSaved }) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Request failed' }));
-        if (res.status === 409 && err.existingArticle) {
-          // Friendly duplicate framing — same shape as in-stream skipped events.
+        if (res.status === 409) {
+          // Normalize duplicate copy regardless of which backend phrasing came back.
+          const friendly = err.code === 'SLUG_ALREADY_EXISTS'
+            ? 'That slug is already in use by another article.'
+            : 'This topic already has an article.';
           setLog([{
             kind: 'skipped',
-            title: err.existingArticle.title || 'Topic already covered',
-            reason: err.error || 'This topic already has an article.',
-            existingArticle: err.existingArticle,
+            title: err.existingArticle?.title || 'Already covered',
+            reason: friendly,
+            existingArticle: err.existingArticle || null,
             n: 1, total: 1,
           }]);
         } else {
@@ -274,6 +277,14 @@ export default function BulkGenerator({ onSaved }) {
                           {languageLabel(item.existingArticle.language)}
                         </span>
                       )}
+                      {item.existingArticle.id && (
+                        <a
+                          href={`/admin/#articles?article_id=${encodeURIComponent(item.existingArticle.id)}`}
+                          style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                        >
+                          Edit in admin →
+                        </a>
+                      )}
                       {item.existingArticle.status === 'published' && item.existingArticle.slug && (
                         <a
                           href={(() => {
@@ -286,9 +297,9 @@ export default function BulkGenerator({ onSaved }) {
                             return `/guides/${s}/`;
                           })()}
                           target="_blank" rel="noreferrer"
-                          style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                          style={{ color: '#5a4a35', textDecoration: 'underline', fontWeight: '500', fontSize: '0.7rem' }}
                         >
-                          View live →
+                          View live ↗
                         </a>
                       )}
                     </div>

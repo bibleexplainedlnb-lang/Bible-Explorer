@@ -228,12 +228,20 @@ function EditModal({ article, onSave, onClose }) {
 
 
 /* ─── Main component ─── */
-export default function Articles() {
+export default function Articles({ initialArticleId = null }) {
   const [articles,      setArticles]      = useState([]);
   const [loading,       setLoading]       = useState(true);
-  const [filter,        setFilter]        = useState({ status: 'published', category: '' });
+  // Default to "all statuses" when deep-linked, since the target article
+  // may be a draft and the default "published" filter would hide it.
+  const [filter,        setFilter]        = useState({
+    status: initialArticleId ? '' : 'published',
+    category: '',
+  });
   const [filterSpecial, setFilterSpecial] = useState('');
   const [editing,       setEditing]       = useState(null);
+  // Track which deep-link IDs we've already auto-opened to avoid loops
+  // when the same component remounts with the same prop.
+  const [autoOpenedId,  setAutoOpenedId]  = useState(null);
   const [deleting,      setDeleting]      = useState(null);
   const [actioning,     setActioning]     = useState(null);
   const [improving,     setImproving]     = useState(new Set());
@@ -267,6 +275,45 @@ export default function Articles() {
   }, [filter]);
 
   useEffect(() => { loadArticles(); }, [loadArticles]);
+
+  // When a deep-link arrives (initial mount or later via hashchange while
+  // already mounted), widen the status filter to "all" so the target — which
+  // may be a draft — isn't filtered out before we can auto-open it.
+  useEffect(() => {
+    if (!initialArticleId || autoOpenedId === initialArticleId) return;
+    setFilter(prev => (prev.status === '' ? prev : { ...prev, status: '' }));
+  }, [initialArticleId, autoOpenedId]);
+
+  // When deep-linked via /admin/#articles?article_id=xxx, auto-open the
+  // EditModal once the article list has finished loading and the row exists.
+  // If the row isn't in the current list (e.g. wrong category filter), fetch
+  // it directly so the modal still opens regardless of list/filter timing.
+  useEffect(() => {
+    if (!initialArticleId || autoOpenedId === initialArticleId) return;
+    if (loading) return;
+    const target = articles.find(a => a.id === initialArticleId);
+    if (target) {
+      setEditing(target);
+      setAutoOpenedId(initialArticleId);
+      return;
+    }
+    // Fallback: fetch the single article directly so deep-link works even when
+    // category filter or pagination hides it from the list.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/admin/articles/${initialArticleId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled || !data?.id) return;
+        setEditing(data);
+        setAutoOpenedId(initialArticleId);
+      } catch (err) {
+        console.error('[Articles] deep-link fetch error:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [initialArticleId, loading, articles, autoOpenedId]);
 
   const displayArticles = useMemo(() => {
     if (filterSpecial === 'orphan')  return articles.filter(a => isThinArticle(a.content));

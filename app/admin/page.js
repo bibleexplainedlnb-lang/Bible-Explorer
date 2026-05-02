@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Dashboard     from './_components/Dashboard.js';
 import SeoDashboard  from './_components/SeoDashboard.js';
@@ -19,9 +19,49 @@ const TABS = [
   { id: 'new-urls',  label: '🔗 New URLs', href: '/admin/new-urls/' },
 ];
 
+const VALID_TABS = new Set(TABS.filter(t => !t.href).map(t => t.id));
+
+// Parse the URL hash like "#articles?article_id=abc" into { tab, params }.
+function parseHash(hash) {
+  if (!hash) return { tab: null, params: {} };
+  const raw = hash.replace(/^#/, '');
+  const [tab, qs] = raw.split('?');
+  const params = {};
+  if (qs) {
+    for (const [k, v] of new URLSearchParams(qs)) params[k] = v;
+  }
+  return { tab: tab || null, params };
+}
+
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [hashParams, setHashParams] = useState({});
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Sync URL hash → state on mount and on hash changes (allows external deep-links
+  // such as "/admin/#articles?article_id=xyz" from the Generator duplicate banner).
+  useEffect(() => {
+    function readHash() {
+      const { tab, params } = parseHash(window.location.hash);
+      if (tab && VALID_TABS.has(tab)) setActiveTab(tab);
+      setHashParams(params);
+    }
+    readHash();
+    window.addEventListener('hashchange', readHash);
+    return () => window.removeEventListener('hashchange', readHash);
+  }, []);
+
+  function selectTab(id) {
+    setActiveTab(id);
+    // Replace the hash without reload so the tab is shareable / bookmarkable.
+    if (typeof window !== 'undefined') {
+      const next = `#${id}`;
+      if (window.location.hash !== next) {
+        history.replaceState(null, '', next);
+        setHashParams({});
+      }
+    }
+  }
 
   function handleSaved() { setRefreshKey(k => k + 1); }
 
@@ -79,7 +119,7 @@ export default function AdminPage() {
               );
             }
             return (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={tabStyle}>
+              <button key={tab.id} onClick={() => selectTab(tab.id)} style={tabStyle}>
                 {tab.label}
               </button>
             );
@@ -91,7 +131,7 @@ export default function AdminPage() {
       <div style={{ maxWidth:'72rem', margin:'0 auto', padding:'2rem 1.5rem' }}>
         {activeTab === 'dashboard' && <Dashboard key={refreshKey} />}
         {activeTab === 'seo'       && <SeoDashboard key={refreshKey} onNavigate={setActiveTab} />}
-        {activeTab === 'articles'  && <Articles key={refreshKey} />}
+        {activeTab === 'articles'  && <Articles key={refreshKey} initialArticleId={hashParams.article_id || null} />}
         {activeTab === 'generate'  && <Generator  onSaved={handleSaved} />}
         {activeTab === 'bulk'      && <BulkGenerator onSaved={handleSaved} />}
         {activeTab === 'topics'    && <Topics />}
