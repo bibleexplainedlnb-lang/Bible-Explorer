@@ -67,7 +67,18 @@ export default function BulkGenerator({ onSaved }) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Request failed' }));
-        setError(err.error ?? 'Bulk generation failed.');
+        if (res.status === 409 && err.existingArticle) {
+          // Friendly duplicate framing — same shape as in-stream skipped events.
+          setLog([{
+            kind: 'skipped',
+            title: err.existingArticle.title || 'Topic already covered',
+            reason: err.error || 'This topic already has an article.',
+            existingArticle: err.existingArticle,
+            n: 1, total: 1,
+          }]);
+        } else {
+          setError(err.error ?? 'Bulk generation failed.');
+        }
         setStatus('idle');
         return;
       }

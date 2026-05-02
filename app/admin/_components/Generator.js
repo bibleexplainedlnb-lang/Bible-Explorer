@@ -413,8 +413,8 @@ export default function Generator({ onSaved }) {
                 </p>
                 <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem' }}>
                   {duplicate.kind === 'SLUG_ALREADY_EXISTS'
-                    ? 'Each article URL must be unique. Open the existing one to edit it instead.'
-                    : 'Each topic can only have one article. Open the existing one to edit it instead.'}
+                    ? 'Each article URL must be unique. Open the Articles tab to edit or delete the existing one.'
+                    : 'Each topic can only have one article. Open the Articles tab to edit or delete the existing one.'}
                 </p>
                 {duplicate.existingArticle ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
