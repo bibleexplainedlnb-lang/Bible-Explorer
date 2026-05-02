@@ -8,28 +8,12 @@ import { enrichContent } from '../../../../lib/seoEnrich.js';
 const AUTHOR_NAME = 'BVI Team';
 const AUTHOR_SLUG = 'bvi-team';
 
-// Paginate through ALL article slugs (published + draft) to prevent any slug collision.
-async function fetchAllSlugs() {
-  const batchSize = 1000;
-  const slugs = new Set();
-  let from = 0;
-  while (true) {
-    const { data, error } = await supabase
-      .from('articles')
-      .select('slug')
-      .range(from, from + batchSize - 1);
-    if (error || !data?.length) break;
-    data.forEach(a => slugs.add(a.slug));
-    if (data.length < batchSize) break;
-    from += batchSize;
-  }
-  return slugs;
-}
+// THE ONE RULE:
+//   PUBLISHED articles are sacred — never touched, never overwritten.
+//   Anything else (draft / rejected) is auto-deleted before generation.
 
-// Returns the existing article for this topic (any status, any language, any category)
-// or null. Strict rule: 1 topic = 1 article — no exceptions for drafts or other languages.
-// Mirrors the DB-level UNIQUE (topic_id) constraint added by:
-//   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
+// Returns the single article (if any) currently attached to this topic.
+// The DB UNIQUE(topic_id) constraint guarantees at most one row.
 async function getExistingArticleForTopic(topicId) {
   if (!topicId) return null;
   const { data } = await supabase
@@ -40,13 +24,47 @@ async function getExistingArticleForTopic(topicId) {
   if (!data?.length) return null;
   const a = data[0];
   return {
-    id:       a.id,
-    title:    a.title,
-    slug:     a.slug,
-    status:   a.status,
-    language: a.language,
+    id: a.id, title: a.title, slug: a.slug, status: a.status, language: a.language,
     category: a.topics?.category || null,
   };
+}
+
+// Owner of a given slug, or null. Same shape as above.
+async function getArticleBySlug(slug) {
+  if (!slug) return null;
+  const { data } = await supabase
+    .from('articles')
+    .select('id, title, slug, status, language, topics(category)')
+    .eq('slug', slug)
+    .limit(1);
+  if (!data?.length) return null;
+  const a = data[0];
+  return {
+    id: a.id, title: a.title, slug: a.slug, status: a.status, language: a.language,
+    category: a.topics?.category || null,
+  };
+}
+
+// Defense-in-depth: only deletes if the row is NOT published. The .neq()
+// makes it impossible for a stale snapshot to delete live content.
+async function deleteNonPublishedArticle(id) {
+  if (!id) return;
+  await supabase.from('articles').delete().eq('id', id).neq('status', 'published');
+}
+
+// Returns a 409 NextResponse for a published collision, or null if not blocking.
+function publishedCollision(existing, kind) {
+  if (!existing || existing.status !== 'published') return null;
+  return NextResponse.json(
+    {
+      error: kind === 'slug'
+        ? `Slug "${existing.slug}" is already used by a PUBLISHED article. Cannot recreate live content.`
+        : `A PUBLISHED article already exists for this topic ("${existing.title}"). Cannot recreate live content.`,
+      code: kind === 'slug' ? 'PUBLISHED_SLUG_EXISTS' : 'PUBLISHED_ARTICLE_EXISTS',
+      existingArticle: existing,
+    },
+    { status: 409 },
+  );
 }
 
 export async function POST(request) {
@@ -56,9 +74,8 @@ export async function POST(request) {
 
     if (!topicName?.trim()) return NextResponse.json({ error: 'topicName is required' }, { status: 400 });
 
-    // Look up topic from DB — category and is_pillar are never trusted from client
-    let category  = 'questions';
-    let isPillar  = false;
+    let category = 'questions';
+    let isPillar = false;
     let articleCreated = false;
 
     if (topicId) {
@@ -72,69 +89,27 @@ export async function POST(request) {
       if (topic?.article_created) articleCreated = true;
     }
 
-    // Strict 1 topic = 1 article rule — block generation if ANY article already exists
-    // for this topic, regardless of status (draft/published/rejected) or language.
-    // Published articles get a stronger error code so the UI surfaces it loudly
-    // and the operator never accidentally tries to overwrite live content.
+    // Step 1: topic-level check. Block PUBLISHED, auto-delete draft.
     if (topicId) {
       const existing = await getExistingArticleForTopic(topicId);
-      if (existing) {
-        const isPublished = existing.status === 'published';
-        return NextResponse.json(
-          {
-            error: isPublished
-              ? `A PUBLISHED article already exists for this topic ("${existing.title}", language: ${existing.language}). Cannot recreate live content.`
-              : `An article already exists for this topic ("${existing.title}", status: ${existing.status}, language: ${existing.language}). Each topic can only have one article.`,
-            code: isPublished ? 'PUBLISHED_ARTICLE_EXISTS' : 'TOPIC_ALREADY_HAS_ARTICLE',
-            existingArticle: existing,
-          },
-          { status: 409 }
-        );
-      }
+      const blocked = publishedCollision(existing, 'topic');
+      if (blocked) return blocked;
+      if (existing) await deleteNonPublishedArticle(existing.id);
     }
 
-    // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
-    const existingSlugs = await fetchAllSlugs();
-
-    // EARLY SLUG PRE-CHECK — for categories where the AI's slug is predictable,
-    // reject BEFORE calling OpenRouter so we don't waste 15-25s + AI cost on
-    // content the user can never save. Returns the friendly 409 the UI expects.
+    // Step 2: predictable-slug pre-check. Block PUBLISHED, auto-delete drafts.
     const candidates = candidateSlugs(category, topicName.trim());
-    const collidingCandidate = candidates.find(s => existingSlugs.has(s));
-    if (collidingCandidate) {
-      const { data: slugOwner } = await supabase
-        .from('articles')
-        .select('id, title, slug, status, language, topics(category)')
-        .eq('slug', collidingCandidate)
-        .limit(1);
-      const existing = slugOwner?.[0]
-        ? {
-            id:       slugOwner[0].id,
-            title:    slugOwner[0].title,
-            slug:     slugOwner[0].slug,
-            status:   slugOwner[0].status,
-            language: slugOwner[0].language,
-            category: slugOwner[0].topics?.category || null,
-          }
-        : null;
-      const isPublished = existing?.status === 'published';
-      return NextResponse.json(
-        {
-          error: isPublished
-            ? `Slug "${collidingCandidate}" is already used by a PUBLISHED article. Cannot recreate live content.`
-            : `Slug "${collidingCandidate}" already exists. Cannot create a variant — each slug must be unique.`,
-          code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
-          existingArticle: existing,
-        },
-        { status: 409 }
-      );
+    for (const cand of candidates) {
+      const owner = await getArticleBySlug(cand);
+      if (!owner) continue;
+      const blocked = publishedCollision(owner, 'slug');
+      if (blocked) return blocked;
+      await deleteNonPublishedArticle(owner.id);
     }
 
+    // Step 3: AI generation
     const contentPrompt = getPrompt(category, topicName.trim(), idea);
-
-    // Build title / slug format hints using classification logic
-    const titleHint = buildTitleHint(category, topicName.trim());
-
+    const titleHint     = buildTitleHint(category, topicName.trim());
     const prompt = `${contentPrompt}${titleHint}
 
 Return ONLY this JSON object (no markdown, no code fences, no commentary outside the JSON):
@@ -154,63 +129,33 @@ HARD RULES:
 - Return ONLY the JSON — nothing before or after it`;
 
     const raw = await callOpenRouter([
-      {
-        role: 'system',
-        content: `You are a senior Christian content writer with 15 years of experience writing for major Bible study publications. Your writing is human, direct, and grounded in Scripture. You always respond with valid JSON only, exactly as specified.`,
-      },
-      { role: 'user', content: prompt },
+      { role: 'system', content: `You are a senior Christian content writer with 15 years of experience writing for major Bible study publications. Your writing is human, direct, and grounded in Scripture. You always respond with valid JSON only, exactly as specified.` },
+      { role: 'user',   content: prompt },
     ]);
 
     let generated;
     try { generated = JSON.parse(raw); }
     catch { return NextResponse.json({ error: 'AI returned invalid JSON', raw }, { status: 500 }); }
 
-    // Enforce deterministic title/slug for strict-format categories
     const enforced = enforceArticleMeta(category, topicName.trim());
     const finalTitle = enforced?.title ?? generated.title ?? topicName.trim();
-
-    // Sanitise slug. NEVER append "-2", "-3", etc. — if the base slug already exists,
-    // reject the request immediately (409) under the strict 1-topic-1-article rule.
-    const rawSlug  = enforced?.slug ?? sanitiseSlug(generated.slug || generated.title || topicName.trim());
-    const baseSlug = sanitiseSlug(rawSlug);
+    const rawSlug    = enforced?.slug  ?? sanitiseSlug(generated.slug || generated.title || topicName.trim());
+    const baseSlug   = sanitiseSlug(rawSlug);
     if (!baseSlug) return NextResponse.json({ error: 'Could not generate a valid slug' }, { status: 422 });
-    if (existingSlugs.has(baseSlug)) {
-      // Look up the article that already owns this slug so the UI can link to it
-      const { data: slugOwner } = await supabase
-        .from('articles')
-        .select('id, title, slug, status, language, topics(category)')
-        .eq('slug', baseSlug)
-        .limit(1);
-      const existing = slugOwner?.[0]
-        ? {
-            id:       slugOwner[0].id,
-            title:    slugOwner[0].title,
-            slug:     slugOwner[0].slug,
-            status:   slugOwner[0].status,
-            language: slugOwner[0].language,
-            category: slugOwner[0].topics?.category || null,
-          }
-        : null;
-      const isPublished = existing?.status === 'published';
-      return NextResponse.json(
-        {
-          error: isPublished
-            ? `Slug "${baseSlug}" is already used by a PUBLISHED article. Cannot recreate live content.`
-            : `Slug "${baseSlug}" already exists. Cannot create a variant — each slug must be unique.`,
-          code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
-          existingArticle: existing,
-        },
-        { status: 409 }
-      );
-    }
-    const finalSlug = baseSlug;
 
-    // Enrich HTML
+    // Step 4: post-AI slug check. Same rule — published blocks, drafts get deleted.
+    const slugOwner = await getArticleBySlug(baseSlug);
+    if (slugOwner) {
+      const blocked = publishedCollision(slugOwner, 'slug');
+      if (blocked) return blocked;
+      await deleteNonPublishedArticle(slugOwner.id);
+    }
+
     const { html: enrichedContent } = await enrichContent(generated.content || '');
 
     return NextResponse.json({
       title:            finalTitle,
-      slug:             finalSlug,
+      slug:             baseSlug,
       meta_title:       generated.meta_title,
       meta_description: generated.meta_description,
       keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
@@ -220,7 +165,6 @@ HARD RULES:
       status:           'draft',
       author_name:      AUTHOR_NAME,
       author_slug:      AUTHOR_SLUG,
-      // Expose pillar/created info so the UI can reflect it
       _meta: { is_pillar: isPillar, article_created: articleCreated, category },
     });
   } catch (err) {

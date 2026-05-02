@@ -84,33 +84,57 @@ export async function POST(request) {
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
 
-    // Strict 1 topic = 1 article rule — refuse to create if ANY article already exists
-    // for this topic, regardless of status (draft/published/rejected) or language.
-    // Mirrors the DB-level UNIQUE (topic_id) constraint added by:
-    //   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
+    // THE ONE RULE: PUBLISHED is sacred. Anything else is auto-replaced.
+    // 1) Topic check
     if (topic_id) {
       const { data: existing } = await supabase
         .from('articles')
         .select('id, title, slug, status, language, topics(category)')
         .eq('topic_id', topic_id)
         .limit(1);
-      if (existing?.length > 0) {
-        const e = existing[0];
-        return NextResponse.json(
-          {
-            error: `An article already exists for this topic ("${e.title}", status: ${e.status}, language: ${e.language}). Each topic can only have one article.`,
-            code: 'TOPIC_ALREADY_HAS_ARTICLE',
-            existingArticle: {
-              id:       e.id,
-              title:    e.title,
-              slug:     e.slug,
-              status:   e.status,
-              language: e.language,
-              category: e.topics?.category || null,
+      const e = existing?.[0];
+      if (e) {
+        if (e.status === 'published') {
+          return NextResponse.json(
+            {
+              error: `A PUBLISHED article already exists for this topic ("${e.title}"). Cannot recreate live content.`,
+              code: 'PUBLISHED_ARTICLE_EXISTS',
+              existingArticle: {
+                id: e.id, title: e.title, slug: e.slug, status: e.status,
+                language: e.language, category: e.topics?.category || null,
+              },
             },
-          },
-          { status: 409 }
-        );
+            { status: 409 }
+          );
+        }
+        // Auto-delete the existing draft/rejected so the new save proceeds.
+        await supabase.from('articles').delete().eq('id', e.id).neq('status', 'published');
+      }
+    }
+
+    // 2) Slug check (covers slugs that aren't tied to topic_id)
+    {
+      const { data: slugRow } = await supabase
+        .from('articles')
+        .select('id, title, slug, status, language, topics(category)')
+        .eq('slug', slug.trim())
+        .limit(1);
+      const s = slugRow?.[0];
+      if (s) {
+        if (s.status === 'published') {
+          return NextResponse.json(
+            {
+              error: `Slug "${s.slug}" is already used by a PUBLISHED article. Cannot recreate live content.`,
+              code: 'PUBLISHED_SLUG_EXISTS',
+              existingArticle: {
+                id: s.id, title: s.title, slug: s.slug, status: s.status,
+                language: s.language, category: s.topics?.category || null,
+              },
+            },
+            { status: 409 }
+          );
+        }
+        await supabase.from('articles').delete().eq('id', s.id).neq('status', 'published');
       }
     }
 
@@ -157,13 +181,11 @@ export async function POST(request) {
 
     if (error) {
       if (error.code === '23505') {
-        // Distinguish between the two unique constraints on the articles table:
-        //   - unique_topic_article  → one article per topic_id (strict 1:1 rule)
-        //   - articles_slug_key (or similar) → unique slug column
+        // After the auto-delete pass above, a 23505 here can only mean a
+        // PUBLISHED article won the race — surface that loudly to the UI.
         const constraint = (error.constraint || error.details || '').toString();
         const isTopicConflict = constraint.includes('unique_topic_article') || constraint.includes('topic_id');
 
-        // Fetch the article that already owns the conflicting key so the UI can link to it
         const lookupQuery = supabase
           .from('articles')
           .select('id, title, slug, status, language, topics(category)')
@@ -185,8 +207,8 @@ export async function POST(request) {
         if (isTopicConflict) {
           return NextResponse.json(
             {
-              error: `An article already exists for this topic. Each topic can only have one article.`,
-              code: 'TOPIC_ALREADY_HAS_ARTICLE',
+              error: `A PUBLISHED article already exists for this topic. Cannot recreate live content.`,
+              code: 'PUBLISHED_ARTICLE_EXISTS',
               existingArticle: existing,
             },
             { status: 409 }
@@ -194,8 +216,8 @@ export async function POST(request) {
         }
         return NextResponse.json(
           {
-            error: `Slug "${slug}" already exists`,
-            code: 'SLUG_ALREADY_EXISTS',
+            error: `Slug "${slug}" is already used by a PUBLISHED article. Cannot recreate live content.`,
+            code: 'PUBLISHED_SLUG_EXISTS',
             existingArticle: existing,
           },
           { status: 409 }

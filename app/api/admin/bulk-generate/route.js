@@ -4,15 +4,15 @@ import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
 import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta, candidateSlugs } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
+// THE ONE RULE:
+//   PUBLISHED articles are sacred — never touched, never overwritten.
+//   Anything else (draft / rejected) is auto-deleted before generation.
+
 function sseEvent(data) {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-// Paginate through ALL articles (PostgREST caps single responses at 1000 rows
-// regardless of `.limit()`, so we MUST use `.range()` in batches to fetch
-// every row). Without this, topics whose articles live past row 1000 silently
-// pass the "already has an article" filter and waste an AI call before the
-// DB unique constraint rejects them.
+// Paginate through ALL articles — PostgREST caps single responses at 1000 rows.
 async function fetchAllArticlesForBulk(supabase) {
   const batchSize = 1000;
   const all = [];
@@ -31,8 +31,18 @@ async function fetchAllArticlesForBulk(supabase) {
   return all;
 }
 
-async function generateArticle(topic, _categoryFallback, existingSlugs, existingTitles) {
-  // Always use the topic's own category from the DB — never trust the caller's fallback
+// Defense-in-depth delete: only deletes if the row is NOT published.
+async function deleteNonPublishedArticle(id) {
+  if (!id) return null;
+  const { error } = await supabase
+    .from('articles')
+    .delete()
+    .eq('id', id)
+    .neq('status', 'published');
+  return error || null;
+}
+
+async function generateArticle(topic, _categoryFallback, existingTitles) {
   const category      = topic.category || _categoryFallback || 'questions';
   const contentPrompt = getPrompt(category, topic.name.trim(), '');
   const titleHint     = buildTitleHint(category, topic.name.trim());
@@ -49,7 +59,7 @@ Return ONLY this JSON object (no markdown, no code fences, no commentary outside
   "meta_title":       "SEO title under 60 chars",
   "meta_description": "140-155 char meta description that makes someone want to click",
   "keywords":         ["3-5 keyword strings"],
-  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote> tags: <blockquote>\\"Verse text\\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
+  "content":          "<p>Full article HTML. Allowed tags: p, h2, h3, ul, ol, li, strong, blockquote. Format quoted Bible verses as <blockquote>\\"Verse text\\" (Book Chapter:Verse)</blockquote>. Cite unquoted verse references inline as BookName Chapter:Verse. Do NOT use h1. Do NOT use markdown.</p>"
 }
 
 HARD RULES:
@@ -66,22 +76,19 @@ HARD RULES:
     { role: 'user', content: prompt },
   ];
 
-  // Attempt once, retry once on any failure (truncation, parse error, transient network)
   let raw;
   let generated;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       raw       = await callOpenRouter(MESSAGES);
       generated = JSON.parse(raw);
-      break; // success
+      break;
     } catch (err) {
-      if (attempt === 2) throw err; // re-throw on second failure
-      // Brief pause before retry to avoid hammering the API
+      if (attempt === 2) throw err;
       await new Promise(r => setTimeout(r, 1500));
     }
   }
 
-  // Enforce deterministic title/slug for strict-format categories
   const enforced   = enforceArticleMeta(category, topic.name.trim());
   const finalTitle = enforced?.title ?? generated.title ?? topic.name;
   const rawSlug    = enforced?.slug  ?? sanitiseSlug(generated.slug || generated.title || topic.name);
@@ -108,10 +115,6 @@ export async function POST(request) {
   const safeLimit  = Math.min(Math.max(parseInt(body.limit ?? body.count ?? 20, 10) || 20, 1), 50);
   const saveStatus = body.saveAsDraft === true ? 'draft' : 'published';
   const language   = (body.language || 'en').toString().toLowerCase().trim();
-  // When true, topics whose existing article is NOT published (draft/rejected)
-  // are eligible for regeneration — the old draft is deleted right before the
-  // new article is inserted. PUBLISHED articles are NEVER touched regardless.
-  const replaceDrafts = body.replaceDrafts === true;
 
   const encoder = new TextEncoder();
 
@@ -128,11 +131,6 @@ export async function POST(request) {
           return;
         }
 
-        // Strict 1 topic = 1 article rule — fetch ALL articles regardless of status,
-        // language, or category to build the topic-skip set and the global slug set.
-        // Mirrors the DB-level UNIQUE (topic_id) constraint:
-        //   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
-        // CRITICAL: must paginate — PostgREST caps single responses at 1000 rows.
         let allArticles;
         try {
           allArticles = await fetchAllArticlesForBulk(supabase);
@@ -142,19 +140,14 @@ export async function POST(request) {
           return;
         }
 
-        // Topics that ALREADY have a PUBLISHED article are off-limits — no generation
-        // path can ever touch live content. Topics with only drafts/rejected articles
-        // are skipped by default but become eligible when `replaceDrafts` is enabled.
+        // Only PUBLISHED articles block. Drafts are auto-replaced.
         const publishedTopicIds = new Set(
           (allArticles || []).filter(a => a.status === 'published').map(a => a.topic_id).filter(Boolean)
         );
-        const usedTopicIds = replaceDrafts
-          ? publishedTopicIds // only PUBLISHED topics are blocked
-          : new Set((allArticles || []).map(a => a.topic_id).filter(Boolean)); // any article blocks
-        // Slug uniqueness is global across all languages (URLs must be unique)
-        const existingSlugs = new Set((allArticles || []).map(a => a.slug));
+        const publishedSlugs = new Set(
+          (allArticles || []).filter(a => a.status === 'published').map(a => a.slug).filter(Boolean)
+        );
 
-        // Lookup maps so a skip event can include the conflicting article's location
         function existingFromRow(a) {
           return {
             id:       a.id,
@@ -165,16 +158,10 @@ export async function POST(request) {
             category: a.topics?.category || null,
           };
         }
-        const articleByTopicId = new Map(
-          (allArticles || [])
-            .filter(a => a.topic_id)
-            .map(a => [a.topic_id, existingFromRow(a)])
-        );
         const articleBySlug = new Map(
           (allArticles || []).map(a => [a.slug, existingFromRow(a)])
         );
-        // Title uniqueness — keep scoped to PUBLISHED articles in THIS language only.
-        // (Title collisions across languages are fine; draft titles can be edited.)
+        // Title uniqueness scoped to PUBLISHED articles in THIS language only
         const sameLangPublished = (allArticles || []).filter(
           a => a.status === 'published' && a.language === language
         );
@@ -187,7 +174,6 @@ export async function POST(request) {
         let orderedTopics;
 
         if (topicIds.length > 0) {
-          // Specific topic IDs provided (advanced mode)
           const { data: topicsData, error: topicsError } = await supabase
             .from('topics')
             .select('id, name, category')
@@ -204,13 +190,13 @@ export async function POST(request) {
             .filter(Boolean)
             .slice(0, safeLimit);
         } else {
-          // Category-based auto-selection (simple mode)
+          // Auto-mode: pick topics that don't yet have a PUBLISHED article
           const { data: categoryTopics, error: catErr } = await supabase
             .from('topics')
             .select('id, name, category')
             .eq('category', category)
             .order('name')
-            .limit(safeLimit * 5); // fetch extra so we can filter out already-created ones
+            .limit(safeLimit * 5);
 
           if (catErr || !categoryTopics?.length) {
             send({ type: 'error', message: `No topics found for category "${category}". Add topics first.` });
@@ -218,146 +204,53 @@ export async function POST(request) {
             return;
           }
 
-          // Only pick topics that don't already have ANY article (any status, any language)
           orderedTopics = categoryTopics
-            .filter(t => !usedTopicIds.has(t.id))
+            .filter(t => !publishedTopicIds.has(t.id))
             .slice(0, safeLimit);
         }
 
         if (!orderedTopics.length) {
-          send({ type: 'error', message: `All topics in this category already have an article.` });
+          send({ type: 'error', message: `Every topic in this category already has a PUBLISHED article.` });
           controller.close();
           return;
         }
 
-        // toProcess = same as orderedTopics (usedTopicIds already filtered above for auto mode;
-        // for explicit topicIds mode we still apply the filter for safety)
-        const toProcess  = orderedTopics.filter(t => !usedTopicIds.has(t.id));
-        const preSkipped = orderedTopics.length - toProcess.length;
-
-        const total = toProcess.length;
-
-        if (!total) {
-          send({ type: 'error', message: `All selected topics already have an article.` });
-          controller.close();
-          return;
-        }
-
-        send({ type: 'start', total, preSkipped });
+        const total = orderedTopics.length;
+        send({ type: 'start', total, preSkipped: 0 });
 
         let generated = 0;
-        let skipped   = preSkipped;
+        let skipped   = 0;
 
-        for (let i = 0; i < toProcess.length; i++) {
-          const topic = toProcess[i];
+        for (let i = 0; i < orderedTopics.length; i++) {
+          const topic = orderedTopics[i];
           send({ type: 'progress', current: i + 1, total, topic: topic.name });
 
           try {
-            // EARLY SLUG PRE-CHECK — for predictable categories, skip BEFORE the
-            // expensive OpenRouter call so we don't burn AI cost on a topic we
-            // already know we'll have to reject.
-            // EXCEPTION: when replaceDrafts is on and the colliding slug belongs
-            // to a NON-PUBLISHED article on THIS SAME topic, don't skip — the
-            // topic-level branch below will delete the draft and we can re-use
-            // the same predictable slug.
-            const topicCategory = topic.category || category || 'questions';
-            const preCandidates = candidateSlugs(topicCategory, topic.name.trim());
-            const preCollision = preCandidates.find(s => existingSlugs.has(s));
-            if (preCollision) {
-              const owner = articleBySlug.get(preCollision) || null;
-              const isPublished = owner?.status === 'published';
-              const ownedBySameTopic = owner?.id && articleByTopicId.get(topic.id)?.id === owner.id;
-              const replaceableSelfDraft = replaceDrafts && !isPublished && ownedBySameTopic;
-              if (!replaceableSelfDraft) {
-                send({
-                  type: 'skipped', current: i + 1, total, topic: topic.name,
-                  code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
-                  reason: isPublished
-                    ? `Slug "${preCollision}" is used by a PUBLISHED article — cannot recreate`
-                    : `Slug "${preCollision}" already exists`,
-                  existingArticle: owner,
-                });
-                skipped++;
-                continue;
-              }
-              // Fall through — the existingForTopic branch will delete this
-              // draft, freeing the slug for the regenerated article.
-            }
-
-            // REAL concurrency guard: re-query the DB right before the AI call.
-            // The snapshot from run start could be stale if another admin
-            // session inserted concurrently. One indexed lookup (~5ms) prevents
-            // wasting a 15-25s AI call AND guarantees we never touch live content.
+            // Concurrency-safe: re-query the DB right before the AI call so we
+            // can't ever (a) overwrite a freshly-published article or (b) waste
+            // a 15-25s AI call on a topic claimed by another admin session.
             const { data: liveCheck } = await supabase
               .from('articles')
               .select('id, title, slug, status, language, topics(category)')
               .eq('topic_id', topic.id)
               .limit(1);
-            const existingForTopic = liveCheck?.[0]
-              ? {
-                  id:       liveCheck[0].id,
-                  title:    liveCheck[0].title,
-                  slug:     liveCheck[0].slug,
-                  status:   liveCheck[0].status,
-                  language: liveCheck[0].language,
-                  category: liveCheck[0].topics?.category || null,
-                }
-              : (articleByTopicId.get(topic.id) || null);
+            const existingForTopic = liveCheck?.[0] ? existingFromRow(liveCheck[0]) : null;
 
-            // Decision matrix:
-            //   PUBLISHED    → ALWAYS skip (cannot touch live content)
-            //   draft/rejected + replaceDrafts ON → delete old, then insert new
-            //   draft/rejected + replaceDrafts OFF → skip (existing behavior)
-            //   no existing article → proceed
             if (existingForTopic) {
-              const isPublished = existingForTopic.status === 'published';
-              // Refresh in-memory caches so later iterations see this row
-              articleByTopicId.set(topic.id, existingForTopic);
-              if (existingForTopic.slug) {
-                articleBySlug.set(existingForTopic.slug, existingForTopic);
-              }
-
-              if (isPublished) {
-                // Hard block — published content is never touched by generation
-                existingSlugs.add(existingForTopic.slug);
-                usedTopicIds.add(topic.id);
+              if (existingForTopic.status === 'published') {
+                publishedTopicIds.add(topic.id);
+                publishedSlugs.add(existingForTopic.slug);
                 send({
                   type: 'skipped', current: i + 1, total, topic: topic.name,
                   code: 'PUBLISHED_ARTICLE_EXISTS',
-                  reason: `Published article already exists for this topic — cannot recreate`,
+                  reason: 'Published article already exists for this topic — cannot recreate',
                   existingArticle: existingForTopic,
                 });
                 skipped++;
                 continue;
               }
-
-              if (!replaceDrafts) {
-                // Existing draft/rejected — skip unless user opted into replacement
-                existingSlugs.add(existingForTopic.slug);
-                usedTopicIds.add(topic.id);
-                send({
-                  type: 'skipped', current: i + 1, total, topic: topic.name,
-                  code: 'TOPIC_ALREADY_HAS_ARTICLE',
-                  reason: `Topic already has an article (${existingForTopic.status}) — enable "Replace existing drafts" to regenerate`,
-                  existingArticle: existingForTopic,
-                });
-                skipped++;
-                continue;
-              }
-
-              // replaceDrafts ON + non-published existing article: free its
-              // slug from the existingSlugs set so the regenerated article
-              // can use the same one if appropriate, then delete the old row.
-              if (existingForTopic.slug) existingSlugs.delete(existingForTopic.slug);
-              usedTopicIds.delete(topic.id);
-              // Belt-and-suspenders: only delete if NOT published (already
-              // checked above, but explicit .neq() guarantees the SQL itself
-              // can never touch a published row even if the snapshot lied).
-              const { error: delErr } = await supabase
-                .from('articles')
-                .delete()
-                .eq('id', existingForTopic.id)
-                .neq('status', 'published');
+              // Draft / rejected — wipe it so the new generation can proceed.
+              const delErr = await deleteNonPublishedArticle(existingForTopic.id);
               if (delErr) {
                 send({
                   type: 'skipped', current: i + 1, total, topic: topic.name,
@@ -367,73 +260,92 @@ export async function POST(request) {
                 skipped++;
                 continue;
               }
-              // Old draft removed — fall through to generate + insert
+              if (existingForTopic.slug) articleBySlug.delete(existingForTopic.slug);
             }
 
-            const article = await generateArticle(topic, category, existingSlugs, existingTitles);
+            // Slug pre-check (predictable categories only) — block on PUBLISHED
+            // collisions, auto-delete any draft owning the slug.
+            const topicCategory = topic.category || category || 'questions';
+            const preCandidates = candidateSlugs(topicCategory, topic.name.trim());
+            let blockedByPublishedSlug = false;
+            for (const cand of preCandidates) {
+              if (publishedSlugs.has(cand)) {
+                const owner = articleBySlug.get(cand) || null;
+                send({
+                  type: 'skipped', current: i + 1, total, topic: topic.name,
+                  code: 'PUBLISHED_SLUG_EXISTS',
+                  reason: `Slug "${cand}" is used by a PUBLISHED article — cannot recreate`,
+                  existingArticle: owner,
+                });
+                blockedByPublishedSlug = true;
+                break;
+              }
+              const owner = articleBySlug.get(cand);
+              if (owner && owner.status !== 'published') {
+                await deleteNonPublishedArticle(owner.id);
+                articleBySlug.delete(cand);
+              }
+            }
+            if (blockedByPublishedSlug) { skipped++; continue; }
 
-            // Strict 1 topic = 1 article rule — never append "-2" / "-3" suffixes.
-            // If the slug already exists, skip this topic entirely.
-            if (existingSlugs.has(article.slug)) {
+            const article = await generateArticle(topic, category, existingTitles);
+
+            // Post-AI slug check — same rule.
+            if (publishedSlugs.has(article.slug)) {
               const owner = articleBySlug.get(article.slug) || null;
-              const isPublished = owner?.status === 'published';
               send({
                 type: 'skipped', current: i + 1, total, topic: topic.name,
-                code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
-                reason: isPublished
-                  ? `Slug "${article.slug}" is used by a PUBLISHED article — cannot recreate`
-                  : `Slug "${article.slug}" already exists`,
+                code: 'PUBLISHED_SLUG_EXISTS',
+                reason: `Slug "${article.slug}" is used by a PUBLISHED article — cannot recreate`,
                 existingArticle: owner,
               });
               skipped++;
               continue;
             }
+            const slugOwner = articleBySlug.get(article.slug);
+            if (slugOwner && slugOwner.status !== 'published') {
+              await deleteNonPublishedArticle(slugOwner.id);
+              articleBySlug.delete(article.slug);
+            }
 
             const titleLower = (article.title || '').toLowerCase().trim();
-            const titleConflict = allTitlesLower.has(titleLower);
-            if (titleConflict) {
+            if (allTitlesLower.has(titleLower)) {
               send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: `Identical title already published in "${language}"` });
               skipped++;
               continue;
             }
-
-            existingSlugs.add(article.slug);
 
             const { html: enrichedHtml } = await enrichContent(article.content);
             article.content  = enrichedHtml;
             article.status   = saveStatus;
             article.language = language;
 
-            const { error: insertError } = await supabase.from('articles').insert(article).select().single();
+            const { data: inserted, error: insertError } = await supabase
+              .from('articles').insert(article).select().single();
 
             if (insertError) {
+              // Should be impossible after the auto-delete pass above, but the
+              // 23505 path is kept for defense in depth.
               let reason = insertError.message;
-              let existingArticle = null;
               let code = null;
+              let existingArticle = null;
               if (insertError.code === '23505') {
-                // Distinguish topic-uniqueness vs slug-uniqueness collisions, and
-                // distinguish PUBLISHED vs draft conflicts so the UI can surface
-                // an explicit "cannot recreate live content" message.
                 const constraint = (insertError.constraint || insertError.details || '').toString();
                 const isTopicConflict = constraint.includes('unique_topic_article') || constraint.includes('topic_id');
-                if (isTopicConflict) {
-                  existingArticle = articleByTopicId.get(topic.id) || null;
-                  const isPublished = existingArticle?.status === 'published';
-                  code = isPublished ? 'PUBLISHED_ARTICLE_EXISTS' : 'TOPIC_ALREADY_HAS_ARTICLE';
-                  reason = isPublished
-                    ? 'Published article already exists for this topic — cannot recreate'
-                    : 'Topic already has an article';
-                } else {
-                  existingArticle = articleBySlug.get(article.slug) || null;
-                  const isPublished = existingArticle?.status === 'published';
-                  code = isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS';
-                  reason = isPublished ? 'Slug used by a PUBLISHED article' : 'Duplicate slug';
-                }
+                code = isTopicConflict ? 'PUBLISHED_ARTICLE_EXISTS' : 'PUBLISHED_SLUG_EXISTS';
+                reason = isTopicConflict
+                  ? 'Published article already exists for this topic — cannot recreate'
+                  : 'Slug used by a PUBLISHED article';
+                existingArticle = articleBySlug.get(article.slug) || null;
               }
               send({ type: 'skipped', current: i + 1, total, topic: topic.name, code, reason, existingArticle });
               skipped++;
             } else {
-              // Track newly saved title/slug so the rest of this run won't duplicate them
+              if (saveStatus === 'published') {
+                publishedTopicIds.add(topic.id);
+                publishedSlugs.add(article.slug);
+              }
+              articleBySlug.set(article.slug, existingFromRow({ ...inserted, topics: { category: topicCategory } }));
               allTitlesLower.add(titleLower);
               send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug, status: saveStatus });
               generated++;

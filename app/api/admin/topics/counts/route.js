@@ -23,27 +23,12 @@ async function fetchAllPaginated(table, select) {
 }
 
 // GET /api/admin/topics/counts
-// Returns per-category breakdown by article status so the UI can clearly show:
-//   - how many topics have a PUBLISHED article (the only true "done" state)
-//   - how many have a draft awaiting review/publish
-//   - how many have a rejected article
-//   - how many have NO article at all (the only "missing" state)
-//   - how many are "available for action" = need generation OR have a non-published draft
-//     that the user might want to regenerate
+// Simple per-category breakdown:
+//   { categories: { questions: { total, published, missing } }, uncategorized, totals }
 //
-// Shape:
-//   {
-//     categories: {
-//       questions: { total, published, drafts, rejected, missing, unpublished, available }
-//     },
-//     uncategorized,
-//     totals: { topics, articles, published, drafts, rejected, missing }
-//   }
-//
-// Where:
-//   - missing     = topics with NO article at all
-//   - unpublished = topics whose article is NOT published (drafts + rejected)
-//   - available   = missing + unpublished (everything that's NOT published)
+// "missing" = topics whose live state is NOT published (no article OR draft).
+// Generation is blocked ONLY by published articles — drafts are auto-replaced
+// when the user runs generation again.
 export async function GET() {
   if (!supabase) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 500 });
@@ -55,39 +40,37 @@ export async function GET() {
       fetchAllPaginated('articles', 'topic_id, status'),
     ]);
 
-    // Build topic_id -> article status map (1 topic = 1 article rule)
-    const articleStatusByTopicId = new Map();
-    for (const a of articles) {
-      if (a.topic_id) articleStatusByTopicId.set(a.topic_id, a.status || 'draft');
-    }
+    // Set of topic_ids that have a PUBLISHED article — these are the only
+    // ones considered "done". Anything else (draft / rejected / no article)
+    // is "missing" from the user's perspective.
+    const publishedTopicIds = new Set(
+      articles.filter(a => a.status === 'published').map(a => a.topic_id).filter(Boolean)
+    );
 
     const KNOWN_CATEGORIES = ['questions', 'topics', 'guides', 'bible-verses', 'bible-characters'];
-    const empty = () => ({ total: 0, published: 0, drafts: 0, rejected: 0, missing: 0, unpublished: 0, available: 0 });
-    const categories = Object.fromEntries(KNOWN_CATEGORIES.map(c => [c, empty()]));
+    const categories = Object.fromEntries(
+      KNOWN_CATEGORIES.map(c => [c, { total: 0, published: 0, missing: 0 }])
+    );
     let uncategorized = 0;
-
-    const totals = { topics: topics.length, articles: articles.length, published: 0, drafts: 0, rejected: 0, missing: 0 };
 
     for (const t of topics) {
       if (!t.category) { uncategorized++; continue; }
-      if (!categories[t.category]) categories[t.category] = empty();
+      if (!categories[t.category]) categories[t.category] = { total: 0, published: 0, missing: 0 };
       const bucket = categories[t.category];
       bucket.total++;
-
-      const status = articleStatusByTopicId.get(t.id);
-      if (!status)                       { bucket.missing++;   totals.missing++; }
-      else if (status === 'published')   { bucket.published++; totals.published++; }
-      else if (status === 'rejected')    { bucket.rejected++;  totals.rejected++; }
-      else                               { bucket.drafts++;    totals.drafts++; }
+      if (publishedTopicIds.has(t.id)) bucket.published++;
+      else                              bucket.missing++;
     }
 
-    // Derive composite counts
-    for (const c of Object.values(categories)) {
-      c.unpublished = c.drafts + c.rejected;            // has article but not live
-      c.available   = c.missing + c.unpublished;        // can be acted on (gen or replace)
-    }
-
-    return NextResponse.json({ categories, uncategorized, totals });
+    return NextResponse.json({
+      categories,
+      uncategorized,
+      totals: {
+        topics:    topics.length,
+        articles:  articles.length,
+        published: publishedTopicIds.size,
+      },
+    });
   } catch (err) {
     console.error('[topics/counts]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
