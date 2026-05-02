@@ -17,6 +17,10 @@ function getSupabase() {
 export const metadata = {
   title: 'Bible Verses | Bible Verse Insights',
   description: 'Browse Bible verse articles organised by topic.',
+  // Self-referencing canonical so this category index isn't treated as a
+  // duplicate of the homepage (the root layout sets canonical='/' which
+  // every page silently inherits unless it sets its own).
+  alternates: { canonical: 'https://bibleverseinsights.com/bible-verses/' },
   robots: { index: true, follow: true },
 };
 

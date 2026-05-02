@@ -62,7 +62,11 @@ export async function generateMetadata({ params }) {
 
   if (!parentTopic || !childTopic) return { title: 'Not Found', robots: { index: false } };
 
-  const canonical = `${SITE_URL}/bible-verses-about-${slug}/${child}/`;
+  // Canonical must point at the final route that returns HTTP 200, not the
+  // legacy `/bible-verses-about-…` URL — middleware 301-redirects that to
+  // `/bible-verses/<slug>/<child>/`, and a canonical pointing at a redirect
+  // is exactly the duplicate-content signal we are trying to eliminate.
+  const canonical = `${SITE_URL}/bible-verses/${slug}/${child}/`;
   const primary   = articles[0];
 
   return {
