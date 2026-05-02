@@ -27,13 +27,21 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get('filter') || 'all';
+  // `state` controls the exported-column filter:
+  //   - 'new' (default): only un-exported URLs — same behavior as before.
+  //   - 'all'           : full history including already-exported URLs.
+  // Anything else falls back to 'new' so the previous default never breaks.
+  const state = searchParams.get('state') === 'all' ? 'all' : 'new';
 
   let query = supabase
     .from('articles')
-    .select('title, slug, created_at, topics(category)')
+    .select('title, slug, created_at, exported, topics(category)')
     .eq('status', 'published')
-    .eq('exported', false)
     .order('created_at', { ascending: false });
+
+  if (state === 'new') {
+    query = query.eq('exported', false);
+  }
 
   if (filter === 'today') {
     const start = new Date();
@@ -64,8 +72,9 @@ export async function GET(request) {
       slug: row.slug,
       url: buildUrl(appUrl, row.slug, category),
       created_at: row.created_at,
+      exported: !!row.exported,
     };
   });
 
-  return NextResponse.json({ data: rows, count: rows.length });
+  return NextResponse.json({ data: rows, count: rows.length, state });
 }

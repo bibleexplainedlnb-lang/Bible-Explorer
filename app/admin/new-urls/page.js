@@ -47,6 +47,9 @@ export default function NewUrlsPage() {
   const [rows, setRows]               = useState([]);
   const [count, setCount]             = useState(0);
   const [filter, setFilter]           = useState('all');
+  // 'new' (default): exported = false only — original behaviour.
+  // 'all'          : full history including already-exported URLs.
+  const [state, setState]             = useState('new');
   const [loading, setLoading]         = useState(true);
   const [missingColumn, setMissing]   = useState(false);
   const [error, setError]             = useState('');
@@ -56,22 +59,23 @@ export default function NewUrlsPage() {
   const [markDone, setMarkDone]       = useState(false);
   const [sqlCopied, setSqlCopied]     = useState(false);
 
-  const load = useCallback(async (f = filter) => {
+  const load = useCallback(async (f = filter, s = state) => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/admin/new-urls?filter=${f}`);
+      const res = await fetch(`/api/admin/new-urls?filter=${f}&state=${s}`);
       const json = await res.json();
       if (json.missingColumn) { setMissing(true); setRows([]); setCount(0); }
       else if (json.error)    { setError(json.error); }
       else                    { setMissing(false); setRows(json.data || []); setCount(json.count || 0); }
     } catch { setError('Failed to load. Please refresh.'); }
     finally  { setLoading(false); }
-  }, [filter]);
+  }, [filter, state]);
 
-  useEffect(() => { load(filter); }, [filter]);
+  useEffect(() => { load(filter, state); }, [filter, state]);
 
-  function handleFilter(f) { setFilter(f); load(f); }
+  function handleFilter(f) { setFilter(f); load(f, state); }
+  function handleState(s)  { setState(s);  load(filter, s); }
 
   async function copyAllUrls() {
     if (!rows.length) return;
@@ -105,7 +109,16 @@ export default function NewUrlsPage() {
 
   async function markExported() {
     if (!rows.length) return;
-    if (!confirm(`Mark all ${count} URL${count !== 1 ? 's' : ''} as exported? This cannot be undone.`)) return;
+    // The mark-exported endpoint always flips ALL currently-unexported
+    // published rows globally — it does not respect the date filter or
+    // the current 'all' view. The confirm text reflects that so the
+    // admin doesn't expect "only what's visible" to be marked.
+    const unexportedVisible = rows.filter(r => !r.exported).length;
+    const msg = state === 'all'
+      ? `Mark all unexported URLs as exported globally? ` +
+        `(${unexportedVisible} visible here, but every published URL with exported=false will be flipped.) This cannot be undone.`
+      : `Mark all ${count} URL${count !== 1 ? 's' : ''} as exported? This cannot be undone.`;
+    if (!confirm(msg)) return;
     setMarking(true);
     try {
       const res  = await fetch('/api/admin/mark-exported', { method: 'POST' });
@@ -138,9 +151,13 @@ export default function NewUrlsPage() {
           ← Admin
         </Link>
         <div style={{ flex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold' }}>New URLs</h1>
+          <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 'bold' }}>
+            {state === 'all' ? 'All URLs' : 'New URLs'}
+          </h1>
           <p style={{ margin: '0.1rem 0 0', color: '#a8b8cc', fontSize: '0.8rem' }}>
-            Published pages not yet exported
+            {state === 'all'
+              ? 'All published pages, exported and not'
+              : 'Published pages not yet exported'}
           </p>
         </div>
         <form action="/api/auth/logout" method="POST">
@@ -185,15 +202,41 @@ export default function NewUrlsPage() {
 
             {/* Count badge */}
             <span style={{ background: '#1e2d4a', color: 'white', borderRadius: '2rem', padding: '0.35rem 0.9rem', fontSize: '0.85rem', fontWeight: '700', whiteSpace: 'nowrap' }}>
-              {loading ? '…' : `${count} new URL${count !== 1 ? 's' : ''}`}
+              {loading
+                ? '…'
+                : state === 'all'
+                  ? `${count} URL${count !== 1 ? 's' : ''} total`
+                  : `${count} new URL${count !== 1 ? 's' : ''}`}
             </span>
 
-            {/* Filter buttons */}
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
+            {/* State toggle: New (exported=false) vs All */}
+            <div role="group" aria-label="Export state filter" style={{ display: 'flex', gap: '0.4rem' }}>
+              {[['new', 'New only'], ['all', 'Show all']].map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => handleState(val)}
+                  aria-pressed={state === val}
+                  style={{
+                    ...btn('outline'),
+                    background:  state === val ? '#15803d' : 'white',
+                    color:       state === val ? 'white'   : '#374151',
+                    borderColor: state === val ? '#15803d' : '#d1d5db',
+                    fontWeight:  state === val ? '700'     : '400',
+                    fontSize:    '0.8rem',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Date filter buttons */}
+            <div role="group" aria-label="Date range filter" style={{ display: 'flex', gap: '0.4rem' }}>
               {[['all', 'All time'], ['today', 'Today'], ['3days', 'Last 3 days']].map(([val, label]) => (
                 <button
                   key={val}
                   onClick={() => handleFilter(val)}
+                  aria-pressed={filter === val}
                   style={{
                     ...btn('outline'),
                     background:  filter === val ? '#1e2d4a' : 'white',
@@ -246,17 +289,24 @@ export default function NewUrlsPage() {
               </div>
             ) : rows.length === 0 ? (
               <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🎉</div>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '1rem', fontWeight: '600' }}>No new URLs available</p>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{state === 'all' ? '📭' : '🎉'}</div>
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '1rem', fontWeight: '600' }}>
+                  {state === 'all' ? 'No published URLs yet' : 'No new URLs available'}
+                </p>
                 <p style={{ margin: '0.4rem 0 0', color: '#9ca3af', fontSize: '0.85rem' }}>
-                  All published pages have been exported.
+                  {state === 'all'
+                    ? 'Published articles will appear here once you generate them.'
+                    : 'All published pages have been exported.'}
                 </p>
               </div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
-                    {['Title', 'URL', 'Created Date'].map(h => (
+                    {(state === 'all'
+                      ? ['Title', 'URL', 'Created Date', 'Status']
+                      : ['Title', 'URL', 'Created Date']
+                    ).map(h => (
                       <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: '700', color: '#374151', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                         {h}
                       </th>
@@ -278,6 +328,21 @@ export default function NewUrlsPage() {
                       <td style={{ padding: '0.75rem 1rem', color: '#6b7280', whiteSpace: 'nowrap' }}>
                         {formatDate(row.created_at)}
                       </td>
+                      {state === 'all' && (
+                        <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '1rem',
+                            fontSize: '0.72rem',
+                            fontWeight: '700',
+                            background: row.exported ? '#dcf5e7' : '#fff3cd',
+                            color:      row.exported ? '#1b5e20' : '#856404',
+                          }}>
+                            {row.exported ? '✓ Exported' : '● New'}
+                          </span>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
