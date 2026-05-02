@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { friendlyDuplicateCopy } from '../../../lib/duplicateCopy';
 
 const CATEGORIES = [
@@ -45,7 +45,38 @@ export default function BulkGenerator({ onSaved }) {
   const [log,       setLog]       = useState([]);
   const [summary,   setSummary]   = useState(null);
   const [error,     setError]     = useState('');
+  const [counts,        setCounts]        = useState(null); // { categories: { ... }, uncategorized, totals }
+  const [countsLoading, setCountsLoading] = useState(true);
+  const [countsError,   setCountsError]   = useState(false);
   const readerRef = useRef(null);
+
+  // Fetch per-category availability so users can see which categories still
+  // have topics to generate before they click. Refreshed after each run.
+  // On failure we keep the existing button enabled (treat counts as unknown)
+  // so a transient counts API blip never blocks the user from generating.
+  const loadCounts = useCallback(async () => {
+    setCountsLoading(true);
+    try {
+      const r = await fetch('/api/admin/topics/counts', { cache: 'no-store' });
+      if (!r.ok) throw new Error(`counts HTTP ${r.status}`);
+      const data = await r.json();
+      setCounts(data);
+      setCountsError(false);
+    } catch {
+      setCounts(null);          // clear stale data so button doesn't stay disabled
+      setCountsError(true);
+    } finally {
+      setCountsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadCounts(); }, [loadCounts]);
+
+  // When counts are unavailable, treat as "unknown" (not zero) so the user
+  // can still attempt to generate — the server is the source of truth anyway.
+  const availableForCategory = counts?.categories?.[category]?.available ?? null;
+  const totalForCategory     = counts?.categories?.[category]?.total ?? null;
+  const isOutOfTopics        = availableForCategory === 0; // strict 0 only — null = unknown
 
   function reset() {
     setStatus('idle');
@@ -122,6 +153,8 @@ export default function BulkGenerator({ onSaved }) {
           } else if (event.type === 'done') {
             setSummary({ generated: event.generated, skipped: event.skipped });
             setStatus('done');
+            // refresh per-category availability so the UI reflects new state
+            loadCounts();
             onSaved?.();
           } else if (event.type === 'error') {
             const friendly = event.code
@@ -162,8 +195,34 @@ export default function BulkGenerator({ onSaved }) {
               style={S.input}
               disabled={isGenerating}
             >
-              {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              {CATEGORIES.map(c => {
+                const a = counts?.categories?.[c.value]?.available;
+                const t = counts?.categories?.[c.value]?.total;
+                const suffix = (a == null || t == null)
+                  ? ''
+                  : a === 0 ? '  — all done' : `  (${a} of ${t} left)`;
+                return (
+                  <option key={c.value} value={c.value}>
+                    {c.label}{suffix}
+                  </option>
+                );
+              })}
             </select>
+            {!countsLoading && availableForCategory != null && (
+              <p style={{
+                margin: '0.4rem 0 0', fontSize: '0.78rem',
+                color: isOutOfTopics ? '#b91c1c' : '#5a4a35',
+              }}>
+                {isOutOfTopics
+                  ? `Every topic in this category already has an article. Pick a different category or add new topics.`
+                  : `${availableForCategory} of ${totalForCategory} topics in this category still need an article.`}
+              </p>
+            )}
+            {countsError && (
+              <p style={{ margin: '0.4rem 0 0', fontSize: '0.78rem', color: '#8b7355' }}>
+                Couldn’t load topic counts — you can still try generating.
+              </p>
+            )}
           </div>
           <div>
             <label style={S.label}>Number of articles (1–20)</label>
@@ -181,15 +240,18 @@ export default function BulkGenerator({ onSaved }) {
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             onClick={generate}
-            disabled={isGenerating}
-            style={S.btn('primary', isGenerating)}
+            disabled={isGenerating || isOutOfTopics}
+            title={isOutOfTopics ? 'No topics left in this category' : ''}
+            style={S.btn('primary', isGenerating || isOutOfTopics)}
           >
             {isGenerating
               ? `⟳ Generating… (${progress.current}/${progress.total || count})`
-              : `✦ Generate ${count} Article${count !== 1 ? 's' : ''}`}
+              : isOutOfTopics
+                ? '✓ All articles already created'
+                : `✦ Generate ${count} Article${count !== 1 ? 's' : ''}`}
           </button>
 
-          {isDone && (
+          {isDone && !isOutOfTopics && (
             <button onClick={generate} style={S.btn('secondary')}>
               Generate more
             </button>

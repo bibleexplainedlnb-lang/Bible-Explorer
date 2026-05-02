@@ -8,6 +8,29 @@ function sseEvent(data) {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
+// Paginate through ALL articles (PostgREST caps single responses at 1000 rows
+// regardless of `.limit()`, so we MUST use `.range()` in batches to fetch
+// every row). Without this, topics whose articles live past row 1000 silently
+// pass the "already has an article" filter and waste an AI call before the
+// DB unique constraint rejects them.
+async function fetchAllArticlesForBulk(supabase) {
+  const batchSize = 1000;
+  const all = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('id, slug, title, topic_id, language, status, topics(category)')
+      .range(from, from + batchSize - 1);
+    if (error) throw new Error(error.message);
+    if (!data?.length) break;
+    all.push(...data);
+    if (data.length < batchSize) break;
+    from += batchSize;
+  }
+  return all;
+}
+
 async function generateArticle(topic, _categoryFallback, existingSlugs, existingTitles) {
   // Always use the topic's own category from the DB — never trust the caller's fallback
   const category      = topic.category || _categoryFallback || 'questions';
@@ -105,10 +128,15 @@ export async function POST(request) {
         // language, or category to build the topic-skip set and the global slug set.
         // Mirrors the DB-level UNIQUE (topic_id) constraint:
         //   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
-        const { data: allArticles } = await supabase
-          .from('articles')
-          .select('id, slug, title, topic_id, language, status, topics(category)')
-          .limit(20000);
+        // CRITICAL: must paginate — PostgREST caps single responses at 1000 rows.
+        let allArticles;
+        try {
+          allArticles = await fetchAllArticlesForBulk(supabase);
+        } catch (fetchErr) {
+          send({ type: 'error', message: `Could not load existing articles: ${fetchErr.message}` });
+          controller.close();
+          return;
+        }
 
         // Any topic that already has ANY article (any status, any language) is skipped
         const usedTopicIds = new Set(
