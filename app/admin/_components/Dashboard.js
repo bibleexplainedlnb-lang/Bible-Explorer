@@ -92,6 +92,106 @@ function PillarModal({ article, onClose, onAssigned }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CompletionPanel
+// High-level "how much content is done" view. Reuses /api/admin/topics/counts
+// which already returns:
+//   totals.topics    = SELECT COUNT(*) FROM topics
+//   totals.published = COUNT(DISTINCT topic_id) FROM articles WHERE status='published'
+// We compute Pending = totals.topics - totals.published and Progress %.
+// ─────────────────────────────────────────────────────────────────────────────
+function CompletionPanel() {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true); setError('');
+    try {
+      const res = await fetch('/api/admin/topics/counts');
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || 'Failed to load completion data.'); return; }
+      setData(json);
+    } catch (err) { setError(err.message); }
+    finally       { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const total    = data?.totals?.topics    ?? 0;
+  const created  = data?.totals?.published ?? 0;
+  const pending  = Math.max(0, total - created);
+  const progress = total > 0 ? (created / total) * 100 : 0;
+  // Clamp so that any future data anomaly (e.g. orphaned articles producing
+  // created > total) cannot break the progress bar / ARIA semantics.
+  const safeProgress  = Math.min(100, Math.max(0, progress));
+  const progressLabel = total > 0 ? `${progress.toFixed(1)}%` : '—';
+
+  const cards = [
+    { label: 'Total Topics', value: total,   color: '#1e2d4a' },
+    { label: 'Created',      value: created, color: '#2d6a4f' },
+    { label: 'Pending',      value: pending, color: '#b8860b' },
+    { label: 'Progress',     value: progressLabel, color: '#2c4270' },
+  ];
+
+  return (
+    <div style={{ ...S.card, marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <p style={{ margin: 0, fontWeight: '700', fontSize: '1rem', color: '#1e2d4a' }}>Content Completion</p>
+          <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: '#8b7355' }}>
+            Topics with at least one published article.
+          </p>
+        </div>
+        <button onClick={load} disabled={loading} style={{ ...S.btn, fontSize: '0.78rem' }}>
+          {loading ? '⟳ Loading…' : '↻ Refresh'}
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: '#fff0f0', border: '1px solid #f5c6c6', color: '#7b2020', borderRadius: '6px', padding: '0.65rem 1rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+        {cards.map(c => (
+          <div key={c.label} style={{ background: '#f9f5ee', border: '1px solid #e8dfc8', borderRadius: '0.625rem', padding: '0.85rem 1rem' }}>
+            <p style={{ ...S.label, margin: '0 0 0.25rem' }}>{c.label}</p>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold', color: c.color }}>
+              {loading ? '—' : c.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress bar */}
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(safeProgress)}
+        aria-label="Content completion"
+        style={{ height: '14px', background: '#f1ead9', border: '1px solid #e8dfc8', borderRadius: '999px', overflow: 'hidden' }}
+      >
+        <div
+          style={{
+            width: `${safeProgress}%`,
+            height: '100%',
+            background: 'linear-gradient(90deg,#2d6a4f,#3a8a66)',
+            transition: 'width 0.4s ease',
+          }}
+        />
+      </div>
+      {!loading && total > 0 && (
+        <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: '#5a4a35', textAlign: 'right' }}>
+          {created.toLocaleString()} of {total.toLocaleString()} topics published · {pending.toLocaleString()} remaining
+        </p>
+      )}
+    </div>
+  );
+}
+
 function DiagnosticsPanel() {
   const [diag,    setDiag]    = useState(null);
   const [loading, setLoading] = useState(false);
@@ -259,6 +359,10 @@ export default function Dashboard() {
           onAssigned={handlePillarAssigned}
         />
       )}
+
+      {/* Content completion overview (added without modifying the existing
+          stat cards / diagnostics below). */}
+      <CompletionPanel />
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: '1rem', marginBottom: '2rem' }}>
