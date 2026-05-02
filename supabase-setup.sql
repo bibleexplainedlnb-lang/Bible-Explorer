@@ -94,3 +94,14 @@ ON CONFLICT DO NOTHING;
 
 -- 6. New-URLs export tracking
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS exported BOOLEAN NOT NULL DEFAULT false;
+
+-- 7. Strict 1 topic = 1 article rule — enforce at the DB level.
+-- One topic_id can only ever have one article, regardless of language, status, or category.
+-- Safe to run multiple times: if the constraint already exists, the exception is swallowed.
+DO $$
+BEGIN
+  ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
+EXCEPTION
+  WHEN duplicate_table THEN NULL;
+  WHEN duplicate_object THEN NULL;
+END $$;

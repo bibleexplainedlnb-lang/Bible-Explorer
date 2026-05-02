@@ -84,19 +84,20 @@ export async function POST(request) {
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
 
-    // Guard: refuse to create a duplicate if a PUBLISHED article already exists for this
-    // topic IN THIS LANGUAGE. Drafts and other languages do NOT block.
+    // Strict 1 topic = 1 article rule — refuse to create if ANY article already exists
+    // for this topic, regardless of status (draft/published/rejected) or language.
+    // Mirrors the DB-level UNIQUE (topic_id) constraint added by:
+    //   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
     if (topic_id) {
       const { data: existing } = await supabase
         .from('articles')
-        .select('id, title')
+        .select('id, title, status, language')
         .eq('topic_id', topic_id)
-        .eq('language', language)
-        .eq('status', 'published')
         .limit(1);
       if (existing?.length > 0) {
+        const e = existing[0];
         return NextResponse.json(
-          { error: `A published "${language}" article already exists for this topic ("${existing[0].title}").` },
+          { error: `An article already exists for this topic ("${e.title}", status: ${e.status}, language: ${e.language}). Each topic can only have one article.` },
           { status: 409 }
         );
       }
@@ -144,7 +145,19 @@ export async function POST(request) {
     }
 
     if (error) {
-      if (error.code === '23505') return NextResponse.json({ error: `Slug "${slug}" already exists` }, { status: 409 });
+      if (error.code === '23505') {
+        // Distinguish between the two unique constraints on the articles table:
+        //   - unique_topic_article  → one article per topic_id (strict 1:1 rule)
+        //   - articles_slug_key (or similar) → unique slug column
+        const constraint = (error.constraint || error.details || '').toString();
+        if (constraint.includes('unique_topic_article') || constraint.includes('topic_id')) {
+          return NextResponse.json(
+            { error: `An article already exists for this topic. Each topic can only have one article.` },
+            { status: 409 }
+          );
+        }
+        return NextResponse.json({ error: `Slug "${slug}" already exists` }, { status: 409 });
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

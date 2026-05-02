@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, uniqueSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
+import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 const AUTHOR_NAME = 'BVI Team';
@@ -26,17 +26,16 @@ async function fetchAllSlugs() {
   return slugs;
 }
 
-// Returns true if this topic already has a PUBLISHED article in the given language.
-// Drafts do NOT count — a topic with only a draft can still be regenerated.
-// Different languages do NOT collide — English and German for the same topic can coexist.
-async function topicHasPublishedArticle(topicId, language) {
+// Returns true if this topic already has ANY article (any status, any language, any category).
+// Strict rule: 1 topic = 1 article — no exceptions for drafts or other languages.
+// Mirrors the DB-level UNIQUE (topic_id) constraint added by:
+//   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
+async function topicHasAnyArticle(topicId) {
   if (!topicId) return false;
   const { data } = await supabase
     .from('articles')
     .select('id')
     .eq('topic_id', topicId)
-    .eq('status', 'published')
-    .eq('language', language)
     .limit(1);
   return (data?.length ?? 0) > 0;
 }
@@ -64,10 +63,10 @@ export async function POST(request) {
       if (topic?.article_created) articleCreated = true;
     }
 
-    // Block generation only if a PUBLISHED article already exists for this topic in this language.
-    // Draft articles are ignored. Other languages do not collide.
-    if (topicId && await topicHasPublishedArticle(topicId, language)) {
-      return NextResponse.json({ error: `A published article already exists for this topic in "${language}".` }, { status: 409 });
+    // Strict 1 topic = 1 article rule — block generation if ANY article already exists
+    // for this topic, regardless of status (draft/published/rejected) or language.
+    if (topicId && await topicHasAnyArticle(topicId)) {
+      return NextResponse.json({ error: `An article already exists for this topic. Each topic can only have one article (any status, any language).` }, { status: 409 });
     }
 
     // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
@@ -112,11 +111,18 @@ HARD RULES:
     const enforced = enforceArticleMeta(category, topicName.trim());
     const finalTitle = enforced?.title ?? generated.title ?? topicName.trim();
 
-    // Sanitise and deduplicate slug
+    // Sanitise slug. NEVER append "-2", "-3", etc. — if the base slug already exists,
+    // reject the request immediately (409) under the strict 1-topic-1-article rule.
     const rawSlug  = enforced?.slug ?? sanitiseSlug(generated.slug || generated.title || topicName.trim());
     const baseSlug = sanitiseSlug(rawSlug);
     if (!baseSlug) return NextResponse.json({ error: 'Could not generate a valid slug' }, { status: 422 });
-    const finalSlug = uniqueSlug(baseSlug, existingSlugs);
+    if (existingSlugs.has(baseSlug)) {
+      return NextResponse.json(
+        { error: `Slug "${baseSlug}" already exists. Cannot create a variant — each slug must be unique.` },
+        { status: 409 }
+      );
+    }
+    const finalSlug = baseSlug;
 
     // Enrich HTML
     const { html: enrichedContent } = await enrichContent(generated.content || '');
