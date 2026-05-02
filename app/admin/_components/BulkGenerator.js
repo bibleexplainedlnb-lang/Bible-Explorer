@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { friendlyDuplicateCopy } from '../../../lib/duplicateCopy';
 
 const CATEGORIES = [
   { value: 'questions',        label: 'Questions' },
@@ -68,14 +69,10 @@ export default function BulkGenerator({ onSaved }) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Request failed' }));
         if (res.status === 409) {
-          // Normalize duplicate copy regardless of which backend phrasing came back.
-          const friendly = err.code === 'SLUG_ALREADY_EXISTS'
-            ? 'That slug is already in use by another article.'
-            : 'This topic already has an article.';
           setLog([{
             kind: 'skipped',
             title: err.existingArticle?.title || 'Already covered',
-            reason: friendly,
+            reason: friendlyDuplicateCopy({ code: err.code, fallback: err.error }),
             existingArticle: err.existingArticle || null,
             n: 1, total: 1,
           }]);
@@ -113,20 +110,10 @@ export default function BulkGenerator({ onSaved }) {
             setLog(prev => [...prev, { kind: 'saved', title: event.title, slug: event.slug, n: event.current, total: event.total }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'skipped') {
-            // Normalize skipped reason copy to the same friendly phrasing
-            // used in 409 responses, regardless of backend wording.
-            const raw = String(event.reason || '');
-            const lower = raw.toLowerCase();
-            let friendlyReason = raw || 'Already covered.';
-            if (event.code === 'TOPIC_ALREADY_HAS_ARTICLE' || lower.includes('topic already')) {
-              friendlyReason = 'This topic already has an article.';
-            } else if (event.code === 'SLUG_ALREADY_EXISTS' || lower.includes('slug')) {
-              friendlyReason = 'That slug is already in use by another article.';
-            }
             setLog(prev => [...prev, {
               kind: 'skipped',
               title: event.topic,
-              reason: friendlyReason,
+              reason: friendlyDuplicateCopy({ code: event.code, fallback: event.reason }),
               existingArticle: event.existingArticle || null,
               n: event.current,
               total: event.total,
@@ -137,15 +124,9 @@ export default function BulkGenerator({ onSaved }) {
             setStatus('done');
             onSaved?.();
           } else if (event.type === 'error') {
-            // Normalize any duplicate-like backend phrasing into friendly copy.
-            const msg = String(event.message || '');
-            const lower = msg.toLowerCase();
-            let friendly = msg || 'Bulk generation failed.';
-            if (event.code === 'TOPIC_ALREADY_HAS_ARTICLE' || lower.includes('topic already')) {
-              friendly = 'This topic already has an article.';
-            } else if (event.code === 'SLUG_ALREADY_EXISTS' || lower.includes('slug') && lower.includes('exist')) {
-              friendly = 'That slug is already in use by another article.';
-            }
+            const friendly = event.code
+              ? friendlyDuplicateCopy({ code: event.code, fallback: event.message })
+              : (event.message || 'Bulk generation failed.');
             setError(friendly);
             setStatus('idle');
           }
