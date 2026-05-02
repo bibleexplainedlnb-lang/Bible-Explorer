@@ -10,7 +10,7 @@ import { interlinkArticle }  from '../../../../../lib/interlinker.js';
  * Body (all optional):
  *   ids    – string[]  specific article IDs; omit to re-link ALL non-rejected
  *   smart  – boolean   use smart interlinker (default true)
- *   force  – boolean   re-link even if link_count >= 7 (default false)
+ *   force  – boolean   reserved for future use (no link-count cap exists)
  *
  * Strips old injected links, re-runs the full pipeline:
  *   1. Smart internal linking (Related, Explore More, contextual)

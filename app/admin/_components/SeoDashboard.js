@@ -150,8 +150,8 @@ export default function SeoDashboard({ onNavigate }) {
   /* ── Mass interlink weak articles ── */
   async function massInterlink() {
     if (!data?.lowLinks?.length) return;
-    const ids = data.lowLinks.filter(a => a.link_count < 7).map(a => a.id);
-    if (!ids.length) { setToast({ status: 'success', message: 'All shown articles are already optimised.' }); return; }
+    const ids = data.lowLinks.map(a => a.id);
+    if (!ids.length) { setToast({ status: 'success', message: 'No articles to re-link.' }); return; }
     setMassLinking(true);
     try {
       const res  = await fetch('/api/admin/articles/relink/', {
@@ -466,7 +466,7 @@ export default function SeoDashboard({ onNavigate }) {
             <div>
               {lowLinks.map((a, i) => {
                 const isLinking = interlinking.has(a.id);
-                const optimised = a.link_count >= 7;
+                const optimised = a.link_count >= 5;
                 return (
                   <div key={a.id} style={{ ...S.row, borderBottom: i === lowLinks.length - 1 ? 'none' : `1px solid #f5f0e8`, opacity: isLinking ? 0.6 : 1 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
