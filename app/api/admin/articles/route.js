@@ -73,26 +73,30 @@ export async function POST(request) {
       title, slug, content, meta_title, meta_description,
       keywords, related_slugs, topic_id, status = 'draft',
       author_name, author_slug,
+      language: rawLang,
       // _meta is a client-only hint from the generate route — never insert into DB
       _meta: _ignoredMeta,
       ...rest
     } = body;
 
+    const language = (rawLang || 'en').toString().toLowerCase().trim();
+
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
     if (!slug?.trim())  return NextResponse.json({ error: 'slug is required' },  { status: 400 });
 
-    // Guard: refuse to create a duplicate if a PUBLISHED article already exists for this topic.
-    // Draft articles do NOT block — regenerating over a draft is allowed.
+    // Guard: refuse to create a duplicate if a PUBLISHED article already exists for this
+    // topic IN THIS LANGUAGE. Drafts and other languages do NOT block.
     if (topic_id) {
       const { data: existing } = await supabase
         .from('articles')
         .select('id, title')
         .eq('topic_id', topic_id)
+        .eq('language', language)
         .eq('status', 'published')
         .limit(1);
       if (existing?.length > 0) {
         return NextResponse.json(
-          { error: `A published article already exists for this topic ("${existing[0].title}").` },
+          { error: `A published "${language}" article already exists for this topic ("${existing[0].title}").` },
           { status: 409 }
         );
       }
@@ -109,6 +113,7 @@ export async function POST(request) {
       topic_id:         topic_id || null,
       author_name:      author_name || 'BVI Team',
       author_slug:      author_slug || 'bvi-team',
+      language,
       status,
     };
 

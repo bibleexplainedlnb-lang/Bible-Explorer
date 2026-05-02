@@ -84,6 +84,7 @@ export async function POST(request) {
   const category   = body.category || 'questions';
   const safeLimit  = Math.min(Math.max(parseInt(body.limit ?? body.count ?? 20, 10) || 20, 1), 50);
   const saveStatus = body.saveAsDraft === true ? 'draft' : 'published';
+  const language   = (body.language || 'en').toString().toLowerCase().trim();
 
   const encoder = new TextEncoder();
 
@@ -100,30 +101,36 @@ export async function POST(request) {
           return;
         }
 
-        // Fetch published articles — only these block generation (no duplicates of live content)
+        // Fetch PUBLISHED articles ONLY in the selected language — these block generation
+        // (no duplicates of live content for THIS language; other languages are independent)
         const { data: publishedArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'published')
+          .eq('language', language)
           .limit(5000);
 
-        // Also fetch draft slugs/titles to avoid URL and title collisions within this run
+        // Slugs are GLOBAL (URLs must be unique across languages), so fetch ALL slugs
+        const { data: allSlugRows } = await supabase
+          .from('articles')
+          .select('slug')
+          .limit(20000);
+
+        // Draft titles in this language — used for in-language title-collision detection
         const { data: draftArticles } = await supabase
           .from('articles')
           .select('slug, title, topic_id')
           .eq('status', 'draft')
+          .eq('language', language)
           .limit(5000);
 
-        // Only PUBLISHED topics are skipped — topics with only a draft can be regenerated
+        // Only topics with a PUBLISHED article IN THIS LANGUAGE are skipped
         const usedTopicIds = new Set(
           (publishedArticles || []).map(a => a.topic_id).filter(Boolean)
         );
-        // All slugs (published + draft) to prevent URL collisions
-        const existingSlugs = new Set([
-          ...(publishedArticles || []).map(a => a.slug),
-          ...(draftArticles     || []).map(a => a.slug),
-        ]);
-        // Only published titles are off-limits for the AI uniqueness hint
+        // Slug uniqueness is global across all languages
+        const existingSlugs = new Set((allSlugRows || []).map(a => a.slug));
+        // Title uniqueness applies only within the same language
         const allTitlesLower = new Set(
           (publishedArticles || []).map(a => (a.title || '').toLowerCase().trim())
         );
@@ -171,7 +178,7 @@ export async function POST(request) {
         }
 
         if (!orderedTopics.length) {
-          send({ type: 'error', message: 'All topics in this category already have published articles.' });
+          send({ type: 'error', message: `All topics in this category already have published "${language}" articles.` });
           controller.close();
           return;
         }
@@ -184,7 +191,7 @@ export async function POST(request) {
         const total = toProcess.length;
 
         if (!total) {
-          send({ type: 'error', message: 'All selected topics already have published articles.' });
+          send({ type: 'error', message: `All selected topics already have published "${language}" articles.` });
           controller.close();
           return;
         }
@@ -210,7 +217,7 @@ export async function POST(request) {
             const titleLower = (article.title || '').toLowerCase().trim();
             const titleConflict = allTitlesLower.has(titleLower);
             if (titleConflict) {
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: 'Identical title already published' });
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: `Identical title already published in "${language}"` });
               skipped++;
               continue;
             }
@@ -218,8 +225,9 @@ export async function POST(request) {
             existingSlugs.add(article.slug);
 
             const { html: enrichedHtml } = await enrichContent(article.content);
-            article.content = enrichedHtml;
-            article.status  = saveStatus;
+            article.content  = enrichedHtml;
+            article.status   = saveStatus;
+            article.language = language;
 
             const { error: insertError } = await supabase.from('articles').insert(article).select().single();
 

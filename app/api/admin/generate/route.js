@@ -26,22 +26,25 @@ async function fetchAllSlugs() {
   return slugs;
 }
 
-// Returns true if this topic already has a PUBLISHED article.
+// Returns true if this topic already has a PUBLISHED article in the given language.
 // Drafts do NOT count — a topic with only a draft can still be regenerated.
-async function topicHasPublishedArticle(topicId) {
+// Different languages do NOT collide — English and German for the same topic can coexist.
+async function topicHasPublishedArticle(topicId, language) {
   if (!topicId) return false;
   const { data } = await supabase
     .from('articles')
     .select('id')
     .eq('topic_id', topicId)
     .eq('status', 'published')
+    .eq('language', language)
     .limit(1);
   return (data?.length ?? 0) > 0;
 }
 
 export async function POST(request) {
   try {
-    const { topicId, topicName, idea } = await request.json();
+    const { topicId, topicName, idea, language: rawLang } = await request.json();
+    const language = (rawLang || 'en').toString().toLowerCase().trim();
 
     if (!topicName?.trim()) return NextResponse.json({ error: 'topicName is required' }, { status: 400 });
 
@@ -61,10 +64,10 @@ export async function POST(request) {
       if (topic?.article_created) articleCreated = true;
     }
 
-    // Block generation only if a PUBLISHED article already exists for this topic.
-    // Draft articles are ignored — topics with only drafts can be regenerated freely.
-    if (topicId && await topicHasPublishedArticle(topicId)) {
-      return NextResponse.json({ error: 'A published article already exists for this topic.' }, { status: 409 });
+    // Block generation only if a PUBLISHED article already exists for this topic in this language.
+    // Draft articles are ignored. Other languages do not collide.
+    if (topicId && await topicHasPublishedArticle(topicId, language)) {
+      return NextResponse.json({ error: `A published article already exists for this topic in "${language}".` }, { status: 409 });
     }
 
     // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
@@ -126,6 +129,7 @@ HARD RULES:
       keywords:         Array.isArray(generated.keywords) ? generated.keywords : [],
       content:          enrichedContent,
       topic_id:         topicId || null,
+      language,
       status:           'draft',
       author_name:      AUTHOR_NAME,
       author_slug:      AUTHOR_SLUG,
