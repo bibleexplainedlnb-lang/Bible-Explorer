@@ -407,12 +407,18 @@ export default function Generator({ onSaved }) {
                 borderRadius: '0.5rem', padding: '0.85rem 1rem', marginBottom: '1rem', fontSize: '0.9rem',
               }}>
                 <p style={{ margin: '0 0 0.4rem', fontWeight: '700' }}>
-                  {duplicate.kind === 'SLUG_ALREADY_EXISTS'
+                  {duplicate.kind === 'PUBLISHED_ARTICLE_EXISTS'
+                    ? 'A PUBLISHED article already covers this topic'
+                  : duplicate.kind === 'PUBLISHED_SLUG_EXISTS'
+                    ? 'That slug is used by a PUBLISHED article'
+                  : duplicate.kind === 'SLUG_ALREADY_EXISTS'
                     ? 'That slug is already in use'
                     : 'This topic already has an article'}
                 </p>
                 <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem' }}>
-                  {duplicate.kind === 'SLUG_ALREADY_EXISTS'
+                  {duplicate.kind === 'PUBLISHED_ARTICLE_EXISTS' || duplicate.kind === 'PUBLISHED_SLUG_EXISTS'
+                    ? 'Live content cannot be recreated. Open the Articles tab to edit the existing one, or unpublish it first.'
+                  : duplicate.kind === 'SLUG_ALREADY_EXISTS'
                     ? 'Each article URL must be unique. Open the Articles tab to edit or delete the existing one.'
                     : 'Each topic can only have one article. Open the Articles tab to edit or delete the existing one.'}
                 </p>

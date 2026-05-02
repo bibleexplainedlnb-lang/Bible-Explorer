@@ -74,13 +74,18 @@ export async function POST(request) {
 
     // Strict 1 topic = 1 article rule — block generation if ANY article already exists
     // for this topic, regardless of status (draft/published/rejected) or language.
+    // Published articles get a stronger error code so the UI surfaces it loudly
+    // and the operator never accidentally tries to overwrite live content.
     if (topicId) {
       const existing = await getExistingArticleForTopic(topicId);
       if (existing) {
+        const isPublished = existing.status === 'published';
         return NextResponse.json(
           {
-            error: `An article already exists for this topic ("${existing.title}", status: ${existing.status}, language: ${existing.language}). Each topic can only have one article.`,
-            code: 'TOPIC_ALREADY_HAS_ARTICLE',
+            error: isPublished
+              ? `A PUBLISHED article already exists for this topic ("${existing.title}", language: ${existing.language}). Cannot recreate live content.`
+              : `An article already exists for this topic ("${existing.title}", status: ${existing.status}, language: ${existing.language}). Each topic can only have one article.`,
+            code: isPublished ? 'PUBLISHED_ARTICLE_EXISTS' : 'TOPIC_ALREADY_HAS_ARTICLE',
             existingArticle: existing,
           },
           { status: 409 }
@@ -112,10 +117,13 @@ export async function POST(request) {
             category: slugOwner[0].topics?.category || null,
           }
         : null;
+      const isPublished = existing?.status === 'published';
       return NextResponse.json(
         {
-          error: `Slug "${collidingCandidate}" already exists. Cannot create a variant — each slug must be unique.`,
-          code: 'SLUG_ALREADY_EXISTS',
+          error: isPublished
+            ? `Slug "${collidingCandidate}" is already used by a PUBLISHED article. Cannot recreate live content.`
+            : `Slug "${collidingCandidate}" already exists. Cannot create a variant — each slug must be unique.`,
+          code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
           existingArticle: existing,
         },
         { status: 409 }
@@ -183,10 +191,13 @@ HARD RULES:
             category: slugOwner[0].topics?.category || null,
           }
         : null;
+      const isPublished = existing?.status === 'published';
       return NextResponse.json(
         {
-          error: `Slug "${baseSlug}" already exists. Cannot create a variant — each slug must be unique.`,
-          code: 'SLUG_ALREADY_EXISTS',
+          error: isPublished
+            ? `Slug "${baseSlug}" is already used by a PUBLISHED article. Cannot recreate live content.`
+            : `Slug "${baseSlug}" already exists. Cannot create a variant — each slug must be unique.`,
+          code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
           existingArticle: existing,
         },
         { status: 409 }

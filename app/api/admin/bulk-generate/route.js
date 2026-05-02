@@ -251,10 +251,56 @@ export async function POST(request) {
             const preCandidates = candidateSlugs(topicCategory, topic.name.trim());
             const preCollision = preCandidates.find(s => existingSlugs.has(s));
             if (preCollision) {
+              const owner = articleBySlug.get(preCollision) || null;
+              const isPublished = owner?.status === 'published';
               send({
                 type: 'skipped', current: i + 1, total, topic: topic.name,
-                reason: `Slug "${preCollision}" already exists`,
-                existingArticle: articleBySlug.get(preCollision) || null,
+                code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
+                reason: isPublished
+                  ? `Slug "${preCollision}" is used by a PUBLISHED article — cannot recreate`
+                  : `Slug "${preCollision}" already exists`,
+                existingArticle: owner,
+              });
+              skipped++;
+              continue;
+            }
+
+            // REAL concurrency guard: re-query the DB right before the AI call.
+            // The articleByTopicId map is a snapshot from run start — another
+            // admin session inserting during this run won't be in it. One
+            // indexed lookup (~5ms) is cheap insurance against a 15-25s wasted
+            // OpenRouter call AND prevents any chance of touching live content.
+            const { data: liveCheck } = await supabase
+              .from('articles')
+              .select('id, title, slug, status, language, topics(category)')
+              .eq('topic_id', topic.id)
+              .limit(1);
+            const existingForTopic = liveCheck?.[0]
+              ? {
+                  id:       liveCheck[0].id,
+                  title:    liveCheck[0].title,
+                  slug:     liveCheck[0].slug,
+                  status:   liveCheck[0].status,
+                  language: liveCheck[0].language,
+                  category: liveCheck[0].topics?.category || null,
+                }
+              : (articleByTopicId.get(topic.id) || null);
+            if (existingForTopic) {
+              const isPublished = existingForTopic.status === 'published';
+              // Refresh in-memory caches so subsequent iterations see this row
+              articleByTopicId.set(topic.id, existingForTopic);
+              if (existingForTopic.slug) {
+                existingSlugs.add(existingForTopic.slug);
+                articleBySlug.set(existingForTopic.slug, existingForTopic);
+              }
+              usedTopicIds.add(topic.id);
+              send({
+                type: 'skipped', current: i + 1, total, topic: topic.name,
+                code: isPublished ? 'PUBLISHED_ARTICLE_EXISTS' : 'TOPIC_ALREADY_HAS_ARTICLE',
+                reason: isPublished
+                  ? `Published article already exists for this topic — cannot recreate`
+                  : `Topic already has an article (${existingForTopic.status})`,
+                existingArticle: existingForTopic,
               });
               skipped++;
               continue;
@@ -265,10 +311,15 @@ export async function POST(request) {
             // Strict 1 topic = 1 article rule — never append "-2" / "-3" suffixes.
             // If the slug already exists, skip this topic entirely.
             if (existingSlugs.has(article.slug)) {
+              const owner = articleBySlug.get(article.slug) || null;
+              const isPublished = owner?.status === 'published';
               send({
                 type: 'skipped', current: i + 1, total, topic: topic.name,
-                reason: `Slug "${article.slug}" already exists`,
-                existingArticle: articleBySlug.get(article.slug) || null,
+                code: isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS',
+                reason: isPublished
+                  ? `Slug "${article.slug}" is used by a PUBLISHED article — cannot recreate`
+                  : `Slug "${article.slug}" already exists`,
+                existingArticle: owner,
               });
               skipped++;
               continue;
@@ -294,19 +345,28 @@ export async function POST(request) {
             if (insertError) {
               let reason = insertError.message;
               let existingArticle = null;
+              let code = null;
               if (insertError.code === '23505') {
-                // Distinguish topic-uniqueness vs slug-uniqueness collisions.
+                // Distinguish topic-uniqueness vs slug-uniqueness collisions, and
+                // distinguish PUBLISHED vs draft conflicts so the UI can surface
+                // an explicit "cannot recreate live content" message.
                 const constraint = (insertError.constraint || insertError.details || '').toString();
                 const isTopicConflict = constraint.includes('unique_topic_article') || constraint.includes('topic_id');
                 if (isTopicConflict) {
-                  reason = 'Topic already has an article';
                   existingArticle = articleByTopicId.get(topic.id) || null;
+                  const isPublished = existingArticle?.status === 'published';
+                  code = isPublished ? 'PUBLISHED_ARTICLE_EXISTS' : 'TOPIC_ALREADY_HAS_ARTICLE';
+                  reason = isPublished
+                    ? 'Published article already exists for this topic — cannot recreate'
+                    : 'Topic already has an article';
                 } else {
-                  reason = 'Duplicate slug';
                   existingArticle = articleBySlug.get(article.slug) || null;
+                  const isPublished = existingArticle?.status === 'published';
+                  code = isPublished ? 'PUBLISHED_SLUG_EXISTS' : 'SLUG_ALREADY_EXISTS';
+                  reason = isPublished ? 'Slug used by a PUBLISHED article' : 'Duplicate slug';
                 }
               }
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason, existingArticle });
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, code, reason, existingArticle });
               skipped++;
             } else {
               // Track newly saved title/slug so the rest of this run won't duplicate them
