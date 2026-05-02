@@ -216,6 +216,14 @@ export async function POST(request) {
           orderedTopics = categoryTopics
             .filter(t => !publishedTopicIds.has(t.id))
             .slice(0, safeLimit);
+
+          console.log(
+            `[BULK] auto-mode category="${category}" requested=${safeLimit} ` +
+            `categoryTopics=${categoryTopics.length} ` +
+            `publishedInCategory=${categoryTopics.filter(t => publishedTopicIds.has(t.id)).length} ` +
+            `selected=${orderedTopics.length}`
+          );
+          console.log(`[BULK] selected topics:`, orderedTopics.map(t => t.name));
         }
 
         if (!orderedTopics.length) {
@@ -225,6 +233,7 @@ export async function POST(request) {
         }
 
         const total = orderedTopics.length;
+        console.log(`[BULK] STARTING loop — total=${total} category=${category} saveStatus=${saveStatus}`);
         send({ type: 'start', total, preSkipped: 0 });
 
         let generated = 0;
@@ -232,6 +241,7 @@ export async function POST(request) {
 
         for (let i = 0; i < orderedTopics.length; i++) {
           const topic = orderedTopics[i];
+          console.log(`[BULK] ── iteration ${i + 1}/${total} topic="${topic.name}" ──`);
           send({ type: 'progress', current: i + 1, total, topic: topic.name });
 
           try {
@@ -361,22 +371,32 @@ export async function POST(request) {
               }
               articleBySlug.set(article.slug, existingFromRow({ ...inserted, topics: { category: topicCategory } }));
               allTitlesLower.add(titleLower);
+              console.log(`[BULK] ✓ saved iteration ${i + 1}/${total} slug="${article.slug}"`);
               send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug, status: saveStatus });
               generated++;
             }
           } catch (err) {
-            console.error(`[bulk-generate] topic "${topic.name}" failed:`, err.message);
-            send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: err.message });
+            console.error(`[BULK] ✗ iteration ${i + 1}/${total} topic "${topic.name}" THREW:`, err.stack || err.message);
+            try {
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: err.message });
+            } catch (sendErr) {
+              console.error(`[BULK] !! send() failed at iteration ${i + 1}:`, sendErr.message);
+            }
             skipped++;
           }
         }
 
+        console.log(`[BULK] LOOP COMPLETE — generated=${generated} skipped=${skipped} expected=${total}`);
         send({ type: 'done', generated, skipped });
       } catch (err) {
-        console.error('[bulk-generate]', err);
-        send({ type: 'error', message: err.message });
+        // OUTER catch — anything thrown OUTSIDE the per-iteration try/catch
+        // ends up here and aborts the entire run. This is the most likely
+        // explanation for "fewer items processed than requested" with no
+        // matching skipped events.
+        console.error('[BULK] !! OUTER catch (request aborted):', err.stack || err.message);
+        try { send({ type: 'error', message: err.message }); } catch (_) {}
       } finally {
-        controller.close();
+        try { controller.close(); } catch (_) {}
       }
     },
   });
