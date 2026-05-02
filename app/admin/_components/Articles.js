@@ -295,6 +295,11 @@ export default function Articles({ initialArticleId = null }) {
     if (target) {
       setEditing(target);
       setAutoOpenedId(initialArticleId);
+      // Clear the article_id from the hash so re-mounts (e.g. tab switching)
+      // don't re-trigger auto-open after the user has dismissed the modal.
+      if (typeof window !== 'undefined') {
+        history.replaceState(null, '', '#articles');
+      }
       return;
     }
     // Fallback: fetch the single article directly so deep-link works even when
@@ -308,6 +313,9 @@ export default function Articles({ initialArticleId = null }) {
         if (cancelled || !data?.id) return;
         setEditing(data);
         setAutoOpenedId(initialArticleId);
+        if (typeof window !== 'undefined') {
+          history.replaceState(null, '', '#articles');
+        }
       } catch (err) {
         console.error('[Articles] deep-link fetch error:', err);
       }

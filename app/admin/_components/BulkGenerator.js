@@ -127,7 +127,16 @@ export default function BulkGenerator({ onSaved }) {
             setStatus('done');
             onSaved?.();
           } else if (event.type === 'error') {
-            setError(event.message);
+            // Normalize any duplicate-like backend phrasing into friendly copy.
+            const msg = String(event.message || '');
+            const lower = msg.toLowerCase();
+            let friendly = msg || 'Bulk generation failed.';
+            if (event.code === 'TOPIC_ALREADY_HAS_ARTICLE' || lower.includes('topic already')) {
+              friendly = 'This topic already has an article.';
+            } else if (event.code === 'SLUG_ALREADY_EXISTS' || lower.includes('slug') && lower.includes('exist')) {
+              friendly = 'That slug is already in use by another article.';
+            }
+            setError(friendly);
             setStatus('idle');
           }
         }
