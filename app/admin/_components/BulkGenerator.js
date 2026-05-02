@@ -263,7 +263,7 @@ export default function BulkGenerator({ onSaved }) {
       {isGenerating && progress.total > 0 && (
         <div style={S.card}>
           <p style={{ margin: '0 0 0.5rem', fontWeight: '600', color: '#1e2d4a', fontSize: '0.9rem' }}>
-            {progress.current} of {progress.total} generated…
+            Working on slot {progress.current} of {progress.total}…
           </p>
           {progress.topic && (
             <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: '#8b7355' }}>

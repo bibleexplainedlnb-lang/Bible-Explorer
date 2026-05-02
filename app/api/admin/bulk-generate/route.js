@@ -177,8 +177,12 @@ export async function POST(request) {
         );
         const existingTitles = sameLangPublished.map(a => `  - ${a.title}`).join('\n');
 
-        // Resolve the ordered list of topics to process
-        let orderedTopics;
+        // Resolve the candidate pool. In auto-mode we keep the FULL pool and
+        // iterate it until we've SAVED safeLimit articles (or the pool runs
+        // out). This guarantees we never under-deliver just because the first
+        // N alphabetical candidates happened to get published mid-run.
+        let candidatePool;
+        const targetCount = safeLimit;
 
         if (topicIds.length > 0) {
           const { data: topicsData, error: topicsError } = await supabase
@@ -192,20 +196,13 @@ export async function POST(request) {
             return;
           }
 
-          orderedTopics = topicIds
+          // Manual mode: the user explicitly chose these topics — process them
+          // in the order they were given, capped at safeLimit.
+          candidatePool = topicIds
             .map(id => topicsData.find(t => t.id === id))
             .filter(Boolean)
             .slice(0, safeLimit);
         } else {
-          // Auto-mode: pick topics that don't yet have a PUBLISHED article.
-          //
-          // We MUST fetch the entire category (not safeLimit*5) because the
-          // published topics aren't evenly distributed alphabetically — if the
-          // first N alphabetical topics happen to already be published we'd
-          // silently end up with 0 or too few candidates and either lie that
-          // "every topic is published" or generate fewer articles than asked
-          // for. Categories cap out around ~400 topics so a 2000 ceiling is
-          // safe and well under PostgREST's hard limit.
           const { data: categoryTopics, error: catErr } = await supabase
             .from('topics')
             .select('id, name, category')
@@ -219,36 +216,44 @@ export async function POST(request) {
             return;
           }
 
-          orderedTopics = categoryTopics
-            .filter(t => !publishedTopicIds.has(t.id))
-            .slice(0, safeLimit);
+          // Filter out already-published topics. KEEP THE FULL POOL — we'll
+          // walk it until safeLimit articles are SAVED.
+          candidatePool = categoryTopics.filter(t => !publishedTopicIds.has(t.id));
 
           console.log(
-            `[BULK] auto-mode category="${category}" requested=${safeLimit} ` +
+            `[BULK] auto-mode category="${category}" requested=${targetCount} ` +
             `categoryTopics=${categoryTopics.length} ` +
             `publishedInCategory=${categoryTopics.filter(t => publishedTopicIds.has(t.id)).length} ` +
-            `selected=${orderedTopics.length}`
+            `candidatePool=${candidatePool.length}`
           );
-          console.log(`[BULK] selected topics:`, orderedTopics.map(t => t.name));
         }
 
-        if (!orderedTopics.length) {
+        if (!candidatePool.length) {
           send({ type: 'error', message: `Every topic in this category already has a PUBLISHED article.` });
           controller.close();
           return;
         }
 
-        const total = orderedTopics.length;
-        console.log(`[BULK] STARTING loop — total=${total} category=${category} saveStatus=${saveStatus}`);
-        send({ type: 'start', total, preSkipped: 0 });
+        // Tell the UI we're aiming for `targetCount` (not the full pool size).
+        // We may iterate more than targetCount times if some get skipped.
+        console.log(`[BULK] STARTING loop — target=${targetCount} pool=${candidatePool.length} category=${category} saveStatus=${saveStatus}`);
+        send({ type: 'start', total: targetCount, preSkipped: 0 });
 
         let generated = 0;
         let skipped   = 0;
+        const total   = targetCount;
 
-        for (let i = 0; i < orderedTopics.length; i++) {
-          const topic = orderedTopics[i];
-          console.log(`[BULK] ── iteration ${i + 1}/${total} topic="${topic.name}" ──`);
-          send({ type: 'progress', current: i + 1, total, topic: topic.name });
+        for (let i = 0; i < candidatePool.length; i++) {
+          // STOP as soon as we've saved the requested number of articles —
+          // any extra candidates in the pool stay untouched for next time.
+          if (generated >= targetCount) {
+            console.log(`[BULK] target reached (${generated}/${targetCount}) — stopping at iteration ${i}`);
+            break;
+          }
+          const topic = candidatePool[i];
+          const slot  = generated + 1;
+          console.log(`[BULK] ── iteration ${i + 1} (slot ${slot}/${targetCount}) topic="${topic.name}" ──`);
+          send({ type: 'progress', current: slot, total: targetCount, topic: topic.name });
 
           try {
             // Concurrency-safe: re-query the DB right before the AI call so we
@@ -266,7 +271,7 @@ export async function POST(request) {
                 publishedTopicIds.add(topic.id);
                 publishedSlugs.add(existingForTopic.slug);
                 send({
-                  type: 'skipped', current: i + 1, total, topic: topic.name,
+                  type: 'skipped', current: slot, total: targetCount, topic: topic.name,
                   code: 'PUBLISHED_ARTICLE_EXISTS',
                   reason: 'Published article already exists for this topic — cannot recreate',
                   existingArticle: existingForTopic,
@@ -278,7 +283,7 @@ export async function POST(request) {
               const delErr = await deleteNonPublishedArticle(existingForTopic.id);
               if (delErr) {
                 send({
-                  type: 'skipped', current: i + 1, total, topic: topic.name,
+                  type: 'skipped', current: slot, total: targetCount, topic: topic.name,
                   reason: `Couldn't replace existing draft: ${delErr.message}`,
                   existingArticle: existingForTopic,
                 });
@@ -297,7 +302,7 @@ export async function POST(request) {
               if (publishedSlugs.has(cand)) {
                 const owner = articleBySlug.get(cand) || null;
                 send({
-                  type: 'skipped', current: i + 1, total, topic: topic.name,
+                  type: 'skipped', current: slot, total: targetCount, topic: topic.name,
                   code: 'PUBLISHED_SLUG_EXISTS',
                   reason: `Slug "${cand}" is used by a PUBLISHED article — cannot recreate`,
                   existingArticle: owner,
@@ -319,7 +324,7 @@ export async function POST(request) {
             if (publishedSlugs.has(article.slug)) {
               const owner = articleBySlug.get(article.slug) || null;
               send({
-                type: 'skipped', current: i + 1, total, topic: topic.name,
+                type: 'skipped', current: slot, total: targetCount, topic: topic.name,
                 code: 'PUBLISHED_SLUG_EXISTS',
                 reason: `Slug "${article.slug}" is used by a PUBLISHED article — cannot recreate`,
                 existingArticle: owner,
@@ -335,7 +340,7 @@ export async function POST(request) {
 
             const titleLower = (article.title || '').toLowerCase().trim();
             if (allTitlesLower.has(titleLower)) {
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: `Identical title already published in "${language}"` });
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: `Identical title already published in "${language}"` });
               skipped++;
               continue;
             }
@@ -368,7 +373,7 @@ export async function POST(request) {
                   : 'Slug used by a PUBLISHED article';
                 existingArticle = articleBySlug.get(article.slug) || null;
               }
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, code, reason, existingArticle });
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, code, reason, existingArticle });
               skipped++;
             } else {
               if (saveStatus === 'published') {
@@ -377,14 +382,14 @@ export async function POST(request) {
               }
               articleBySlug.set(article.slug, existingFromRow({ ...inserted, topics: { category: topicCategory } }));
               allTitlesLower.add(titleLower);
-              console.log(`[BULK] ✓ saved iteration ${i + 1}/${total} slug="${article.slug}"`);
-              send({ type: 'saved', current: i + 1, total, title: article.title, slug: article.slug, status: saveStatus });
+              console.log(`[BULK] ✓ saved slot ${slot}/${targetCount} slug="${article.slug}"`);
+              send({ type: 'saved', current: slot, total: targetCount, title: article.title, slug: article.slug, status: saveStatus });
               generated++;
             }
           } catch (err) {
-            console.error(`[BULK] ✗ iteration ${i + 1}/${total} topic "${topic.name}" THREW:`, err.stack || err.message);
+            console.error(`[BULK] ✗ iteration ${i + 1} (slot ${slot}/${targetCount}) topic "${topic.name}" THREW:`, err.stack || err.message);
             try {
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: err.message });
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: err.message });
             } catch (sendErr) {
               console.error(`[BULK] !! send() failed at iteration ${i + 1}:`, sendErr.message);
             }
@@ -392,7 +397,7 @@ export async function POST(request) {
           }
         }
 
-        console.log(`[BULK] LOOP COMPLETE — generated=${generated} skipped=${skipped} expected=${total}`);
+        console.log(`[BULK] LOOP COMPLETE — generated=${generated}/${targetCount} skipped=${skipped} pool=${candidatePool.length}`);
         send({ type: 'done', generated, skipped });
       } catch (err) {
         // OUTER catch — anything thrown OUTSIDE the per-iteration try/catch
