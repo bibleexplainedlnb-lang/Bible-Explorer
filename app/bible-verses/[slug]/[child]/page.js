@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { topicSlug } from '../../../../lib/topicSlug.js';
 import { ARTICLE_STYLES } from '../../../../lib/articlePage.js';
+import { JsonLd, buildArticleSchema, buildFAQSchema } from '../../../../lib/seoSchema.js';
 
 const SITE_URL = 'https://bibleverseinsights.com';
 
@@ -98,8 +99,19 @@ export default async function BibleVersesChildPage({ params }) {
   const hasArticles = articles.length > 0;
   const singleArticle = articles.length === 1 ? articles[0] : null;
 
+  // Auto-generated JSON-LD: Article + optional FAQPage (single-article path only).
+  const articleSchema = singleArticle
+    ? buildArticleSchema({
+        article: singleArticle,
+        url:     `${SITE_URL}/bible-verses/${slug}/${child}/`,
+      })
+    : null;
+  const faqSchema = singleArticle ? buildFAQSchema(singleArticle.content || '') : null;
+
   return (
     <>
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
       {hasArticles && <style suppressHydrationWarning>{ARTICLE_STYLES}</style>}
 
       <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.5rem 1rem' }}>

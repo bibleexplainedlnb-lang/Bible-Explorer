@@ -1,5 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
+import { JsonLd, buildWebSiteSchema } from "../lib/seoSchema.js";
 
 const SITE_URL = 'https://bibleverseinsights.com';
 
@@ -39,6 +40,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
+        {/* Site-wide WebSite structured data — emitted on every page. */}
+        <JsonLd data={buildWebSiteSchema()} />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
