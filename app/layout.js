@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import { JsonLd, buildWebSiteSchema } from "../lib/seoSchema.js";
+import BibleGamesLink from "../components/BibleGamesLink.js";
 
 const SITE_URL = 'https://bibleverseinsights.com';
 
@@ -33,7 +34,12 @@ const NAV_LINKS = [
   { href: "/bible-verses/",    label: "Bible Verses" },
   { href: "/bible-characters/",label: "Bible Characters" },
   { href: "/bible/john/1/",    label: "Read Bible" },
+  { href: "/tools/",           label: "Tools" },
 ];
+
+// External link rendered separately so it can use the responsive open behavior.
+const NAV_LINK_STYLE = { color: "#c8b99a", padding: "0.3rem 0.7rem", borderRadius: "0.375rem", fontSize: "0.82rem", fontWeight: "500", textDecoration: "none" };
+const FOOTER_LINK_STYLE = { color: "#a0b0c8", padding: "0.3rem 0.75rem", borderRadius: "0.375rem", fontSize: "0.85rem", textDecoration: "none" };
 
 export default function RootLayout({ children }) {
   return (
@@ -78,14 +84,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </Link>
             <nav style={{ display: "flex", gap: "0.15rem", flexWrap: "wrap", justifyContent: "center" }}>
               {NAV_LINKS.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ color: "#c8b99a", padding: "0.3rem 0.7rem", borderRadius: "0.375rem", fontSize: "0.82rem", fontWeight: "500", textDecoration: "none" }}
-                >
-                  {label}
-                </Link>
+                <Link key={href} href={href} style={NAV_LINK_STYLE}>{label}</Link>
               ))}
+              <BibleGamesLink style={NAV_LINK_STYLE}>Bible Games</BibleGamesLink>
             </nav>
           </div>
         </header>
@@ -99,14 +100,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </p>
             <nav style={{ display: "flex", gap: "0.15rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.25rem" }}>
               {NAV_LINKS.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ color: "#a0b0c8", padding: "0.3rem 0.75rem", borderRadius: "0.375rem", fontSize: "0.85rem", textDecoration: "none" }}
-                >
-                  {label}
-                </Link>
+                <Link key={href} href={href} style={FOOTER_LINK_STYLE}>{label}</Link>
               ))}
+              <BibleGamesLink style={FOOTER_LINK_STYLE}>Bible Games</BibleGamesLink>
             </nav>
             <p style={{ fontSize: "0.8rem", color: "#6b7a90" }}>
               KJV Scripture text via{" "}

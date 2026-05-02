@@ -14,6 +14,64 @@ Bible Explorer — Next.js 14 (App Router, JavaScript) KJV Bible study site, mig
 - `NEXT_PUBLIC_SITE_URL` — Public site URL for sitemap/canonical (defaults to Vercel URL if not set)
 - `ADMIN_EMAIL` — Admin login email (secret; required for admin auth)
 - `ADMIN_PASSWORD` — Admin login password (secret; required for admin auth)
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (legacy; not used by Tools section, which talks to Postgres directly via DATABASE_URL)
+
+## Tools section (`/tools/`)
+
+Standalone, server-rendered tools area. All pages are accessible from the
+header/footer "Tools" link plus an external "Bible Games" link.
+
+Six tools, all server-rendered with GET query params (no client JS for forms):
+
+| Page | Source | AI? |
+|---|---|---|
+| `/tools/bible-verse-generator/?topic=…` | OpenRouter `gpt-4.1-mini` | yes (cached) |
+| `/tools/bible-verse-finder/?q=…` | curated `lib/toolsData.js` | no |
+| `/tools/daily-bible-verse/` | deterministic UTC day-of-year over 80 KJV verses | no |
+| `/tools/prayer-generator/?situation=…` | OpenRouter `gpt-4.1-mini` | yes (cached) |
+| `/tools/bible-emotion-finder/?emotion=…` | curated `lib/toolsData.js` | no |
+| `/tools/bible-chapter-summary/?book=…&chapter=…` | OpenRouter for summary + bible-api.com for KJV text | yes (cached) |
+
+Plus an external "Bible Games" link to `https://biblegamesonline.net/` —
+opens in a new tab on desktop ≥768px, same tab on mobile (handled by
+`components/BibleGamesLink.js`).
+
+### Tools support files
+
+- `lib/toolsData.js` — curated KJV data (30+ topics, 15 emotions, 80 daily verses, 14 prayer-situation suggestions). Pure data, safe to import anywhere.
+- `lib/aiTools.js` — server-only AI helpers: `generateVerseForTopic`, `generatePrayerForSituation`, `generateChapterSummary`. Each: normalize input → check cache → AI on miss → write cache. Each accepts `{ clientIp }` for rate limiting.
+- `lib/toolCache.js` — direct Postgres cache (`tool_cache` table) via `pg` pool on `DATABASE_URL`. Bypasses PostgREST schema cache, which is unreliable after DDL on Supabase.
+- `lib/rateLimit.js` — in-memory token bucket (12 AI calls / IP / hour / tool). Cache hits do NOT consume tokens. Resets on process restart; swap for Redis if multi-instance.
+- `components/ShareButtons.js` — server component, 5 social share buttons (FB, X, WhatsApp, Telegram, Pinterest). Plain anchors with `target=_blank`.
+- `components/BibleGamesLink.js` — client component for the responsive open behavior.
+
+### Cache table
+
+```sql
+CREATE TABLE tool_cache (
+  tool       text         NOT NULL,
+  cache_key  text         NOT NULL,
+  output     jsonb        NOT NULL,
+  created_at timestamptz  NOT NULL DEFAULT now(),
+  PRIMARY KEY (tool, cache_key)
+);
+CREATE INDEX idx_tool_cache_created ON tool_cache (tool, created_at DESC);
+```
+
+### Abuse protections
+
+- AI tool pages set `robots: noindex, follow` when query params are present (base URLs stay indexable). This prevents crawlers from inflating AI spend by enumerating query states.
+- Per-IP, per-tool quota: 12 AI cache misses / hour. Cache hits are unlimited and instant (~95ms).
+- Input length is bounded per tool (topic 60ch, situation 200ch, chapter validated against book metadata).
+- The `tool_cache` table acts as a permanent cache — repeated identical inputs hit DB only.
+
+### Sitemap
+
+`app/sitemap.js` prepends 7 tool URLs. `lastModified` is a stable constant
+(`TOOLS_LAST_MODIFIED`) so the sitemap doesn't churn search-engine recrawl
+signals on every fetch — bump the constant when tool content changes
+materially. The Daily Bible Verse entry uses `new Date()` since it really
+does change daily.
 
 ## Stack
 
