@@ -113,10 +113,20 @@ export default function BulkGenerator({ onSaved }) {
             setLog(prev => [...prev, { kind: 'saved', title: event.title, slug: event.slug, n: event.current, total: event.total }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'skipped') {
+            // Normalize skipped reason copy to the same friendly phrasing
+            // used in 409 responses, regardless of backend wording.
+            const raw = String(event.reason || '');
+            const lower = raw.toLowerCase();
+            let friendlyReason = raw || 'Already covered.';
+            if (event.code === 'TOPIC_ALREADY_HAS_ARTICLE' || lower.includes('topic already')) {
+              friendlyReason = 'This topic already has an article.';
+            } else if (event.code === 'SLUG_ALREADY_EXISTS' || lower.includes('slug')) {
+              friendlyReason = 'That slug is already in use by another article.';
+            }
             setLog(prev => [...prev, {
               kind: 'skipped',
               title: event.topic,
-              reason: event.reason,
+              reason: friendlyReason,
               existingArticle: event.existingArticle || null,
               n: event.current,
               total: event.total,
