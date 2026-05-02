@@ -117,6 +117,12 @@ export async function POST(request) {
   const saveStatus = body.saveAsDraft === true ? 'draft' : 'published';
   const language   = (body.language || 'en').toString().toLowerCase().trim();
 
+  console.log(
+    `[BULK] >>> POST received body=${JSON.stringify(body)} ` +
+    `→ category="${category}" safeLimit=${safeLimit} ` +
+    `topicIds=${topicIds.length} saveStatus=${saveStatus} language=${language}`
+  );
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
