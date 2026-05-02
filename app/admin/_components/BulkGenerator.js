@@ -38,16 +38,18 @@ const categoryLabel = c => CATEGORY_LABELS[c] || c || 'Article';
 const languageLabel = l => (l ? (LANGUAGE_LABELS[l.toLowerCase()] || l.toUpperCase()) : '');
 
 export default function BulkGenerator({ onSaved }) {
-  const [category,      setCategory]      = useState('questions');
-  const [count,         setCount]         = useState(5);
-  const [status,        setStatus]        = useState('idle'); // idle | generating | done
-  const [progress,      setProgress]      = useState({ current: 0, total: 0, topic: '' });
-  const [log,           setLog]           = useState([]);
-  const [summary,       setSummary]       = useState(null);
-  const [error,         setError]         = useState('');
-  const [counts,        setCounts]        = useState(null);
-  const [countsLoading, setCountsLoading] = useState(true);
-  const [countsError,   setCountsError]   = useState(false);
+  const [category,        setCategory]        = useState('questions');
+  const [count,           setCount]           = useState(5);
+  const [includeChildren, setIncludeChildren] = useState(false);
+  const [childCount,      setChildCount]      = useState(3);
+  const [status,          setStatus]          = useState('idle'); // idle | generating | done
+  const [progress,        setProgress]        = useState({ current: 0, total: 0, topic: '' });
+  const [log,             setLog]             = useState([]);
+  const [summary,         setSummary]         = useState(null);
+  const [error,           setError]           = useState('');
+  const [counts,          setCounts]          = useState(null);
+  const [countsLoading,   setCountsLoading]   = useState(true);
+  const [countsError,     setCountsError]     = useState(false);
   const readerRef = useRef(null);
 
   const loadCounts = useCallback(async () => {
@@ -93,7 +95,13 @@ export default function BulkGenerator({ onSaved }) {
       const res = await fetch('/api/admin/bulk-generate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ category, count, saveAsDraft: true }),
+        body:    JSON.stringify({
+          category,
+          count,
+          saveAsDraft: true,
+          includeChildren,
+          childCount: includeChildren ? childCount : 0,
+        }),
       });
 
       if (!res.ok) {
@@ -137,7 +145,15 @@ export default function BulkGenerator({ onSaved }) {
           } else if (event.type === 'progress') {
             setProgress(p => ({ ...p, current: event.current, total: event.total, topic: event.topic }));
           } else if (event.type === 'saved') {
-            setLog(prev => [...prev, { kind: 'saved', title: event.title, slug: event.slug, n: event.current, total: event.total }]);
+            setLog(prev => [...prev, {
+              kind: 'saved',
+              title: event.title,
+              slug: event.slug,
+              n: event.current,
+              total: event.total,
+              isChild: event.kind === 'child',
+              parentTitle: event.parentTitle || null,
+            }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'skipped') {
             setLog(prev => [...prev, {
@@ -147,10 +163,17 @@ export default function BulkGenerator({ onSaved }) {
               existingArticle: event.existingArticle || null,
               n: event.current,
               total: event.total,
+              isChild: event.kind === 'child',
+              parentTitle: event.parentTitle || null,
             }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'done') {
-            setSummary({ generated: event.generated, skipped: event.skipped });
+            setSummary({
+              generated:      event.generated,
+              skipped:        event.skipped,
+              childGenerated: event.childGenerated || 0,
+              childSkipped:   event.childSkipped || 0,
+            });
             setStatus('done');
             // refresh per-category availability so the UI reflects new state
             loadCounts();
@@ -231,6 +254,42 @@ export default function BulkGenerator({ onSaved }) {
           </div>
         </div>
 
+        {/* ── Optional child topic generation ── */}
+        <div style={{ marginBottom: '1.25rem', padding: '0.85rem 1rem', background: '#fafaf3', borderRadius: '0.6rem', border: '1px solid #ece5d0' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', cursor: isGenerating ? 'not-allowed' : 'pointer', fontSize: '0.9rem', color: '#1e2d4a', fontWeight: '600' }}>
+            <input
+              type="checkbox"
+              checked={includeChildren}
+              onChange={e => setIncludeChildren(e.target.checked)}
+              disabled={isGenerating}
+              style={{ width: '16px', height: '16px', cursor: isGenerating ? 'not-allowed' : 'pointer' }}
+            />
+            Include Child Topics
+          </label>
+          {includeChildren && (
+            <div style={{ marginTop: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+              <label style={{ fontSize: '0.85rem', color: '#5a4a35', fontWeight: '600' }}>How many child pages per parent?</label>
+              <select
+                value={childCount}
+                onChange={e => setChildCount(Number(e.target.value))}
+                style={{ ...S.input, width: 'auto', minWidth: '90px' }}
+                disabled={isGenerating}
+              >
+                <option value={0}>0</option>
+                <option value={3}>3</option>
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+              </select>
+            </div>
+          )}
+          {includeChildren && (
+            <p style={{ margin: '0.55rem 0 0', fontSize: '0.78rem', color: '#8b7355', lineHeight: 1.5 }}>
+              For each parent topic that gets generated, also generate up to <strong>{childCount}</strong> of its child topics.
+              Children that already have an article are skipped automatically. Children don't count toward your number above.
+            </p>
+          )}
+        </div>
+
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             onClick={generate}
@@ -286,6 +345,12 @@ export default function BulkGenerator({ onSaved }) {
           <p style={{ margin: 0, fontWeight: '700', color: '#1b5e20', fontSize: '1rem' }}>
             ✓ {summary.generated + summary.skipped} processed ({summary.generated} saved, {summary.skipped} skipped)
           </p>
+          {(summary.childGenerated > 0 || summary.childSkipped > 0) && (
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem', color: '#1b5e20', fontWeight: '600' }}>
+              + {summary.childGenerated} child article{summary.childGenerated === 1 ? '' : 's'} saved
+              {summary.childSkipped > 0 && `, ${summary.childSkipped} child skipped`}
+            </p>
+          )}
           <p style={{ margin: '0.3rem 0 0', fontSize: '0.82rem', color: '#4a7c59' }}>
             All saved as drafts. Go to the Dashboard tab to review and publish them.
           </p>
@@ -300,10 +365,34 @@ export default function BulkGenerator({ onSaved }) {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
             {log.map((item, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.55rem 0.75rem', background: '#f9f5ee', borderRadius: '0.4rem', gap: '0.5rem' }}>
+              <div
+                key={i}
+                style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                  padding: '0.55rem 0.75rem',
+                  background: item.isChild ? '#fcfaf3' : '#f9f5ee',
+                  borderRadius: '0.4rem', gap: '0.5rem',
+                  marginLeft: item.isChild ? '1.5rem' : 0,
+                  borderLeft: item.isChild ? '3px solid #d4c5a9' : 'none',
+                }}
+              >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontSize: '0.75rem', color: '#aaa', marginRight: '0.4rem' }}>{item.n}/{item.total}</span>
+                  {item.isChild && (
+                    <span style={{
+                      display: 'inline-block', padding: '0.05rem 0.45rem', marginRight: '0.4rem',
+                      borderRadius: '0.7rem', fontSize: '0.65rem', fontWeight: '700',
+                      background: '#ece5d0', color: '#5a4a35', textTransform: 'uppercase', letterSpacing: '0.04em',
+                    }}>
+                      Child
+                    </span>
+                  )}
                   <span style={{ fontWeight: '600', color: '#1e2d4a', fontSize: '0.875rem', wordBreak: 'break-word' }}>{item.title}</span>
+                  {item.isChild && item.parentTitle && (
+                    <div style={{ fontSize: '0.72rem', color: '#8b7355', marginTop: '0.1rem' }}>
+                      child of <em>{item.parentTitle}</em>
+                    </div>
+                  )}
                   {item.kind === 'saved'   && item.slug   && <div style={{ fontSize: '0.73rem', color: '#8b7355', fontFamily: 'monospace', marginTop: '0.1rem' }}>{item.slug}</div>}
                   {item.kind === 'skipped' && item.reason && <div style={{ fontSize: '0.73rem', color: '#856404', marginTop: '0.1rem' }}>{item.reason}</div>}
                   {item.kind === 'skipped' && item.existingArticle && (

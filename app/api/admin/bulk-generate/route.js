@@ -117,10 +117,21 @@ export async function POST(request) {
   const saveStatus = body.saveAsDraft === true ? 'draft' : 'published';
   const language   = (body.language || 'en').toString().toLowerCase().trim();
 
+  // ── OPT-IN child topic generation ──
+  // When the admin checks "Include Child Topics" and picks 3/5/10 in the UI,
+  // we additionally generate up to N child articles per parent topic. The
+  // parent flow is unchanged when these stay at their defaults (false/0).
+  const includeChildrenFlag = body.includeChildren === true;
+  const childCountReq       = parseInt(body.childCount, 10);
+  const allowedChildCounts  = new Set([0, 3, 5, 10]);
+  const childCount          = includeChildrenFlag && allowedChildCounts.has(childCountReq) ? childCountReq : 0;
+  const includeChildren     = includeChildrenFlag && childCount > 0;
+
   console.log(
     `[BULK] >>> POST received body=${JSON.stringify(body)} ` +
     `→ category="${category}" safeLimit=${safeLimit} ` +
-    `topicIds=${topicIds.length} saveStatus=${saveStatus} language=${language}`
+    `topicIds=${topicIds.length} saveStatus=${saveStatus} language=${language} ` +
+    `includeChildren=${includeChildren} childCount=${childCount}`
   );
 
   const encoder = new TextEncoder();
@@ -243,17 +254,29 @@ export async function POST(request) {
         let skipped   = 0;
         const total   = targetCount;
 
-        for (let i = 0; i < candidatePool.length; i++) {
-          // STOP as soon as we've saved the requested number of articles —
-          // any extra candidates in the pool stay untouched for next time.
-          if (generated >= targetCount) {
-            console.log(`[BULK] target reached (${generated}/${targetCount}) — stopping at iteration ${i}`);
-            break;
+        // Topics already touched in THIS run (parents OR children). Prevents
+        // re-processing the same topic if it shows up in both the parent pool
+        // and a sibling parent's children list.
+        const processedInRun = new Set();
+        let childGenerated = 0;
+        let childSkipped   = 0;
+
+        // Per-topic generation logic, factored out so the parent loop and the
+        // (opt-in) child loop both share the same battle-tested code path. The
+        // only differences for a child invocation are the SSE event decorations
+        // (`kind: 'child'`, `parentTitle`); the slot number stays the same as
+        // the parent's so children don't move the progress bar.
+        async function processOneTopic(topic, slot, kind, parentTitle) {
+          const isChild = kind === 'child';
+          const sseExtras = isChild ? { kind: 'child', parentTitle } : {};
+          const labelPrefix = isChild ? `└─ child of "${parentTitle}"` : '──';
+
+          if (!isChild) {
+            send({ type: 'progress', current: slot, total: targetCount, topic: topic.name });
+          } else {
+            // Child progress — UI shows it as "extra" work happening between slots.
+            send({ type: 'progress', current: slot, total: targetCount, topic: topic.name, ...sseExtras });
           }
-          const topic = candidatePool[i];
-          const slot  = generated + 1;
-          console.log(`[BULK] ── iteration ${i + 1} (slot ${slot}/${targetCount}) topic="${topic.name}" ──`);
-          send({ type: 'progress', current: slot, total: targetCount, topic: topic.name });
 
           try {
             // Concurrency-safe: re-query the DB right before the AI call so we
@@ -275,9 +298,9 @@ export async function POST(request) {
                   code: 'PUBLISHED_ARTICLE_EXISTS',
                   reason: 'Published article already exists for this topic — cannot recreate',
                   existingArticle: existingForTopic,
+                  ...sseExtras,
                 });
-                skipped++;
-                continue;
+                return 'skipped';
               }
               // Draft / rejected — wipe it so the new generation can proceed.
               const delErr = await deleteNonPublishedArticle(existingForTopic.id);
@@ -286,9 +309,9 @@ export async function POST(request) {
                   type: 'skipped', current: slot, total: targetCount, topic: topic.name,
                   reason: `Couldn't replace existing draft: ${delErr.message}`,
                   existingArticle: existingForTopic,
+                  ...sseExtras,
                 });
-                skipped++;
-                continue;
+                return 'skipped';
               }
               if (existingForTopic.slug) articleBySlug.delete(existingForTopic.slug);
             }
@@ -306,6 +329,7 @@ export async function POST(request) {
                   code: 'PUBLISHED_SLUG_EXISTS',
                   reason: `Slug "${cand}" is used by a PUBLISHED article — cannot recreate`,
                   existingArticle: owner,
+                  ...sseExtras,
                 });
                 blockedByPublishedSlug = true;
                 break;
@@ -316,7 +340,7 @@ export async function POST(request) {
                 articleBySlug.delete(cand);
               }
             }
-            if (blockedByPublishedSlug) { skipped++; continue; }
+            if (blockedByPublishedSlug) return 'skipped';
 
             const article = await generateArticle(topic, category, existingTitles);
 
@@ -328,9 +352,9 @@ export async function POST(request) {
                 code: 'PUBLISHED_SLUG_EXISTS',
                 reason: `Slug "${article.slug}" is used by a PUBLISHED article — cannot recreate`,
                 existingArticle: owner,
+                ...sseExtras,
               });
-              skipped++;
-              continue;
+              return 'skipped';
             }
             const slugOwner = articleBySlug.get(article.slug);
             if (slugOwner && slugOwner.status !== 'published') {
@@ -340,9 +364,8 @@ export async function POST(request) {
 
             const titleLower = (article.title || '').toLowerCase().trim();
             if (allTitlesLower.has(titleLower)) {
-              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: `Identical title already published in "${language}"` });
-              skipped++;
-              continue;
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: `Identical title already published in "${language}"`, ...sseExtras });
+              return 'skipped';
             }
 
             const { html: enrichedHtml } = await enrichContent(article.content);
@@ -373,32 +396,104 @@ export async function POST(request) {
                   : 'Slug used by a PUBLISHED article';
                 existingArticle = articleBySlug.get(article.slug) || null;
               }
-              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, code, reason, existingArticle });
-              skipped++;
-            } else {
-              if (saveStatus === 'published') {
-                publishedTopicIds.add(topic.id);
-                publishedSlugs.add(article.slug);
-              }
-              articleBySlug.set(article.slug, existingFromRow({ ...inserted, topics: { category: topicCategory } }));
-              allTitlesLower.add(titleLower);
-              console.log(`[BULK] ✓ saved slot ${slot}/${targetCount} slug="${article.slug}"`);
-              send({ type: 'saved', current: slot, total: targetCount, title: article.title, slug: article.slug, status: saveStatus });
-              generated++;
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, code, reason, existingArticle, ...sseExtras });
+              return 'skipped';
             }
+
+            if (saveStatus === 'published') {
+              publishedTopicIds.add(topic.id);
+              publishedSlugs.add(article.slug);
+            }
+            articleBySlug.set(article.slug, existingFromRow({ ...inserted, topics: { category: topicCategory } }));
+            allTitlesLower.add(titleLower);
+            console.log(`[BULK] ✓ saved ${labelPrefix} slot ${slot}/${targetCount} slug="${article.slug}"`);
+            send({ type: 'saved', current: slot, total: targetCount, title: article.title, slug: article.slug, status: saveStatus, ...sseExtras });
+            return 'saved';
           } catch (err) {
-            console.error(`[BULK] ✗ iteration ${i + 1} (slot ${slot}/${targetCount}) topic "${topic.name}" THREW:`, err.stack || err.message);
+            console.error(`[BULK] ✗ ${labelPrefix} slot ${slot}/${targetCount} topic "${topic.name}" THREW:`, err.stack || err.message);
             try {
-              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: err.message });
+              send({ type: 'skipped', current: slot, total: targetCount, topic: topic.name, reason: err.message, ...sseExtras });
             } catch (sendErr) {
-              console.error(`[BULK] !! send() failed at iteration ${i + 1}:`, sendErr.message);
+              console.error(`[BULK] !! send() failed at slot ${slot}:`, sendErr.message);
             }
-            skipped++;
+            return 'skipped';
           }
         }
 
-        console.log(`[BULK] LOOP COMPLETE — generated=${generated}/${targetCount} skipped=${skipped} pool=${candidatePool.length}`);
-        send({ type: 'done', generated, skipped });
+        for (let i = 0; i < candidatePool.length; i++) {
+          // STOP as soon as we've saved the requested number of articles —
+          // any extra candidates in the pool stay untouched for next time.
+          if (generated >= targetCount) {
+            console.log(`[BULK] target reached (${generated}/${targetCount}) — stopping at iteration ${i}`);
+            break;
+          }
+          const topic = candidatePool[i];
+          // Skip a parent that was already processed earlier in this run as a
+          // child of a previous parent (rare but possible if the data has
+          // crossed parent_id wiring).
+          if (processedInRun.has(topic.id)) continue;
+          processedInRun.add(topic.id);
+
+          const slot = generated + 1;
+          console.log(`[BULK] ── iteration ${i + 1} (slot ${slot}/${targetCount}) topic="${topic.name}" ──`);
+
+          const outcome = await processOneTopic(topic, slot, 'parent', null);
+          if (outcome === 'saved') {
+            generated++;
+          } else {
+            skipped++;
+          }
+
+          // ── Optional child generation ──
+          // Only runs when the admin explicitly opted in via the UI. For each
+          // child of this parent that doesn't already have a published article
+          // (and wasn't already processed in this run), generate one.
+          // Children DO NOT count toward `targetCount`.
+          if (includeChildren && outcome === 'saved') {
+            const { data: rawChildren, error: childErr } = await supabase
+              .from('topics')
+              .select('id, name, category, parent_id')
+              .eq('parent_id', topic.id)
+              .order('name')
+              .limit(50); // grab extra so the post-filter can still hit childCount
+
+            if (childErr) {
+              // Surface the failure to the UI as a child skip so the summary
+              // reflects reality instead of silently swallowing the error.
+              console.error(`[BULK] !! child fetch failed for parent "${topic.name}":`, childErr.message);
+              send({
+                type: 'skipped', current: slot, total: targetCount, topic: `Children of ${topic.name}`,
+                reason: `Couldn't load child topics: ${childErr.message}`,
+                kind: 'child', parentTitle: topic.name,
+              });
+              childSkipped++;
+            } else {
+              const eligibleChildren = (rawChildren || [])
+                .filter(c => c.id !== topic.id)              // never recurse into self
+                .filter(c => !processedInRun.has(c.id))      // dedupe across run
+                .filter(c => !publishedTopicIds.has(c.id))   // never overwrite published
+                .slice(0, childCount);
+
+              console.log(
+                `[BULK] ↪ children of "${topic.name}": fetched=${rawChildren?.length || 0} ` +
+                `eligible=${eligibleChildren.length} requested=${childCount}`
+              );
+
+              for (const child of eligibleChildren) {
+                processedInRun.add(child.id);
+                const childOutcome = await processOneTopic(child, slot, 'child', topic.name);
+                if (childOutcome === 'saved') childGenerated++;
+                else childSkipped++;
+              }
+            }
+          }
+        }
+
+        console.log(
+          `[BULK] LOOP COMPLETE — generated=${generated}/${targetCount} skipped=${skipped} ` +
+          `childGenerated=${childGenerated} childSkipped=${childSkipped} pool=${candidatePool.length}`
+        );
+        send({ type: 'done', generated, skipped, childGenerated, childSkipped });
       } catch (err) {
         // OUTER catch — anything thrown OUTSIDE the per-iteration try/catch
         // ends up here and aborts the entire run. This is the most likely

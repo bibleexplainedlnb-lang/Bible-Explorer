@@ -1,0 +1,138 @@
+Create a complete "Bible Tools" section with SOCIAL SHARING and external "Bible Games" integration.
+IMPORTANT:
+Do NOT break existing system
+Add as new section: /tools/
+Each tool must have its own page
+SEO-friendly pages (no thin content)
+==================================
+TOOLS MAIN PAGE
+==================================
+Route:
+/tools/
+Show:
+Bible Verse Generator
+Bible Verse Finder
+Daily Bible Verse
+Prayer Generator
+Bible Emotion Finder
+Bible Chapter Summary
+Bible Games Online (NEW)
+
+DISPLAY:
+Each item:
+Title
+Short description
+Button
+For tools:
+→ "Use Tool"
+For games:
+→ "Play Now"
+==================================
+2. BIBLE GAMES INTEGRATION (IMPORTANT)
+Add new card:
+Title:
+Bible Games Online
+Description:
+Play interactive Bible-based games and quizzes to test your knowledge and grow your faith.
+Button:
+"Play Now"
+
+ACTION:
+On click:
+→ Redirect to external URL
+Example:
+https://biblegamesonline.net/
+
+HEADER INTEGRATION:
+Also add in main header menu:
+"Bible Games"
+→ Redirect to external site
+
+SEO:
+Add internal mention in tools page:
+"Explore fun and interactive Bible games online"
+==================================
+3. SOCIAL SHARING (ALL TOOL PAGES)
+Add sharing buttons:
+Facebook
+Twitter (X)
+WhatsApp
+Telegram
+Pinterest
+
+PLACEMENT:
+Below title
+Bottom of content
+Optional floating sidebar
+
+DYNAMIC LINKS:
+Facebook:
+https://www.facebook.com/sharer/sharer.php?u={URL}
+Twitter:
+https://twitter.com/intent/tweet?text={TITLE}&url={URL}
+WhatsApp:
+https://api.whatsapp.com/send?text={TITLE} {URL}
+Telegram:
+https://t.me/share/url?url={URL}&text={TITLE}
+Pinterest:
+https://pinterest.com/pin/create/button/?url={URL}&description={TITLE}
+Replace:
+{URL} = current page URL
+{TITLE} = page title
+==================================
+4. BIBLE VERSE GENERATOR
+Route:
+/tools/bible-verse-generator/
+Input: topic/emotion
+Output:
+verse
+reference
+short explanation
+==================================
+5. BIBLE VERSE FINDER
+Route:
+/tools/bible-verse-finder/
+Input: keyword
+Output:
+5–10 verses
+==================================
+6. DAILY BIBLE VERSE
+Route:
+/tools/daily-bible-verse/
+1 verse per day
+auto change daily
+==================================
+7. PRAYER GENERATOR
+Input: situation
+Output: short prayer
+==================================
+8. BIBLE EMOTION FINDER
+Select emotion
+Output: relevant verses
+==================================
+9. BIBLE CHAPTER SUMMARY
+Input: book + chapter
+Output: summary
+==================================
+10. SEO REQUIREMENTS
+Each tool page must include:
+H1
+300–500 words intro
+Internal linking to articles
+Mention tools where relevant
+==================================
+11. HEADER MENU
+Add:
+Tools
+Bible Games (external link)
+==================================
+12. PERFORMANCE
+Fast load
+No heavy API
+Cache daily verse
+==================================
+GOAL
+Create a powerful tools + engagement hub with:
+tools usage
+social sharing
+external game engagement
