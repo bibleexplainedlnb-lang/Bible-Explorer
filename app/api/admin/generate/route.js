@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
 import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta, candidateSlugs } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
+import { sanitizeForPg } from '../../../../lib/sanitizeForPg.js';
 
 const AUTHOR_NAME = 'BVI Team';
 const AUTHOR_SLUG = 'bvi-team';
@@ -153,7 +154,9 @@ HARD RULES:
 
     const { html: enrichedContent } = await enrichContent(generated.content || '');
 
-    return NextResponse.json({
+    // Pre-sanitize the preview so the values the user sees are exactly what
+    // will be inserted (the save endpoint also sanitizes as a safety net).
+    return NextResponse.json(sanitizeForPg({
       title:            finalTitle,
       slug:             baseSlug,
       meta_title:       generated.meta_title,
@@ -166,7 +169,7 @@ HARD RULES:
       author_name:      AUTHOR_NAME,
       author_slug:      AUTHOR_SLUG,
       _meta: { is_pillar: isPillar, article_created: articleCreated, category },
-    });
+    }));
   } catch (err) {
     console.error('[admin/generate]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });

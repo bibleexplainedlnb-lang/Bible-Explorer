@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
 import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta, candidateSlugs } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
+import { sanitizeForPg } from '../../../../lib/sanitizeForPg.js';
 
 // THE ONE RULE:
 //   PUBLISHED articles are sacred — never touched, never overwritten.
@@ -320,8 +321,13 @@ export async function POST(request) {
             article.status   = saveStatus;
             article.language = language;
 
+            // Strip NUL bytes / lone surrogates that PostgreSQL refuses to
+            // store ("unsupported Unicode escape sequence"). Same fix as the
+            // single-article save path.
+            const safeArticle = sanitizeForPg(article);
+
             const { data: inserted, error: insertError } = await supabase
-              .from('articles').insert(article).select().single();
+              .from('articles').insert(safeArticle).select().single();
 
             if (insertError) {
               // Should be impossible after the auto-delete pass above, but the

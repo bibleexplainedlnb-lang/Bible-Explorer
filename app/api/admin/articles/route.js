@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
+import { sanitizeForPg } from '../../../../lib/sanitizeForPg.js';
 
 const OPTIONAL_COLS = ['meta_title', 'meta_description', 'keywords', 'related_slugs'];
 
@@ -138,7 +139,10 @@ export async function POST(request) {
       }
     }
 
-    const insertData = {
+    // Strip NUL bytes / lone surrogates / unprintable control chars that
+    // PostgreSQL rejects with "unsupported Unicode escape sequence". The AI
+    // occasionally emits these inside HTML content or keyword strings.
+    const insertData = sanitizeForPg({
       title:            title.trim(),
       slug:             slug.trim(),
       content:          content          || null,
@@ -151,7 +155,7 @@ export async function POST(request) {
       author_slug:      author_slug || 'bvi-team',
       language,
       status,
-    };
+    });
 
     // Try insert — fall back on schema errors by removing optional columns
     let { data, error } = await supabase
