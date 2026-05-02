@@ -137,7 +137,7 @@ export default function Generator({ onSaved }) {
 
   async function handleSave(publish) {
     if (!preview) return;
-    setSaving(true); setError(''); setDuplicate(null);
+    setSaving(true); setError(''); setDuplicate(null); setSaved(false);
     try {
       const res  = await fetch('/api/admin/articles', {
         method: 'POST',
@@ -498,10 +498,20 @@ export default function Generator({ onSaved }) {
               </h2>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button onClick={() => handleSave(false)} disabled={saving} style={S.btnGhost}>
+              <button
+                onClick={() => handleSave(false)}
+                disabled={saving || !!duplicate}
+                title={duplicate ? 'Resolve the duplicate above before saving' : ''}
+                style={{ ...S.btnGhost, opacity: (saving || duplicate) ? 0.5 : 1, cursor: (saving || duplicate) ? 'not-allowed' : 'pointer' }}
+              >
                 {saving ? 'Saving…' : '📄 Save Draft'}
               </button>
-              <button onClick={() => handleSave(true)} disabled={saving} style={S.btnGold}>
+              <button
+                onClick={() => handleSave(true)}
+                disabled={saving || !!duplicate}
+                title={duplicate ? 'Resolve the duplicate above before publishing' : ''}
+                style={{ ...S.btnGold, opacity: (saving || duplicate) ? 0.5 : 1, cursor: (saving || duplicate) ? 'not-allowed' : 'pointer' }}
+              >
                 {saving ? 'Saving…' : '✓ Publish'}
               </button>
               <button onClick={reset} style={S.btnGhost}>Discard</button>

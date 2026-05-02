@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
+import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta, candidateSlugs } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 function sseEvent(data) {
@@ -216,6 +216,22 @@ export async function POST(request) {
           send({ type: 'progress', current: i + 1, total, topic: topic.name });
 
           try {
+            // EARLY SLUG PRE-CHECK — for predictable categories, skip BEFORE the
+            // expensive OpenRouter call so we don't burn AI cost on a topic we
+            // already know we'll have to reject.
+            const topicCategory = topic.category || category || 'questions';
+            const preCandidates = candidateSlugs(topicCategory, topic.name.trim());
+            const preCollision = preCandidates.find(s => existingSlugs.has(s));
+            if (preCollision) {
+              send({
+                type: 'skipped', current: i + 1, total, topic: topic.name,
+                reason: `Slug "${preCollision}" already exists`,
+                existingArticle: articleBySlug.get(preCollision) || null,
+              });
+              skipped++;
+              continue;
+            }
+
             const article = await generateArticle(topic, category, existingSlugs, existingTitles);
 
             // Strict 1 topic = 1 article rule — never append "-2" / "-3" suffixes.

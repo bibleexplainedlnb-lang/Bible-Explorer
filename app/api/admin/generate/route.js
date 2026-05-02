@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '../../../../lib/supabaseAdmin.js';
-import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta } from '../../../../lib/generator.js';
+import { sanitiseSlug, getPrompt, buildTitleHint, callOpenRouter, enforceArticleMeta, candidateSlugs } from '../../../../lib/generator.js';
 import { enrichContent } from '../../../../lib/seoEnrich.js';
 
 const AUTHOR_NAME = 'BVI Team';
@@ -90,6 +90,37 @@ export async function POST(request) {
 
     // Fetch ALL existing slugs (published + draft) for complete slug-collision prevention
     const existingSlugs = await fetchAllSlugs();
+
+    // EARLY SLUG PRE-CHECK — for categories where the AI's slug is predictable,
+    // reject BEFORE calling OpenRouter so we don't waste 15-25s + AI cost on
+    // content the user can never save. Returns the friendly 409 the UI expects.
+    const candidates = candidateSlugs(category, topicName.trim());
+    const collidingCandidate = candidates.find(s => existingSlugs.has(s));
+    if (collidingCandidate) {
+      const { data: slugOwner } = await supabase
+        .from('articles')
+        .select('id, title, slug, status, language, topics(category)')
+        .eq('slug', collidingCandidate)
+        .limit(1);
+      const existing = slugOwner?.[0]
+        ? {
+            id:       slugOwner[0].id,
+            title:    slugOwner[0].title,
+            slug:     slugOwner[0].slug,
+            status:   slugOwner[0].status,
+            language: slugOwner[0].language,
+            category: slugOwner[0].topics?.category || null,
+          }
+        : null;
+      return NextResponse.json(
+        {
+          error: `Slug "${collidingCandidate}" already exists. Cannot create a variant — each slug must be unique.`,
+          code: 'SLUG_ALREADY_EXISTS',
+          existingArticle: existing,
+        },
+        { status: 409 }
+      );
+    }
 
     const contentPrompt = getPrompt(category, topicName.trim(), idea);
 
