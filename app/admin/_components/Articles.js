@@ -252,6 +252,8 @@ export default function Articles({ initialArticleId = null }) {
   const [toast,         setToast]         = useState(null);
 
   const [interlinking,  setInterlinking]  = useState(new Set());
+  const [unlinking,     setUnlinking]     = useState(new Set());
+  const [stripping,     setStripping]     = useState(false);
   const [selectedIds,   setSelectedIds]   = useState(new Set());
   const [bulkActioning, setBulkActioning] = useState(false);
   const [bulkConfirm,   setBulkConfirm]   = useState(null);
@@ -421,6 +423,37 @@ export default function Articles({ initialArticleId = null }) {
     finally { setInterlinking(prev => { const s = new Set(prev); s.delete(article.id); return s; }); }
   }
 
+  async function unlinkOne(article) {
+    setUnlinking(prev => new Set([...prev, article.id])); setToast(null);
+    try {
+      const res  = await fetch(`/api/admin/articles/${article.id}/strip-links`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'De-interlink failed' });
+      } else {
+        setArticles(prev => prev.map(a => a.id === data.id ? { ...a, ...data } : a));
+        setToast({ status: 'success', message: `"${article.title}" — ${data.message}` });
+      }
+    } catch (err) { setToast({ status: 'error', message: err.message }); }
+    finally { setUnlinking(prev => { const s = new Set(prev); s.delete(article.id); return s; }); }
+  }
+
+  async function stripAllLinks() {
+    if (!confirm('Remove all article-to-article internal links from EVERY article?\n\nBible verse links will be preserved. You can always re-link with "Re-link All".')) return;
+    setStripping(true); setToast(null);
+    try {
+      const res  = await fetch('/api/admin/articles/strip-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ status: 'error', message: data.error || 'Strip failed' });
+      } else {
+        setToast({ status: 'success', message: data.message });
+        loadArticles();
+      }
+    } catch (err) { setToast({ status: 'error', message: err.message }); }
+    finally { setStripping(false); }
+  }
+
   async function relinkAll() {
     setRelinking(true); setToast(null);
     try {
@@ -549,11 +582,19 @@ export default function Articles({ initialArticleId = null }) {
         <button onClick={loadArticles} style={{ ...S.btn('default'), padding: '0.4rem 0.85rem' }}>↻ Refresh</button>
 
         <button
-          onClick={relinkAll} disabled={relinking}
+          onClick={relinkAll} disabled={relinking || stripping}
           title="Strip old enrichment and re-run internal linking on all published articles"
           style={{ ...S.btn('improve'), padding: '0.4rem 0.85rem', opacity: relinking ? 0.6 : 1 }}
         >
           {relinking ? '⟳ Re-linking…' : '🔗 Re-link All'}
+        </button>
+
+        <button
+          onClick={stripAllLinks} disabled={relinking || stripping}
+          title="Remove all article-to-article internal links from every article (keeps Bible verse links). Useful for A/B comparing with vs without interlinking."
+          style={{ ...S.btn('reject'), padding: '0.4rem 0.85rem', opacity: stripping ? 0.6 : 1 }}
+        >
+          {stripping ? '⟳ Stripping…' : '✂ Strip Links'}
         </button>
 
         <button
@@ -694,12 +735,13 @@ export default function Articles({ initialArticleId = null }) {
                   const busy            = actioning && actioning.startsWith(a.id);
                   const isImproving     = improving.has(a.id);
                   const isInterlinking  = interlinking.has(a.id);
+                  const isUnlinking     = unlinking.has(a.id);
                   const old             = isOldArticle(a.created_at);
                   const thin            = isThinArticle(a.content);
                   const checked         = selectedIds.has(a.id);
                   return (
                     <tr key={a.id} style={{
-                      opacity: (busy || isImproving || isInterlinking) ? 0.6 : 1,
+                      opacity: (busy || isImproving || isInterlinking || isUnlinking) ? 0.6 : 1,
                       transition: 'opacity 0.2s',
                       background: checked ? '#f0f9ff' : undefined,
                     }}>
@@ -724,11 +766,11 @@ export default function Articles({ initialArticleId = null }) {
                       <td style={S.td} suppressHydrationWarning>{fmt(a.created_at)}</td>
                       <td style={{ ...S.td, whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy || isImproving || isInterlinking}>Edit</button>
+                          <button onClick={() => setEditing(a)} style={S.btn('default')} disabled={busy || isImproving || isInterlinking || isUnlinking}>Edit</button>
                           <button
                             onClick={() => improveArticle(a)}
                             style={{ ...S.btn('improve'), minWidth: '4.5rem' }}
-                            disabled={busy || isImproving || isInterlinking}
+                            disabled={busy || isImproving || isInterlinking || isUnlinking}
                             title="Rewrite with AI — saves automatically"
                           >
                             {isImproving ? '…' : '✦ Improve'}
@@ -736,21 +778,29 @@ export default function Articles({ initialArticleId = null }) {
                           <button
                             onClick={() => interlinkOne(a)}
                             style={{ ...S.btn('upgrade'), minWidth: '5rem' }}
-                            disabled={busy || isImproving || isInterlinking}
+                            disabled={busy || isImproving || isInterlinking || isUnlinking}
                             title={`Add smart internal links${(a.link_count || 0) >= 7 ? ' (already optimised — will skip)' : ''}`}
                           >
                             {isInterlinking ? '⟳ Linking…' : `🔗 Interlink${(a.link_count || 0) > 0 ? ` (${a.link_count})` : ''}`}
                           </button>
+                          <button
+                            onClick={() => unlinkOne(a)}
+                            style={{ ...S.btn('reject'), minWidth: '4.5rem' }}
+                            disabled={busy || isImproving || isInterlinking || isUnlinking || (a.link_count || 0) === 0}
+                            title="Remove internal article links from this article (keeps Bible verse links). Idempotent — running twice has no effect."
+                          >
+                            {isUnlinking ? '⟳ Unlinking…' : '✂ Unlink'}
+                          </button>
                           {a.status !== 'published' && (
-                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy || isImproving || isInterlinking}>Publish</button>
+                            <button onClick={() => setStatus(a, 'published')} style={S.btn('publish')} disabled={busy || isImproving || isInterlinking || isUnlinking}>Publish</button>
                           )}
                           {a.status !== 'draft' && (
-                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy || isImproving || isInterlinking}>Draft</button>
+                            <button onClick={() => setStatus(a, 'draft')} style={S.btn('draft')} disabled={busy || isImproving || isInterlinking || isUnlinking}>Draft</button>
                           )}
                           {a.status !== 'rejected' && (
-                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy || isImproving || isInterlinking}>Reject</button>
+                            <button onClick={() => setStatus(a, 'rejected')} style={S.btn('reject')} disabled={busy || isImproving || isInterlinking || isUnlinking}>Reject</button>
                           )}
-                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy || isImproving || isInterlinking}>Delete</button>
+                          <button onClick={() => setDeleting(a)} style={S.btn('delete')} disabled={busy || isImproving || isInterlinking || isUnlinking}>Delete</button>
                         </div>
                       </td>
                     </tr>

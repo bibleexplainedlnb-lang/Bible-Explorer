@@ -234,7 +234,9 @@ Next.js 14 (App Router, JavaScript) KJV Bible study site. Dev server runs via `n
 - `app/page.js` — homepage; Supabase fetch, featured Bible passages (hardcoded nav links only)
 - `app/sitemap.js` — dynamic sitemap from Supabase articles
 - `public/robots.txt` — User-agent: *, Allow: /, Sitemap URL
-- `lib/seoEnrich.js` — async AI-powered inline linking pipeline
+- `lib/seoEnrich.js` — async AI-powered inline linking pipeline; `stripArticleLinksOnly()` "de-interlink" helper preserves Bible verse links
+- `lib/interlinker.js` — smart interlinker. Strict rules: ≥2 words, ≥2 content words, no stopword-only phrases, contextual paragraph match required (link only lands inside a paragraph that shares a topical keyword with the link target). Pipeline is idempotent — strip-then-relink on every call.
+- Admin "✂ Unlink" (per-row) and "✂ Strip Links" (bulk) buttons let editors A/B compare with vs without internal linking. Endpoints: `POST /api/admin/articles/[id]/strip-links`, `POST /api/admin/articles/strip-links`. Both keep Bible verse links intact.
 - `lib/generator.js` — OpenRouter AI generation (MODEL: gpt-4.1-mini)
 - `app/bible-verses/[slug]/page.js` — canonical article page with full SEO metadata
 - `app/admin/_components/Articles.js` — admin CMS with Upgrade AI, Old Article badge, Save Draft/Publish
