@@ -90,6 +90,7 @@ async function fetchPool() {
       .from('articles')
       .select('id, slug, title, topic_id, link_count, topics(category, is_pillar, parent_id)')
       .eq('status', 'published')
+      .order('id', { ascending: true })       // stable order so duplicate-URL dedup picks the same winner across runs
       .range(from, from + 999);
 
     if (error || !data?.length) break;
