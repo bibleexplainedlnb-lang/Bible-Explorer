@@ -38,22 +38,19 @@ const categoryLabel = c => CATEGORY_LABELS[c] || c || 'Article';
 const languageLabel = l => (l ? (LANGUAGE_LABELS[l.toLowerCase()] || l.toUpperCase()) : '');
 
 export default function BulkGenerator({ onSaved }) {
-  const [category,  setCategory]  = useState('questions');
-  const [count,     setCount]     = useState(5);
-  const [status,    setStatus]    = useState('idle'); // idle | generating | done
-  const [progress,  setProgress]  = useState({ current: 0, total: 0, topic: '' });
-  const [log,       setLog]       = useState([]);
-  const [summary,   setSummary]   = useState(null);
-  const [error,     setError]     = useState('');
+  const [category,      setCategory]      = useState('questions');
+  const [count,         setCount]         = useState(5);
+  const [replaceDrafts, setReplaceDrafts] = useState(false);
+  const [status,        setStatus]        = useState('idle'); // idle | generating | done
+  const [progress,      setProgress]      = useState({ current: 0, total: 0, topic: '' });
+  const [log,           setLog]           = useState([]);
+  const [summary,       setSummary]       = useState(null);
+  const [error,         setError]         = useState('');
   const [counts,        setCounts]        = useState(null); // { categories: { ... }, uncategorized, totals }
   const [countsLoading, setCountsLoading] = useState(true);
   const [countsError,   setCountsError]   = useState(false);
   const readerRef = useRef(null);
 
-  // Fetch per-category availability so users can see which categories still
-  // have topics to generate before they click. Refreshed after each run.
-  // On failure we keep the existing button enabled (treat counts as unknown)
-  // so a transient counts API blip never blocks the user from generating.
   const loadCounts = useCallback(async () => {
     setCountsLoading(true);
     try {
@@ -63,7 +60,7 @@ export default function BulkGenerator({ onSaved }) {
       setCounts(data);
       setCountsError(false);
     } catch {
-      setCounts(null);          // clear stale data so button doesn't stay disabled
+      setCounts(null);
       setCountsError(true);
     } finally {
       setCountsLoading(false);
@@ -72,11 +69,24 @@ export default function BulkGenerator({ onSaved }) {
 
   useEffect(() => { loadCounts(); }, [loadCounts]);
 
-  // When counts are unavailable, treat as "unknown" (not zero) so the user
-  // can still attempt to generate — the server is the source of truth anyway.
-  const availableForCategory = counts?.categories?.[category]?.available ?? null;
-  const totalForCategory     = counts?.categories?.[category]?.total ?? null;
-  const isOutOfTopics        = availableForCategory === 0; // strict 0 only — null = unknown
+  // Per-category breakdown. "missing" = no article at all. "unpublished" =
+  // draft + rejected (article exists but not live). When `replaceDrafts` is
+  // on, both are actionable; otherwise only `missing` is.
+  const cat = counts?.categories?.[category] || null;
+  const totalForCategory     = cat?.total ?? null;
+  const publishedCount       = cat?.published ?? null;
+  const draftsCount          = cat?.drafts ?? null;
+  const rejectedCount        = cat?.rejected ?? null;
+  const missingCount         = cat?.missing ?? null;
+  const unpublishedCount     = cat?.unpublished ?? null;
+  // Topics this run can act on, given the current toggle state
+  const actionableCount      = cat
+    ? (replaceDrafts ? cat.missing + cat.unpublished : cat.missing)
+    : null;
+  const isOutOfTopics        = actionableCount === 0;
+  // Truly "all done" = every topic in this category is published. Used for
+  // the celebratory "✓ All articles already created" state.
+  const isAllPublished       = cat ? cat.published === cat.total && cat.total > 0 : false;
 
   function reset() {
     setStatus('idle');
@@ -94,7 +104,7 @@ export default function BulkGenerator({ onSaved }) {
       const res = await fetch('/api/admin/bulk-generate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ category, count, saveAsDraft: true }),
+        body:    JSON.stringify({ category, count, saveAsDraft: true, replaceDrafts }),
       });
 
       if (!res.ok) {
@@ -196,27 +206,52 @@ export default function BulkGenerator({ onSaved }) {
               disabled={isGenerating}
             >
               {CATEGORIES.map(c => {
-                const a = counts?.categories?.[c.value]?.available;
-                const t = counts?.categories?.[c.value]?.total;
-                const suffix = (a == null || t == null)
-                  ? ''
-                  : a === 0 ? '  — all done' : `  (${a} of ${t} left)`;
-                return (
-                  <option key={c.value} value={c.value}>
-                    {c.label}{suffix}
-                  </option>
-                );
+                const cc = counts?.categories?.[c.value];
+                if (!cc) return <option key={c.value} value={c.value}>{c.label}</option>;
+                let suffix;
+                if (cc.published === cc.total && cc.total > 0) {
+                  suffix = `  — ✓ all ${cc.total} published`;
+                } else if (replaceDrafts) {
+                  const act = cc.missing + cc.unpublished;
+                  suffix = act === 0
+                    ? `  — ✓ all ${cc.total} published`
+                    : `  — ${cc.published}/${cc.total} live · ${act} can be (re)generated`;
+                } else {
+                  suffix = `  — ${cc.published}/${cc.total} live · ${cc.drafts} drafts · ${cc.missing} missing`;
+                }
+                return <option key={c.value} value={c.value}>{c.label}{suffix}</option>;
               })}
             </select>
-            {!countsLoading && availableForCategory != null && (
-              <p style={{
-                margin: '0.4rem 0 0', fontSize: '0.78rem',
-                color: isOutOfTopics ? '#b91c1c' : '#5a4a35',
-              }}>
-                {isOutOfTopics
-                  ? `Every topic in this category already has an article. Pick a different category or add new topics.`
-                  : `${availableForCategory} of ${totalForCategory} topics in this category still need an article.`}
-              </p>
+            {!countsLoading && cat && (
+              <div style={{ margin: '0.5rem 0 0', fontSize: '0.78rem', color: '#5a4a35', lineHeight: 1.45 }}>
+                <div>
+                  <strong style={{ color: '#1b5e20' }}>{publishedCount} published</strong>
+                  {' · '}
+                  <span style={{ color: draftsCount > 0 ? '#856404' : '#8b7355' }}>
+                    {draftsCount} draft{draftsCount === 1 ? '' : 's'} awaiting publish
+                  </span>
+                  {rejectedCount > 0 && <> · <span>{rejectedCount} rejected</span></>}
+                  {' · '}
+                  <span>{missingCount} need generating</span>
+                  {' · '}
+                  <span style={{ color: '#6b6b6b' }}>({totalForCategory} total)</span>
+                </div>
+                {isAllPublished ? (
+                  <div style={{ color: '#1b5e20', marginTop: '0.25rem' }}>
+                    ✓ Every topic in this category is published.
+                  </div>
+                ) : isOutOfTopics ? (
+                  <div style={{ color: '#b91c1c', marginTop: '0.25rem' }}>
+                    No new topics to generate. Enable “Replace existing drafts” below to regenerate the {unpublishedCount} unpublished one{unpublishedCount === 1 ? '' : 's'}, or review the {draftsCount} pending draft{draftsCount === 1 ? '' : 's'} in the Articles tab.
+                  </div>
+                ) : (
+                  <div style={{ marginTop: '0.25rem' }}>
+                    {replaceDrafts
+                      ? `This run will (re)generate up to ${count} of the ${actionableCount} actionable topic${actionableCount === 1 ? '' : 's'}. Existing drafts will be replaced.`
+                      : `This run will generate up to ${count} of the ${missingCount} missing topic${missingCount === 1 ? '' : 's'}.`}
+                  </div>
+                )}
+              </div>
             )}
             {countsError && (
               <p style={{ margin: '0.4rem 0 0', fontSize: '0.78rem', color: '#8b7355' }}>
@@ -237,18 +272,46 @@ export default function BulkGenerator({ onSaved }) {
           </div>
         </div>
 
+        {/* Replace existing drafts toggle */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+          background: replaceDrafts ? '#fffbeb' : '#fafaf7',
+          border: `1px solid ${replaceDrafts ? '#fde68a' : '#e8dfc8'}`,
+          borderRadius: '0.5rem', padding: '0.75rem 0.9rem', marginBottom: '1.25rem',
+        }}>
+          <input
+            id="bulk-replace-drafts"
+            type="checkbox"
+            checked={replaceDrafts}
+            onChange={e => setReplaceDrafts(e.target.checked)}
+            disabled={isGenerating}
+            style={{ marginTop: '0.2rem', cursor: isGenerating ? 'not-allowed' : 'pointer' }}
+          />
+          <label htmlFor="bulk-replace-drafts" style={{ cursor: isGenerating ? 'not-allowed' : 'pointer', fontSize: '0.85rem', color: '#1e2d4a', lineHeight: 1.45 }}>
+            <strong>Replace existing drafts</strong>
+            <div style={{ color: '#5a4a35', fontSize: '0.78rem', marginTop: '0.15rem' }}>
+              When on, topics that already have a <em>draft or rejected</em> article become eligible — the old draft is deleted and a fresh one is generated.{' '}
+              <strong style={{ color: '#1b5e20' }}>Published articles are never touched.</strong>
+            </div>
+          </label>
+        </div>
+
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             onClick={generate}
             disabled={isGenerating || isOutOfTopics}
-            title={isOutOfTopics ? 'No topics left in this category' : ''}
+            title={isOutOfTopics ? (isAllPublished ? 'Every topic is already published' : 'No topics to generate — enable Replace existing drafts to regenerate') : ''}
             style={S.btn('primary', isGenerating || isOutOfTopics)}
           >
             {isGenerating
               ? `⟳ Generating… (${progress.current}/${progress.total || count})`
-              : isOutOfTopics
-                ? '✓ All articles already created'
-                : `✦ Generate ${count} Article${count !== 1 ? 's' : ''}`}
+              : isAllPublished
+                ? '✓ All articles published'
+                : isOutOfTopics
+                  ? '✓ No new topics — enable Replace to regenerate'
+                  : replaceDrafts
+                    ? `↻ (Re)generate ${count} Article${count !== 1 ? 's' : ''}`
+                    : `✦ Generate ${count} Article${count !== 1 ? 's' : ''}`}
           </button>
 
           {isDone && !isOutOfTopics && (
