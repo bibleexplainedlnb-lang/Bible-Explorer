@@ -91,13 +91,24 @@ export async function POST(request) {
     if (topic_id) {
       const { data: existing } = await supabase
         .from('articles')
-        .select('id, title, status, language')
+        .select('id, title, slug, status, language, topics(category)')
         .eq('topic_id', topic_id)
         .limit(1);
       if (existing?.length > 0) {
         const e = existing[0];
         return NextResponse.json(
-          { error: `An article already exists for this topic ("${e.title}", status: ${e.status}, language: ${e.language}). Each topic can only have one article.` },
+          {
+            error: `An article already exists for this topic ("${e.title}", status: ${e.status}, language: ${e.language}). Each topic can only have one article.`,
+            code: 'TOPIC_ALREADY_HAS_ARTICLE',
+            existingArticle: {
+              id:       e.id,
+              title:    e.title,
+              slug:     e.slug,
+              status:   e.status,
+              language: e.language,
+              category: e.topics?.category || null,
+            },
+          },
           { status: 409 }
         );
       }
@@ -150,13 +161,45 @@ export async function POST(request) {
         //   - unique_topic_article  → one article per topic_id (strict 1:1 rule)
         //   - articles_slug_key (or similar) → unique slug column
         const constraint = (error.constraint || error.details || '').toString();
-        if (constraint.includes('unique_topic_article') || constraint.includes('topic_id')) {
+        const isTopicConflict = constraint.includes('unique_topic_article') || constraint.includes('topic_id');
+
+        // Fetch the article that already owns the conflicting key so the UI can link to it
+        const lookupQuery = supabase
+          .from('articles')
+          .select('id, title, slug, status, language, topics(category)')
+          .limit(1);
+        const { data: conflictRows } = isTopicConflict && topic_id
+          ? await lookupQuery.eq('topic_id', topic_id)
+          : await lookupQuery.eq('slug', slug);
+        const existing = conflictRows?.[0]
+          ? {
+              id:       conflictRows[0].id,
+              title:    conflictRows[0].title,
+              slug:     conflictRows[0].slug,
+              status:   conflictRows[0].status,
+              language: conflictRows[0].language,
+              category: conflictRows[0].topics?.category || null,
+            }
+          : null;
+
+        if (isTopicConflict) {
           return NextResponse.json(
-            { error: `An article already exists for this topic. Each topic can only have one article.` },
+            {
+              error: `An article already exists for this topic. Each topic can only have one article.`,
+              code: 'TOPIC_ALREADY_HAS_ARTICLE',
+              existingArticle: existing,
+            },
             { status: 409 }
           );
         }
-        return NextResponse.json({ error: `Slug "${slug}" already exists` }, { status: 409 });
+        return NextResponse.json(
+          {
+            error: `Slug "${slug}" already exists`,
+            code: 'SLUG_ALREADY_EXISTS',
+            existingArticle: existing,
+          },
+          { status: 409 }
+        );
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

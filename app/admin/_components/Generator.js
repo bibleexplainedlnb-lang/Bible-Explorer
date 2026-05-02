@@ -45,6 +45,7 @@ export default function Generator({ onSaved }) {
   const [saving,     setSaving]     = useState(false);
   const [preview,    setPreview]    = useState(null);
   const [error,      setError]      = useState('');
+  const [duplicate,  setDuplicate]  = useState(null); // { kind, existingArticle }
   const [saved,      setSaved]      = useState(false);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function Generator({ onSaved }) {
 
   function selectTopic(topic) {
     setSelectedTopic(topic);
-    setIdea(''); setUsedIdeaId(null); setError('');
+    setIdea(''); setUsedIdeaId(null); setError(''); setDuplicate(null);
     setIdeas([]); setPreview(null); setSaved(false);
     fetchIdeasById(topic.id);
   }
@@ -113,7 +114,7 @@ export default function Generator({ onSaved }) {
   async function handleGenerate(e) {
     e.preventDefault();
     if (!selectedTopic) { setError('Please select a topic.'); return; }
-    setError(''); setPreview(null); setSaved(false); setGenerating(true);
+    setError(''); setDuplicate(null); setPreview(null); setSaved(false); setGenerating(true);
     try {
       const res  = await fetch('/api/admin/generate', {
         method: 'POST',
@@ -121,6 +122,10 @@ export default function Generator({ onSaved }) {
         body: JSON.stringify({ topicId: selectedTopic.id, topicName: selectedTopic.name, idea: idea.trim() }),
       });
       const data = await res.json();
+      if (res.status === 409) {
+        setDuplicate({ kind: data.code || 'DUPLICATE', existingArticle: data.existingArticle || null });
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       setPreview(data);
     } catch (err) {
@@ -132,7 +137,7 @@ export default function Generator({ onSaved }) {
 
   async function handleSave(publish) {
     if (!preview) return;
-    setSaving(true);
+    setSaving(true); setError(''); setDuplicate(null);
     try {
       const res  = await fetch('/api/admin/articles', {
         method: 'POST',
@@ -140,6 +145,10 @@ export default function Generator({ onSaved }) {
         body: JSON.stringify({ ...preview, status: publish ? 'published' : 'draft' }),
       });
       const data = await res.json();
+      if (res.status === 409) {
+        setDuplicate({ kind: data.code || 'DUPLICATE', existingArticle: data.existingArticle || null });
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Save failed');
       if (usedIdeaId) {
         fetch(`/api/admin/ideas/${usedIdeaId}`, {
@@ -159,8 +168,34 @@ export default function Generator({ onSaved }) {
 
   function reset() {
     setSelectedTopic(null); setIdea(''); setPreview(null);
-    setError(''); setSaved(false); setGenerating(false);
+    setError(''); setDuplicate(null); setSaved(false); setGenerating(false);
     setUsedIdeaId(null); setIdeas([]);
+  }
+
+  // Build the public URL for an existing article so the user can jump to it.
+  // Mirrors the articleUrl helper in lib/articlePage.js.
+  function existingArticlePublicUrl(a) {
+    if (!a?.slug) return null;
+    const c = a.category;
+    if (c === 'questions')        return `/questions/${a.slug}/`;
+    if (c === 'topics')           return `/topics/${a.slug}/`;
+    if (c === 'bible-characters') return `/bible-characters/${a.slug}/`;
+    if (c === 'bible-verses')     return `/bible-verses/${a.slug}/`;
+    return `/guides/${a.slug}/`;
+  }
+
+  // Friendly display labels — the duplicate banner shouldn't show raw codes
+  function categoryLabel(c) {
+    const map = {
+      questions: 'Questions', guides: 'Guides', topics: 'Topics',
+      'bible-verses': 'Bible Verses', 'bible-characters': 'Bible Characters',
+    };
+    return map[c] || c || 'Article';
+  }
+  function languageLabel(l) {
+    const map = { en: 'English', de: 'German', es: 'Spanish', fr: 'French', pt: 'Portuguese', it: 'Italian' };
+    if (!l) return '';
+    return map[l.toLowerCase()] || l.toUpperCase();
   }
 
   return (
@@ -365,6 +400,65 @@ export default function Generator({ onSaved }) {
                 style={S.input}
               />
             </div>
+
+            {duplicate && (
+              <div style={{
+                background: '#fffbeb', border: '1px solid #fde68a', color: '#854d0e',
+                borderRadius: '0.5rem', padding: '0.85rem 1rem', marginBottom: '1rem', fontSize: '0.9rem',
+              }}>
+                <p style={{ margin: '0 0 0.4rem', fontWeight: '700' }}>
+                  {duplicate.kind === 'SLUG_ALREADY_EXISTS'
+                    ? 'That slug is already in use'
+                    : 'This topic already has an article'}
+                </p>
+                <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem' }}>
+                  {duplicate.kind === 'SLUG_ALREADY_EXISTS'
+                    ? 'Each article URL must be unique. Open the existing one to edit it instead.'
+                    : 'Each topic can only have one article. Open the existing one to edit it instead.'}
+                </p>
+                {duplicate.existingArticle ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center', fontSize: '0.85rem' }}>
+                    <strong style={{ color: '#1e2d4a' }}>{duplicate.existingArticle.title}</strong>
+                    {duplicate.existingArticle.category && (
+                      <span style={{
+                        padding: '0.1rem 0.5rem', borderRadius: '1rem', fontSize: '0.72rem', fontWeight: '700',
+                        background: '#f0ece4', color: '#5a4a35',
+                      }}>
+                        {categoryLabel(duplicate.existingArticle.category)}
+                      </span>
+                    )}
+                    <span style={{
+                      padding: '0.1rem 0.5rem', borderRadius: '1rem', fontSize: '0.72rem', fontWeight: '700',
+                      background: duplicate.existingArticle.status === 'published' ? '#dcf5e7' : '#fff3cd',
+                      color:      duplicate.existingArticle.status === 'published' ? '#1b5e20' : '#856404',
+                    }}>
+                      {duplicate.existingArticle.status === 'published' ? 'Published' : 'Draft'}
+                    </span>
+                    {duplicate.existingArticle.language && (
+                      <span style={{
+                        padding: '0.1rem 0.5rem', borderRadius: '1rem', fontSize: '0.72rem', fontWeight: '700',
+                        background: '#e8f4fd', color: '#1565c0',
+                      }}>
+                        {languageLabel(duplicate.existingArticle.language)}
+                      </span>
+                    )}
+                    {existingArticlePublicUrl(duplicate.existingArticle) && duplicate.existingArticle.status === 'published' && (
+                      <a
+                        href={existingArticlePublicUrl(duplicate.existingArticle)}
+                        target="_blank" rel="noreferrer"
+                        style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                      >
+                        View live →
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#92400e' }}>
+                    Find it in the Articles tab to edit or delete it.
+                  </p>
+                )}
+              </div>
+            )}
 
             {error && <div style={S.errBox}>{error}</div>}
 

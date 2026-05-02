@@ -28,6 +28,14 @@ const S = {
   }),
 };
 
+const CATEGORY_LABELS = {
+  questions: 'Questions', guides: 'Guides', topics: 'Topics',
+  'bible-verses': 'Bible Verses', 'bible-characters': 'Bible Characters',
+};
+const LANGUAGE_LABELS = { en: 'English', de: 'German', es: 'Spanish', fr: 'French', pt: 'Portuguese', it: 'Italian' };
+const categoryLabel = c => CATEGORY_LABELS[c] || c || 'Article';
+const languageLabel = l => (l ? (LANGUAGE_LABELS[l.toLowerCase()] || l.toUpperCase()) : '');
+
 export default function BulkGenerator({ onSaved }) {
   const [category,  setCategory]  = useState('questions');
   const [count,     setCount]     = useState(5);
@@ -91,7 +99,14 @@ export default function BulkGenerator({ onSaved }) {
             setLog(prev => [...prev, { kind: 'saved', title: event.title, slug: event.slug, n: event.current, total: event.total }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'skipped') {
-            setLog(prev => [...prev, { kind: 'skipped', title: event.topic, reason: event.reason, n: event.current, total: event.total }]);
+            setLog(prev => [...prev, {
+              kind: 'skipped',
+              title: event.topic,
+              reason: event.reason,
+              existingArticle: event.existingArticle || null,
+              n: event.current,
+              total: event.total,
+            }]);
             setProgress(p => ({ ...p, current: event.current }));
           } else if (event.type === 'done') {
             setSummary({ generated: event.generated, skipped: event.skipped });
@@ -221,6 +236,52 @@ export default function BulkGenerator({ onSaved }) {
                   <span style={{ fontWeight: '600', color: '#1e2d4a', fontSize: '0.875rem', wordBreak: 'break-word' }}>{item.title}</span>
                   {item.kind === 'saved'   && item.slug   && <div style={{ fontSize: '0.73rem', color: '#8b7355', fontFamily: 'monospace', marginTop: '0.1rem' }}>{item.slug}</div>}
                   {item.kind === 'skipped' && item.reason && <div style={{ fontSize: '0.73rem', color: '#856404', marginTop: '0.1rem' }}>{item.reason}</div>}
+                  {item.kind === 'skipped' && item.existingArticle && (
+                    <div style={{ fontSize: '0.73rem', color: '#6b6b6b', marginTop: '0.2rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
+                      <span>Existing:</span>
+                      <strong style={{ color: '#1e2d4a' }}>{item.existingArticle.title}</strong>
+                      {item.existingArticle.category && (
+                        <span style={{
+                          padding: '0.05rem 0.4rem', borderRadius: '1rem', fontSize: '0.68rem', fontWeight: '700',
+                          background: '#f0ece4', color: '#5a4a35',
+                        }}>
+                          {categoryLabel(item.existingArticle.category)}
+                        </span>
+                      )}
+                      <span style={{
+                        padding: '0.05rem 0.4rem', borderRadius: '1rem', fontSize: '0.68rem', fontWeight: '700',
+                        background: item.existingArticle.status === 'published' ? '#dcf5e7' : '#fff3cd',
+                        color:      item.existingArticle.status === 'published' ? '#1b5e20' : '#856404',
+                      }}>
+                        {item.existingArticle.status === 'published' ? 'Published' : 'Draft'}
+                      </span>
+                      {item.existingArticle.language && (
+                        <span style={{
+                          padding: '0.05rem 0.4rem', borderRadius: '1rem', fontSize: '0.68rem', fontWeight: '700',
+                          background: '#e8f4fd', color: '#1565c0',
+                        }}>
+                          {languageLabel(item.existingArticle.language)}
+                        </span>
+                      )}
+                      {item.existingArticle.status === 'published' && item.existingArticle.slug && (
+                        <a
+                          href={(() => {
+                            const c = item.existingArticle.category;
+                            const s = item.existingArticle.slug;
+                            if (c === 'questions')        return `/questions/${s}/`;
+                            if (c === 'topics')           return `/topics/${s}/`;
+                            if (c === 'bible-characters') return `/bible-characters/${s}/`;
+                            if (c === 'bible-verses')     return `/bible-verses/${s}/`;
+                            return `/guides/${s}/`;
+                          })()}
+                          target="_blank" rel="noreferrer"
+                          style={{ color: '#1e2d4a', textDecoration: 'underline', fontWeight: '600' }}
+                        >
+                          View live →
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <span style={S.badge(item.kind)}>{item.kind === 'saved' ? 'Saved' : 'Skipped'}</span>
               </div>

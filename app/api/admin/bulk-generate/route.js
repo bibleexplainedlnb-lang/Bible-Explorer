@@ -107,7 +107,7 @@ export async function POST(request) {
         //   ALTER TABLE articles ADD CONSTRAINT unique_topic_article UNIQUE (topic_id);
         const { data: allArticles } = await supabase
           .from('articles')
-          .select('slug, title, topic_id, language, status')
+          .select('id, slug, title, topic_id, language, status, topics(category)')
           .limit(20000);
 
         // Any topic that already has ANY article (any status, any language) is skipped
@@ -116,6 +116,26 @@ export async function POST(request) {
         );
         // Slug uniqueness is global across all languages (URLs must be unique)
         const existingSlugs = new Set((allArticles || []).map(a => a.slug));
+
+        // Lookup maps so a skip event can include the conflicting article's location
+        function existingFromRow(a) {
+          return {
+            id:       a.id,
+            title:    a.title,
+            slug:     a.slug,
+            status:   a.status,
+            language: a.language,
+            category: a.topics?.category || null,
+          };
+        }
+        const articleByTopicId = new Map(
+          (allArticles || [])
+            .filter(a => a.topic_id)
+            .map(a => [a.topic_id, existingFromRow(a)])
+        );
+        const articleBySlug = new Map(
+          (allArticles || []).map(a => [a.slug, existingFromRow(a)])
+        );
         // Title uniqueness — keep scoped to PUBLISHED articles in THIS language only.
         // (Title collisions across languages are fine; draft titles can be edited.)
         const sameLangPublished = (allArticles || []).filter(
@@ -201,7 +221,11 @@ export async function POST(request) {
             // Strict 1 topic = 1 article rule — never append "-2" / "-3" suffixes.
             // If the slug already exists, skip this topic entirely.
             if (existingSlugs.has(article.slug)) {
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason: `Slug "${article.slug}" already exists` });
+              send({
+                type: 'skipped', current: i + 1, total, topic: topic.name,
+                reason: `Slug "${article.slug}" already exists`,
+                existingArticle: articleBySlug.get(article.slug) || null,
+              });
               skipped++;
               continue;
             }
@@ -225,14 +249,20 @@ export async function POST(request) {
 
             if (insertError) {
               let reason = insertError.message;
+              let existingArticle = null;
               if (insertError.code === '23505') {
                 // Distinguish topic-uniqueness vs slug-uniqueness collisions.
                 const constraint = (insertError.constraint || insertError.details || '').toString();
-                reason = (constraint.includes('unique_topic_article') || constraint.includes('topic_id'))
-                  ? 'Topic already has an article'
-                  : 'Duplicate slug';
+                const isTopicConflict = constraint.includes('unique_topic_article') || constraint.includes('topic_id');
+                if (isTopicConflict) {
+                  reason = 'Topic already has an article';
+                  existingArticle = articleByTopicId.get(topic.id) || null;
+                } else {
+                  reason = 'Duplicate slug';
+                  existingArticle = articleBySlug.get(article.slug) || null;
+                }
               }
-              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason });
+              send({ type: 'skipped', current: i + 1, total, topic: topic.name, reason, existingArticle });
               skipped++;
             } else {
               // Track newly saved title/slug so the rest of this run won't duplicate them
