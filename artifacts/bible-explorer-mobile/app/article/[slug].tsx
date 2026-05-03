@@ -160,9 +160,69 @@ export default function ArticleScreen() {
       />
 
       {query.isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.mutedForeground} />
-        </View>
+        <ScrollView
+          contentContainerStyle={[styles.scroll, { paddingBottom: bottomPad }]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[
+              styles.skelLine,
+              { backgroundColor: colors.border, width: 80, height: 12 },
+            ]}
+          />
+          <View
+            style={[
+              styles.skelLine,
+              {
+                backgroundColor: colors.border,
+                width: "90%",
+                height: 28,
+                marginTop: 14,
+              },
+            ]}
+          />
+          <View
+            style={[
+              styles.skelLine,
+              {
+                backgroundColor: colors.border,
+                width: "70%",
+                height: 28,
+                marginTop: 10,
+              },
+            ]}
+          />
+          <View
+            style={[
+              styles.skelLine,
+              {
+                backgroundColor: colors.border,
+                width: 120,
+                height: 12,
+                marginTop: 14,
+                opacity: 0.6,
+              },
+            ]}
+          />
+          <View
+            style={[styles.divider, { backgroundColor: colors.border }]}
+          />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.skelLine,
+                {
+                  backgroundColor: colors.border,
+                  width: i % 4 === 3 ? "55%" : "100%",
+                  height: 12,
+                  marginTop: 10,
+                  opacity: 0.6,
+                },
+              ]}
+            />
+          ))}
+        </ScrollView>
       ) : query.isError || !article ? (
         <View style={styles.center}>
           <Feather name="alert-circle" size={28} color={colors.destructive} />
@@ -252,6 +312,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   divider: { height: 1, marginVertical: 20 },
+  skelLine: { borderRadius: 4 },
   bodyFallback: {
     fontFamily: "Merriweather_400Regular",
     fontSize: 17,

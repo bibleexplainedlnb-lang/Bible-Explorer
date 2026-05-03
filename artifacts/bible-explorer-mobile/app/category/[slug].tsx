@@ -74,7 +74,7 @@ export default function CategoryScreen() {
       <Stack.Screen options={{ title: category?.label ?? "Articles" }} />
 
       {query.isLoading ? (
-        <LoadingState color={colors.mutedForeground} />
+        <SkeletonList category={category} />
       ) : query.isError ? (
         <ErrorState
           message={(query.error as Error)?.message ?? "Something went wrong"}
@@ -192,6 +192,76 @@ function LoadingState({ color }: { color: string }) {
   );
 }
 
+function SkeletonList({
+  category,
+}: {
+  category: ReturnType<typeof categoryByValue>;
+}) {
+  const colors = useColors();
+  return (
+    <View style={[styles.listContent, { paddingTop: 0 }]}>
+      {category ? (
+        <View style={styles.listHeader}>
+          <View
+            style={[
+              styles.headerIcon,
+              { backgroundColor: category.color + "1A" },
+            ]}
+          >
+            <Feather name={category.icon} size={20} color={category.color} />
+          </View>
+          <Text
+            style={[styles.headerBlurb, { color: colors.mutedForeground }]}
+          >
+            {category.blurb}
+          </Text>
+        </View>
+      ) : null}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <View key={i}>
+          <View style={styles.row}>
+            <View style={styles.rowBody}>
+              <View
+                style={[
+                  styles.skelLine,
+                  { backgroundColor: colors.border, width: "75%", height: 16 },
+                ]}
+              />
+              <View
+                style={[
+                  styles.skelLine,
+                  {
+                    backgroundColor: colors.border,
+                    width: "95%",
+                    height: 12,
+                    marginTop: 8,
+                    opacity: 0.6,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.skelLine,
+                  {
+                    backgroundColor: colors.border,
+                    width: "60%",
+                    height: 12,
+                    marginTop: 6,
+                    opacity: 0.6,
+                  },
+                ]}
+              />
+            </View>
+          </View>
+          {i < 5 ? (
+            <View style={[styles.sep, { backgroundColor: colors.border }]} />
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 function ErrorState({
   message,
   onRetry,
@@ -286,6 +356,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   sep: { height: StyleSheet.hairlineWidth },
+  skelLine: { borderRadius: 4 },
   footerLoading: { paddingVertical: 24, alignItems: "center" },
   center: {
     flex: 1,
