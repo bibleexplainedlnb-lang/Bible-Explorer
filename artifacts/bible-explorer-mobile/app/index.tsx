@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Platform,
   Pressable,
@@ -13,7 +14,10 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
+import { fetchArticles } from "@/lib/api";
 import { CATEGORIES, type CategoryDef } from "@/lib/categories";
+
+const PREFETCH_PAGE_SIZE = 30;
 
 const WEB_TOP_INSET = 67;
 const WEB_BOTTOM_INSET = 34;
@@ -22,7 +26,23 @@ export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isWeb = Platform.OS === "web";
+
+  useEffect(() => {
+    CATEGORIES.forEach((cat) => {
+      queryClient.prefetchInfiniteQuery({
+        queryKey: ["articles", cat.value],
+        queryFn: () =>
+          fetchArticles({
+            category: cat.value,
+            limit: PREFETCH_PAGE_SIZE,
+            offset: 0,
+          }),
+        initialPageParam: 0,
+      });
+    });
+  }, [queryClient]);
 
   const topPad = (isWeb ? WEB_TOP_INSET : insets.top) + 16;
   const bottomPad = (isWeb ? WEB_BOTTOM_INSET : insets.bottom) + 32;

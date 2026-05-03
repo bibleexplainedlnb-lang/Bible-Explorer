@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo } from "react";
 import {
@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
-import { fetchArticles, type ArticleSummary } from "@/lib/api";
+import { fetchArticle, fetchArticles, type ArticleSummary } from "@/lib/api";
 import { categoryByValue } from "@/lib/categories";
 
 const PAGE_SIZE = 30;
@@ -26,6 +26,7 @@ export default function CategoryScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isWeb = Platform.OS === "web";
 
   const category = useMemo(() => categoryByValue(slug ?? ""), [slug]);
@@ -46,10 +47,25 @@ export default function CategoryScreen() {
   );
 
   const onEndReached = useCallback(() => {
-    if (query.hasNextPage && !query.isFetchingNextPage) {
+    if (
+      !query.isLoading &&
+      query.hasNextPage &&
+      !query.isFetchingNextPage &&
+      articles.length > 0
+    ) {
       query.fetchNextPage();
     }
-  }, [query]);
+  }, [query, articles.length]);
+
+  const prefetchArticle = useCallback(
+    (articleSlug: string) => {
+      queryClient.prefetchQuery({
+        queryKey: ["article", articleSlug],
+        queryFn: () => fetchArticle(articleSlug),
+      });
+    },
+    [queryClient],
+  );
 
   const bottomPad = (isWeb ? WEB_BOTTOM_INSET : insets.bottom) + 24;
 
@@ -103,12 +119,13 @@ export default function CategoryScreen() {
           renderItem={({ item }) => (
             <ArticleRow
               item={item}
-              onPress={() =>
+              onPress={() => {
+                prefetchArticle(item.slug);
                 router.push({
                   pathname: "/article/[slug]",
                   params: { slug: item.slug },
-                })
-              }
+                });
+              }}
             />
           )}
           onEndReached={onEndReached}
