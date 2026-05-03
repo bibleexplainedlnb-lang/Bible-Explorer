@@ -35,14 +35,14 @@ export async function fetchArticles(params: {
   qs.set("limit", String(params.limit ?? 30));
   qs.set("offset", String(params.offset ?? 0));
 
-  const res = await fetch(`${baseUrl()}/api/public/articles?${qs.toString()}`);
+  const res = await fetch(`${baseUrl()}/api/public/articles/?${qs.toString()}`);
   if (!res.ok) throw new Error(`Failed to load articles (${res.status})`);
   return res.json();
 }
 
 export async function fetchArticle(slug: string): Promise<ArticleDetail> {
   const res = await fetch(
-    `${baseUrl()}/api/public/articles/${encodeURIComponent(slug)}`,
+    `${baseUrl()}/api/public/articles/${encodeURIComponent(slug)}/`,
   );
   if (res.status === 404) throw new Error("Article not found");
   if (!res.ok) throw new Error(`Failed to load article (${res.status})`);

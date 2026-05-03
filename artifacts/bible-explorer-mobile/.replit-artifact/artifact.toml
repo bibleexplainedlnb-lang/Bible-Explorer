@@ -16,11 +16,11 @@ paths = [ "/mobile/" ]
 localPort = 22762
 
 [services.development]
-run = "npm --prefix artifacts/bible-explorer-mobile run dev"
+run = "npm run dev"
 
 [services.production]
-build = [ "npm", "--prefix", "artifacts/bible-explorer-mobile", "run", "build" ]
-run = [ "npm", "--prefix", "artifacts/bible-explorer-mobile", "run", "serve" ]
+build = [ "npm", "run", "build" ]
+run = [ "npm", "run", "serve" ]
 
 [services.env]
 PORT = "22762"
