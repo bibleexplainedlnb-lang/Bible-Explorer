@@ -2,24 +2,7 @@
 
 ## Overview
 
-Bible Explorer — Next.js 14 (App Router, JavaScript) KJV Bible study site, migrated from Vercel to Replit. A companion Expo mobile app at `artifacts/bible-explorer-mobile/` consumes the same content via a public JSON API.
-
-## Mobile companion app (`artifacts/bible-explorer-mobile/`)
-
-- Expo (SDK 54) + expo-router. Single-stack layout (no tabs).
-- Screens: `app/index.tsx` (categories home), `app/category/[slug].tsx` (paginated article list), `app/article/[slug].tsx` (HTML article render via `react-native-render-html`, with "open in browser" button via `expo-web-browser`).
-- Reads from the Next.js public API at `EXPO_PUBLIC_DOMAIN` (defaults to `bibleverseinsights.com`). In dev, set automatically to `$REPLIT_DEV_DOMAIN` by the workflow.
-- Categories defined in `lib/categories.ts` mirroring `/lib/categories.js`.
-- Fonts: Inter (UI) + Merriweather (article body / titles).
-- Note: package.json was migrated off pnpm `catalog:`/`workspace:*` refs because the root project uses npm, not pnpm workspaces. Dev script uses `npx expo start`.
-
-## Public JSON API (Next.js)
-
-For the mobile app and any external consumer. CORS-enabled, only published articles, no auth:
-- `GET /api/public/articles?category=<slug>&limit=<n>&offset=<n>` — list with `{articles: [...], hasMore}`.
-- `GET /api/public/articles/[slug]` — full article incl. `html_content`.
-
-Source: `app/api/public/articles/route.js`, `app/api/public/articles/[slug]/route.js`.
+Bible Explorer — Next.js 14 (App Router, JavaScript) KJV Bible study site, migrated from Vercel to Replit.
 
 **Running:** `npm run dev` on port 3000 (workflow: "Start application")
 
