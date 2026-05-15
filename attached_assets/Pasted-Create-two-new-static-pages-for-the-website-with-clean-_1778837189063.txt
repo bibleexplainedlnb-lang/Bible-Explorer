@@ -1,0 +1,104 @@
+Create two new static pages for the website with clean responsive styling matching the current Bible Verse Insights website design.
+
+Pages:
+
+1. Privacy Policy
+URL slug: /privacy-policy
+
+2. Terms of Service
+URL slug: /terms-of-service
+
+Add both pages to the footer navigation with small clean minimal links.
+
+Ensure:
+- Pages are publicly accessible
+- SEO friendly metadata is added
+- Proper canonical URLs are included
+- Mobile responsive layout
+- Consistent typography and spacing with the current site
+- Pages should work properly in both desktop and mobile view
+
+Privacy Policy Content:
+
+# Privacy Policy
+
+Last updated: May 2026
+
+Bible Verse Insights ("we", "our", or "us") operates https://bibleverseinsights.com.
+
+This page informs visitors regarding our policies with the collection, use, and disclosure of personal information for users of the website.
+
+## Information We Collect
+
+We may collect:
+- Browser type
+- Device information
+- IP address
+- Cookies and usage data
+
+## Google AdSense & Advertising
+
+We may use third-party advertising services such as Google AdSense that use cookies to serve ads based on a user's prior visits to this website and other websites.
+
+Google may use advertising cookies to provide personalized ads.
+
+Users may opt out of personalized advertising by visiting:
+https://www.google.com/settings/ads
+
+## Analytics
+
+We may use analytics tools such as Google Analytics to understand website traffic and improve our content.
+
+## External Links
+
+Our website may contain links to external websites. We are not responsible for the privacy practices of those websites.
+
+## Children's Privacy
+
+This website is not directed toward children under 13.
+
+## Consent
+
+By using our website, you consent to our Privacy Policy.
+
+## Contact
+
+If you have any questions, contact us through our website contact form.
+
+Terms of Service Content:
+
+# Terms of Service
+
+Last updated: May 2026
+
+Welcome to Bible Verse Insights.
+
+By accessing this website, you agree to comply with these Terms of Service.
+
+## Content
+
+All articles, devotionals, Bible references, and content published on this website are for informational and inspirational purposes only.
+
+## Intellectual Property
+
+Content on this website may not be copied, reproduced, or redistributed without permission.
+
+## External Links
+
+We may include links to third-party websites. We are not responsible for their content or practices.
+
+## Disclaimer
+
+While we strive for accuracy, we do not guarantee that all content is error-free or complete.
+
+## Limitation of Liability
+
+Bible Verse Insights shall not be held liable for any damages arising from the use of this website.
+
+## Changes
+
+We may update these Terms at any time without prior notice.
+
+## Contact
+
+For questions regarding these Terms, contact us through our website.

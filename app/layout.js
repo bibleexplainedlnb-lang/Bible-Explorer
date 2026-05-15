@@ -104,6 +104,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               ))}
               <BibleGamesLink style={FOOTER_LINK_STYLE}>Bible Games</BibleGamesLink>
             </nav>
+            <nav style={{ display: "flex", gap: "0.15rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "0.85rem" }}>
+              <Link href="/privacy-policy/" style={{ ...FOOTER_LINK_STYLE, fontSize: "0.78rem", color: "#7d8ca4" }}>Privacy Policy</Link>
+              <Link href="/terms-of-service/" style={{ ...FOOTER_LINK_STYLE, fontSize: "0.78rem", color: "#7d8ca4" }}>Terms of Service</Link>
+            </nav>
             <p style={{ fontSize: "0.8rem", color: "#6b7a90" }}>
               KJV Scripture text via{" "}
               <a href="https://bible-api.com" target="_blank" rel="noopener noreferrer" style={{ color: "#a0b0c8" }}>

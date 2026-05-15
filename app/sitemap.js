@@ -14,6 +14,11 @@ const TOOL_PAGES = [
   '/tools/bible-chapter-summary/',
 ];
 
+const STATIC_LEGAL_PAGES = [
+  '/privacy-policy/',
+  '/terms-of-service/',
+];
+
 // Stable lastModified for tool pages so we don't churn search-engine recrawl
 // signals on every sitemap fetch. Bump this when tool content meaningfully
 // changes (data files, page copy, new tools).
@@ -28,8 +33,15 @@ export default async function sitemap() {
     priority:        p === '/tools/' ? 0.8 : 0.7,
   }));
 
+  const legalEntries = STATIC_LEGAL_PAGES.map((p) => ({
+    url:             `${SITE_URL}${p}`,
+    lastModified:    TOOLS_LAST_MODIFIED,
+    changeFrequency: 'yearly',
+    priority:        0.3,
+  }));
+
   const supabase = getNoStoreSupabase();
-  if (!supabase) return toolEntries;
+  if (!supabase) return [...toolEntries, ...legalEntries];
 
   const { data } = await supabase
     .from('articles')
@@ -47,5 +59,5 @@ export default async function sitemap() {
     priority:        0.85,
   }));
 
-  return [...toolEntries, ...articleEntries];
+  return [...toolEntries, ...legalEntries, ...articleEntries];
 }
