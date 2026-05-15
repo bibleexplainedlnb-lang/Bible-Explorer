@@ -46,6 +46,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="FkihMIPDnTJBL07TMuuTZ42BNGkPjlePyLe8nGVWWqU" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1364556784080701"
+          crossOrigin="anonymous"
+        />
         {/* Site-wide WebSite structured data — emitted on every page. */}
         <JsonLd data={buildWebSiteSchema()} />
         <script
