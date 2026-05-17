@@ -1,0 +1,268 @@
+PHASE 1 — FULL MULTILINGUAL FRONTEND ROUTING IMPLEMENTATION
+
+IMPORTANT:
+Do NOT change or break the current English system.
+Do NOT modify existing English URLs.
+Do NOT remove existing namespace mapping.
+Do NOT hardcode category namespaces anywhere.
+Use the centralized namespace mapping already implemented in categories.ts as the single source of truth.
+
+==================================================
+GOAL
+====
+
+Implement complete multilingual frontend routing for:
+
+* German (de)
+* Spanish (es)
+* Italian (it)
+* French (fr)
+
+The admin system already generates the correct multilingual URLs.
+
+The frontend must now support and render them correctly.
+
+==================================================
+CURRENT PROBLEM
+===============
+
+These routes currently return 404:
+
+/de/
+/de/themen/
+/de/themen/:slug
+/de/fragen/:slug
+/de/anleitungen/:slug
+/de/bibelverse/:slug
+/de/bibelcharaktere/:slug
+
+The multilingual frontend router layer is missing or incomplete.
+
+==================================================
+REQUIREMENTS
+============
+
+==================================================
+
+1. LANGUAGE ROOT ROUTES
+   ==================================================
+
+Implement language homepages:
+
+/de/
+/es/
+/it/
+/fr/
+
+Each homepage must:
+
+* render successfully
+* load only that language’s content
+* query articles by language
+* show latest articles for that language only
+* keep the existing frontend design
+* keep admin language English only
+
+==================================================
+2. CATEGORY ARCHIVE ROUTES
+==========================
+
+Implement multilingual category archives:
+
+/de/themen/
+/de/fragen/
+/de/anleitungen/
+/de/bibelverse/
+/de/bibelcharaktere/
+
+Same structure for:
+
+* es
+* it
+* fr
+
+Category pages must:
+
+* load successfully
+* query only matching language
+* query only matching category
+* paginate correctly
+* render existing frontend design
+
+==================================================
+3. ARTICLE ROUTES
+=================
+
+Implement multilingual article routes:
+
+/de/themen/:slug
+/de/fragen/:slug
+/de/anleitungen/:slug
+/de/bibelverse/:slug
+/de/bibelcharaktere/:slug
+
+And same for:
+
+* es
+* it
+* fr
+
+Article pages must:
+
+* load successfully
+* resolve article by:
+
+  * language
+  * namespace/category
+  * slug
+* NOT use flat slug matching
+* render full article correctly
+* render existing article design
+* support breadcrumbs
+* support metadata
+
+==================================================
+4. URL RESOLUTION RULES
+=======================
+
+English remains default:
+
+* /topics/slug/
+* /questions/slug/
+
+Non-English:
+
+* /de/themen/slug/
+* /de/fragen/slug/
+
+Use namespace mapping from categories.ts only.
+
+Do NOT hardcode:
+
+* themen
+* fragen
+* anleitungen
+* bibelverse
+* bibelcharaktere
+
+==================================================
+5. MENU LOCALIZATION
+====================
+
+Frontend menus must localize based on active language.
+
+Examples:
+
+English:
+
+* Topics
+* Questions
+* Guides
+
+German:
+
+* Themen
+* Fragen
+* Anleitungen
+
+Admin UI remains English.
+
+==================================================
+6. BREADCRUMB LOCALIZATION
+==========================
+
+Examples:
+
+English:
+Home → Topics → Article
+
+German:
+Startseite → Themen → Article
+
+==================================================
+7. DATABASE SAFETY
+==================
+
+Do NOT:
+
+* modify English rows
+* rewrite slugs
+* rewrite categories
+* delete articles
+* alter English routing
+
+All changes must be additive and reversible.
+
+==================================================
+8. SEO REQUIREMENTS
+===================
+
+Implement:
+
+* proper canonical URLs
+* language-aware metadata
+* language-aware breadcrumbs
+
+Do NOT implement hreflang yet.
+That comes in Phase 2.
+
+==================================================
+9. IMPLEMENTATION REQUIREMENTS
+==============================
+
+Before coding:
+
+* inspect all frontend routing files
+* inspect route loaders
+* inspect article resolution logic
+* inspect category archive logic
+
+Then provide:
+
+1. root cause analysis
+2. affected files
+3. implementation plan
+4. rollback plan
+
+ONLY AFTER analysis:
+implement changes.
+
+==================================================
+10. VERIFICATION REQUIRED
+=========================
+
+Verify ALL of these work:
+
+/de/
+/de/themen/
+/de/themen/hoffnung-in-schweren-zeiten/
+/de/fragen/wie-starkt-man-seinen-glauben/
+/de/anleitungen/bibelstudium-grundlagen-und-praxis/
+
+And verify English still works:
+
+/topics/
+/questions/
+/guides/
+
+==================================================
+11. IMPORTANT
+=============
+
+This is frontend routing implementation ONLY.
+
+Do NOT:
+
+* bulk insert topics
+* generate thousands of articles
+* modify indexing
+* modify sitemap logic
+* modify Google integrations
+
+Focus ONLY on:
+
+* multilingual frontend routing
+* multilingual rendering
+* multilingual archives
+* multilingual article loading
+* multilingual navigation
