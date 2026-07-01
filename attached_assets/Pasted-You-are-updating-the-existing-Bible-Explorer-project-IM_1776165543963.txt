@@ -1,0 +1,149 @@
+You are updating the existing Bible Explorer project.
+
+IMPORTANT RULES:
+- Do NOT break existing functionality
+- If logic already exists → UPDATE it
+- Do NOT duplicate middleware/config
+- Ensure everything remains SEO-safe
+
+-------------------------------------
+🚨 GOAL
+-------------------------------------
+
+Enforce trailing slash URLs across the entire project:
+
+/page → /page/
+
+Applies to:
+- All existing URLs (redirect)
+- All future URLs (generated correctly)
+- Sitemap
+- Internal links
+
+-------------------------------------
+✅ STEP 1: ENABLE TRAILING SLASH (GLOBAL)
+-------------------------------------
+
+Update or create next.config.js
+
+If exists → MODIFY
+If not → CREATE
+
+Add:
+
+const nextConfig = {
+  trailingSlash: true,
+};
+
+export default nextConfig;
+
+-------------------------------------
+✅ STEP 2: ADD MIDDLEWARE REDIRECT
+-------------------------------------
+
+Check if middleware.ts exists.
+
+If exists → UPDATE it
+If not → CREATE it
+
+Add logic:
+
+- Skip:
+  - /_next
+  - static files (with extension)
+  - already trailing slash
+
+- Redirect all non-trailing URLs to trailing slash
+
+Example logic:
+
+if (
+  !pathname.endsWith('/') &&
+  !pathname.includes('.') &&
+  !pathname.startsWith('/_next')
+) {
+  redirect to pathname + '/'
+}
+
+IMPORTANT:
+- Use 301 redirect (permanent)
+- Preserve query params
+
+-------------------------------------
+✅ STEP 3: FIX INTERNAL LINK GENERATION
+-------------------------------------
+
+Find ALL places where article URLs are generated:
+
+Examples:
+- enrichContent()
+- injectInlineLinks()
+- Related Articles
+- Read More
+- "Know more"
+
+Update ALL links:
+
+FROM:
+href="/bible-verses/${slug}"
+
+TO:
+href="/bible-verses/${slug}/"
+
+IMPORTANT:
+- Do not miss any location
+- Ensure consistency everywhere
+
+-------------------------------------
+✅ STEP 4: FIX SITEMAP
+-------------------------------------
+
+File: sitemap.js or equivalent
+
+Update ALL URLs:
+
+FROM:
+${SITE_URL}/bible-verses/${slug}
+
+TO:
+${SITE_URL}/bible-verses/${slug}/
+
+Ensure:
+- No mixed formats
+- All entries end with /
+
+-------------------------------------
+✅ STEP 5: SAFETY CHECK
+-------------------------------------
+
+Ensure:
+- No duplicate middleware created
+- No broken routes
+- App builds successfully
+- No redirect loops
+
+-------------------------------------
+✅ EXPECTED RESULT
+-------------------------------------
+
+1. Visiting:
+   /bible-verses/example
+
+→ Automatically redirects to:
+   /bible-verses/example/
+
+2. All new articles:
+   Always saved and linked with trailing slash
+
+3. Sitemap:
+   Clean URLs with trailing slash only
+
+4. Internal links:
+   100% consistent
+
+-------------------------------------
+
+After implementing:
+- Restart server
+- Test multiple URLs
+- Ensure redirect works properly

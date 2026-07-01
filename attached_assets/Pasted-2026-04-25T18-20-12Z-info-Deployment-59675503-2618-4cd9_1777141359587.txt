@@ -1,0 +1,70 @@
+2026-04-25T18:20:12Z info: Deployment: 59675503-2618-4cd9-85f8-eec9c43208ac
+2026-04-25T18:20:12Z info: Build: c7e27ebf-c2d0-4698-8379-3a086e7be384
+2026-04-25T18:20:13Z info: Running Security Scan
+2026-04-25T18:20:25Z info: Security Scan Complete
+2026-04-25T18:20:27Z info: Installing packages
+--> npm install
+
+
+added 2 packages, and audited 193 packages in 3s
+
+42 packages are looking for funding
+
+npm notice
+npm notice New minor version of npm available! 11.6.2 -> 11.13.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+npm notice To update run: npm install -g npm@11.13.0
+npm notice
+
+2026-04-25T18:20:30Z info: Starting Build
+
+> bible-explorer@1.0.0 build
+> npm rebuild better-sqlite3 --build-from-source && next build
+
+
+npm warn Unknown cli config "--build-from-source". This will stop working in the next major version of npm.
+
+npm error code 1
+
+npm error gyp info it worked if it ends with ok
+npm error gyp info using node-gyp@11.4.2
+npm error gyp info using node@24.13.0 | linux | x64
+npm error gyp ERR! find Python 
+npm error gyp ERR! find Python Python is not set from command line or npm configuration
+npm error gyp ERR! find Python Python is not set from environment variable PYTHON
+npm error gyp ERR! find Python checking if "python3" can be used
+npm error gyp ERR! find Python - executable path is ""
+npm error gyp ERR! find Python - "" could not be run
+npm error gyp ERR! find Python checking if "python" can be used
+npm error gyp ERR! find Python - executable path is ""
+npm error gyp ERR! find Python - "" could not be run
+npm error gyp ERR! find Python 
+npm error gyp ERR! find Python **********************************************************
+npm error gyp ERR! find Python You need to install the latest version of Python.
+npm error gyp ERR! find Python Node-gyp should be able to find and use Python. If not,
+npm error gyp ERR! find Python you can try one of the following options:
+npm error gyp ERR! find Python - Use the switch --python="/path/to/pythonexecutable"
+npm error gyp ERR! find Python (accepted by both node-gyp and npm)
+npm error gyp ERR! find Python - Set the environment variable PYTHON
+npm error gyp ERR! find Python - Set the npm configuration variable python:
+npm error gyp ERR! find Python npm config set python "/path/to/pythonexecutable"
+npm error gyp ERR! find Python For more information consult the documentation at:
+npm error gyp ERR! find Python https://github.com/nodejs/node-gyp#installation
+npm error gyp ERR! find Python **********************************************************
+npm error gyp ERR! find Python 
+npm error gyp ERR! configure error 
+npm error gyp ERR! stack Error: Could not find any Python installation to use
+npm error gyp ERR! stack at PythonFinder.fail (/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/lib/node_modules/npm/node_modules/node-gyp/lib/find-python.js:306:11)
+npm error gyp ERR! stack at PythonFinder.findPython (/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/lib/node_modules/npm/node_modules/node-gyp/lib/find-python.js:164:17)
+npm error gyp ERR! stack at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+npm error gyp ERR! stack at async configure (/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/lib/node_modules/npm/node_modules/node-gyp/lib/configure.js:27:18)
+npm error gyp ERR! stack at async run (/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js:81:18)
+npm error gyp ERR! System Linux 6.14.11
+npm error gyp ERR! command "/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/bin/node" "/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js" "rebuild" "--release"
+npm error gyp ERR! cwd /home/runner/workspace/node_modules/better-sqlite3
+npm error gyp ERR! node -v v24.13.0
+npm error gyp ERR! node-gyp -v v11.4.2
+npm error gyp ERR! not ok
+
+npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-04-25T18_20_31_691Z-debug-0.log
+

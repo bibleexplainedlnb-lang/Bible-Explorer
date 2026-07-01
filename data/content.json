@@ -1,0 +1,194 @@
+{
+  "topics": [
+    {
+      "id": 1,
+      "title": "Faith",
+      "slug": "faith",
+      "description": "Explore what Scripture teaches about trust, belief, and walking in faith with God. Faith is the foundation of the Christian life — the assurance of things hoped for and the conviction of things not seen."
+    },
+    {
+      "id": 2,
+      "title": "Prayer",
+      "slug": "prayer",
+      "description": "Discover the practice and power of prayer. From the Lord's Prayer to Paul's instructions, the Bible has much to say about how, when, and why we talk to God."
+    },
+    {
+      "id": 3,
+      "title": "Salvation",
+      "slug": "salvation",
+      "description": "Understand God's redemptive plan for humanity. Salvation is the free gift of God through Jesus Christ — forgiveness of sin and the promise of eternal life."
+    },
+    {
+      "id": 4,
+      "title": "Love",
+      "slug": "love",
+      "description": "God is love, and His love is the model for all human relationships. Explore the depth of God's love for us and how we are called to love one another."
+    },
+    {
+      "id": 5,
+      "title": "Wisdom",
+      "slug": "wisdom",
+      "description": "The fear of the LORD is the beginning of wisdom. Learn how Scripture defines wisdom and how to seek God's guidance in every area of life."
+    },
+    {
+      "id": 6,
+      "title": "Hope",
+      "slug": "hope",
+      "description": "Biblical hope is not wishful thinking — it is confident expectation grounded in God's promises. Discover what the Bible says about hope in difficult times."
+    },
+    {
+      "id": 7,
+      "title": "Grace",
+      "slug": "grace",
+      "description": "Grace is God's unmerited favor — the gift we could never earn. Explore how grace runs through the entire biblical narrative and transforms our lives."
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "title": "What is faith according to the Bible?",
+      "slug": "what-is-faith",
+      "topicId": 1,
+      "content": "The Bible gives us a clear definition of faith in Hebrews 11:1: 'Now faith is the substance of things hoped for, the evidence of things not seen.' Faith, in the biblical sense, is not blind belief — it is confident trust grounded in who God is and what He has revealed.\n\nFaith is closely tied to trust. Proverbs 3:5–6 calls us to 'trust in the LORD with all your heart and lean not on your own understanding.' Romans 10:17 tells us that 'faith comes by hearing, and hearing by the word of God.' This means our faith grows as we engage with Scripture.\n\nThe famous 'Hall of Faith' in Hebrews 11 describes men and women throughout history who acted on their belief in God's promises — from Noah building the ark to Abraham leaving his homeland to Moses leading the Israelites. Their faith was demonstrated through action.\n\nJames reinforces this in James 2:17 when he writes that 'faith without works is dead.' A living, saving faith will produce fruit — obedience, love, and a changed life.\n\n**Key verses:**\n- Hebrews 11:1 — Definition of faith\n- Romans 10:17 — Faith comes from hearing\n- James 2:17 — Faith without works is dead\n- Proverbs 3:5–6 — Trust in the Lord"
+    },
+    {
+      "id": 2,
+      "title": "How should Christians pray?",
+      "slug": "how-should-christians-pray",
+      "topicId": 2,
+      "content": "Jesus gave us the clearest model for prayer in Matthew 6:9–13, known as the Lord's Prayer. It opens with worship ('Our Father in heaven, hallowed be your name'), moves to submission ('your kingdom come, your will be done'), then to petition (daily bread, forgiveness, deliverance), and closes with praise.\n\nThis model teaches us several things about prayer:\n\n**1. Approach God as Father.** Prayer is not a ritual — it is a conversation with a loving Father. Jesus called God 'Abba' (Romans 8:15), an intimate term meaning Father or Daddy.\n\n**2. Align your will with His.** Jesus modeled this in Gethsemane: 'not my will, but yours, be done' (Luke 22:42). Prayer is not about bending God's will to ours — it is about aligning ourselves with His purposes.\n\n**3. Be persistent.** In Luke 18:1, Jesus told a parable to show that we 'ought always to pray and not lose heart.' Paul echoes this in 1 Thessalonians 5:17: 'pray without ceasing.'\n\n**4. Pray with faith.** Mark 11:24 says, 'Whatever you ask in prayer, believe that you have received it, and it will be yours.'\n\n**5. Pray in the Spirit.** Ephesians 6:18 calls us to pray 'at all times in the Spirit, with all prayer and supplication.'\n\n**Key verses:**\n- Matthew 6:9–13 — The Lord's Prayer\n- Philippians 4:6 — Present your requests to God\n- 1 Thessalonians 5:17 — Pray without ceasing\n- James 5:16 — The prayer of a righteous person is powerful"
+    },
+    {
+      "id": 3,
+      "title": "What does it mean to be saved?",
+      "slug": "what-does-it-mean-to-be-saved",
+      "topicId": 3,
+      "content": "Salvation means being rescued from the penalty and power of sin and restored to a right relationship with God. The Bible teaches that all humanity has sinned (Romans 3:23) and that the consequence of sin is death (Romans 6:23). Salvation is God's answer to this universal problem.\n\nSalvation comes through Jesus Christ alone. John 14:6 records Jesus saying, 'I am the way, and the truth, and the life. No one comes to the Father except through me.' His death on the cross paid the penalty for our sins, and His resurrection conquered death.\n\nHow does someone receive salvation? Acts 16:31 gives a simple answer: 'Believe in the Lord Jesus, and you will be saved.' This belief is not merely intellectual agreement but a wholehearted trust in Jesus. Romans 10:9 says, 'If you confess with your mouth that Jesus is Lord and believe in your heart that God raised him from the dead, you will be saved.'\n\nSalvation is entirely by grace — God's free gift — not by our own efforts or good works. Ephesians 2:8–9 is clear: 'For by grace you have been saved through faith. And this is not your own doing; it is the gift of God, not a result of works, so that no one may boast.'\n\n**Key verses:**\n- John 3:16 — God's love expressed in salvation\n- Romans 3:23 — All have sinned\n- Ephesians 2:8–9 — Saved by grace through faith\n- Romans 10:9 — How to be saved"
+    },
+    {
+      "id": 4,
+      "title": "How does God show His love for us?",
+      "slug": "how-does-god-show-love",
+      "topicId": 4,
+      "content": "God's love is not merely a feeling — it is demonstrated through action. The greatest demonstration of His love is found in John 3:16: 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'\n\nRomans 5:8 goes even deeper: 'God demonstrates his own love for us in this: While we were still sinners, Christ died for us.' God did not wait for us to clean up our lives before loving us. He loved us at our worst.\n\nGod's love is also shown through creation (Psalm 19:1), through His constant provision (Matthew 6:26–30), through His Word (Psalm 119:97), through the Holy Spirit dwelling in us (Romans 5:5), and through the community of believers He places us in.\n\n1 John 4:8 reveals something profound: 'God is love.' Love is not just something God does — it is who He is. His every action flows from this essential nature.\n\n**Key verses:**\n- John 3:16 — God gave His Son\n- Romans 5:8 — Love demonstrated while we were sinners\n- 1 John 4:8 — God is love\n- Jeremiah 31:3 — Everlasting love"
+    },
+    {
+      "id": 5,
+      "title": "Where can I find wisdom in the Bible?",
+      "slug": "where-to-find-wisdom",
+      "topicId": 5,
+      "content": "The Bible is filled with wisdom literature and practical guidance for living. The most concentrated source is the book of Proverbs, which opens with the foundational principle: 'The fear of the LORD is the beginning of wisdom' (Proverbs 1:7). Fearing God — revering Him and submitting to His authority — is the starting point of a wise life.\n\nThe Psalms offer wisdom through prayer and reflection on God's character. Psalm 1 describes the blessed life of one who meditates on God's law day and night. Psalm 119 is the longest chapter in the Bible — 176 verses all devoted to the joy and wisdom found in God's Word.\n\nEcclesiastes wrestles with the meaning of life and concludes that fearing God and keeping His commandments is the whole duty of man (12:13). The book of Job grapples with suffering and the limits of human wisdom.\n\nIn the New Testament, James 1:5 gives a direct promise: 'If any of you lacks wisdom, let him ask God, who gives generously to all without reproach, and it will be given him.' Wisdom is available to all who ask.\n\nColossians 2:3 tells us that in Christ 'are hidden all the treasures of wisdom and knowledge.' Knowing Jesus is the highest wisdom.\n\n**Key verses:**\n- Proverbs 1:7 — Fear of the Lord\n- James 1:5 — Ask God for wisdom\n- Proverbs 3:5–6 — Lean not on your own understanding\n- Colossians 2:3 — All wisdom in Christ"
+    },
+    {
+      "id": 6,
+      "title": "What does the Bible say about hope?",
+      "slug": "what-bible-says-about-hope",
+      "topicId": 6,
+      "content": "Biblical hope is radically different from everyday usage. When we say 'I hope so,' we often mean 'I wish, but I'm not sure.' But biblical hope is confident expectation — a certainty grounded in the character and promises of God.\n\nRomans 5:3–5 describes hope that is tested and refined through suffering: 'suffering produces endurance, and endurance produces character, and character produces hope, and hope does not put us to shame, because God's love has been poured into our hearts through the Holy Spirit.' Real hope is built through hardship, not despite it.\n\nThe greatest hope of the Christian is resurrection — the promise that death is not the end. 1 Peter 1:3 calls this a 'living hope' through the resurrection of Jesus Christ from the dead. Romans 8:24–25 reminds us that hope that is seen is not hope — we wait for what we do not yet see with patience.\n\nHebrews 6:19 beautifully describes hope as 'an anchor for the soul, firm and secure.' In a stormy world, biblical hope holds us steady.\n\n**Key verses:**\n- Romans 5:3–5 — Hope through suffering\n- 1 Peter 1:3 — Living hope through resurrection\n- Hebrews 6:19 — Hope as an anchor\n- Romans 15:13 — God of hope"
+    },
+    {
+      "id": 7,
+      "title": "What is grace and how does it work?",
+      "slug": "what-is-grace",
+      "topicId": 7,
+      "content": "Grace is one of the most important words in the Bible. At its core, grace means unmerited favor — receiving something good that we have not earned and do not deserve. While the law reveals what we should be, grace provides what we cannot achieve on our own.\n\nGrace appears throughout the Old Testament (the Hebrew word 'hesed' meaning steadfast love), but it reaches its fullest expression in Jesus Christ. John 1:17 says, 'For the law was given through Moses; grace and truth came through Jesus Christ.'\n\nSalvation is entirely a work of grace. Ephesians 2:8–9 is the classic text: 'For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.' We cannot earn, buy, or merit salvation — it is freely given.\n\nBut grace does more than save us — it transforms us. Titus 2:11–12 says grace 'trains us to renounce ungodliness and worldly passions, and to live self-controlled, upright, and godly lives.' Grace is not a license to sin (Romans 6:1–2) — it is the power to live differently.\n\n2 Corinthians 12:9 records Jesus telling Paul, 'My grace is sufficient for you, for my power is made perfect in weakness.' Grace meets us in our deepest weakness.\n\n**Key verses:**\n- Ephesians 2:8–9 — Saved by grace\n- 2 Corinthians 12:9 — Grace in weakness\n- Romans 5:20 — Where sin increased, grace abounded\n- Titus 2:11 — Grace that trains us"
+    },
+    {
+      "id": 8,
+      "title": "What does the Bible say about anxiety and worry?",
+      "slug": "bible-on-anxiety-and-worry",
+      "topicId": 2,
+      "content": "Anxiety and worry are common human experiences, and the Bible speaks directly to them with compassion and practical guidance.\n\nJesus addresses worry extensively in the Sermon on the Mount (Matthew 6:25–34). He points to birds and flowers — creatures that neither toil nor spin, yet God provides for them. His conclusion: 'Therefore do not be anxious about tomorrow, for tomorrow will be anxious for itself. Sufficient for the day is its own trouble.'\n\nPhilippians 4:6–7 gives us the most practical biblical instruction on anxiety: 'Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.' The answer to anxiety is prayer — bringing our worries to God with thanksgiving.\n\n1 Peter 5:7 gives us a simple but profound invitation: 'Cast all your anxiety on him, because he cares for you.' God is not annoyed by our worries — He invites us to bring them to Him.\n\nPsalm 23, 46, and 91 are among the most comforting passages for anxious hearts, reminding us of God's constant presence and protection.\n\n**Key verses:**\n- Philippians 4:6–7 — Prayer as the answer to anxiety\n- Matthew 6:25–27 — Do not worry\n- 1 Peter 5:7 — Cast your anxiety on God\n- Isaiah 41:10 — Do not fear, for I am with you"
+    },
+    {
+      "id": 9,
+      "title": "Who is the Holy Spirit?",
+      "slug": "who-is-the-holy-spirit",
+      "topicId": 3,
+      "content": "The Holy Spirit is the third person of the Trinity — fully God, co-equal with the Father and the Son. He is not an impersonal force but a personal being with a mind (Romans 8:27), will (1 Corinthians 12:11), and emotions (Ephesians 4:30).\n\nIn the Old Testament, the Spirit of God hovered over the waters at creation (Genesis 1:2), empowered leaders and prophets (Judges 3:10, Isaiah 61:1), and was promised to be poured out on all people (Joel 2:28).\n\nAt Pentecost (Acts 2), this promise was fulfilled. The Spirit was poured out on all believers, not just special leaders. Since then, every person who believes in Jesus receives the Holy Spirit (Ephesians 1:13–14).\n\nThe Spirit performs many roles in our lives. He convicts us of sin (John 16:8), guides us into truth (John 16:13), intercedes for us in prayer (Romans 8:26), produces the fruit of a transformed character (Galatians 5:22–23), gifts us for ministry (1 Corinthians 12), and assures us that we are God's children (Romans 8:16).\n\nJesus called the Spirit the 'Helper' or 'Paraclete' — one who comes alongside (John 14:16). The Spirit is our constant companion, teacher, and empowerer.\n\n**Key verses:**\n- John 14:16–17 — The Spirit as Helper\n- Acts 2:38 — Receive the Holy Spirit\n- Galatians 5:22–23 — Fruit of the Spirit\n- Romans 8:26 — The Spirit intercedes"
+    },
+    {
+      "id": 10,
+      "title": "How do I start reading the Bible?",
+      "slug": "how-to-start-reading-bible",
+      "topicId": 5,
+      "content": "Starting the Bible for the first time can feel overwhelming — it is a library of 66 books spanning thousands of years. Here is a practical approach to get started.\n\n**Begin with the Gospel of John.** John is widely recommended as the best starting point for new readers. It tells the story of Jesus in clear, beautiful prose, addresses the big questions of meaning and eternal life, and is written explicitly so 'that you may believe that Jesus is the Christ, the Son of God' (John 20:31).\n\n**Then read the rest of the Gospels.** Matthew, Mark, and Luke each give a different perspective on Jesus' life, ministry, death, and resurrection. Understanding Jesus is the key to understanding the whole Bible.\n\n**Move to Acts and the Letters.** Acts tells the story of the early church. The letters of Paul, Peter, and John explain how to live as a follower of Jesus.\n\n**Read the Psalms alongside everything else.** One Psalm a day will nourish your prayer life and give you language to bring your emotions to God.\n\n**Use a modern translation.** The ESV, NIV, CSB, or NLT are all excellent. The KJV is majestic and historically important, but a modern translation may be easier for daily reading.\n\n**Approach with prayer.** Before reading, ask God to open your eyes (Psalm 119:18). The Bible is not just literature — it is the living Word of God (Hebrews 4:12).\n\n**Key verses:**\n- 2 Timothy 3:16–17 — Scripture is inspired\n- Psalm 119:105 — A lamp to my feet\n- Hebrews 4:12 — The Word is living and active\n- Joshua 1:8 — Meditate on it day and night"
+    }
+  ],
+  "guides": [
+    {
+      "id": 1,
+      "title": "Getting Started with Bible Study",
+      "slug": "getting-started-bible-study",
+      "content": "# Getting Started with Bible Study\n\nBeginning a Bible study habit is one of the most transformative things you can do. This guide will help you move from reading the Bible casually to engaging with it deeply and consistently.\n\n## Why Study the Bible?\n\nThe Bible is not like any other book. It is 'God-breathed' (2 Timothy 3:16) — inspired by the Holy Spirit through human authors over 1,500 years. In its pages, God reveals who He is, who we are, and how we can know Him. Hebrews 4:12 describes it as 'living and active, sharper than any two-edged sword.'\n\nRegular Bible study transforms how we think (Romans 12:2), equips us for every good work (2 Timothy 3:17), strengthens our faith (Romans 10:17), and deepens our relationship with God.\n\n## The Basics: How to Approach Scripture\n\n### 1. Prepare Your Heart\nBefore you open your Bible, take a moment to pray. Ask God to open your eyes to see what He wants to show you. Psalm 119:18 is a great prayer: 'Open my eyes, that I may behold wondrous things out of your law.'\n\n### 2. Observe, Interpret, Apply\nThe classic Bible study method uses three questions:\n- **Observe:** What does this passage say? Read it carefully, perhaps in multiple translations.\n- **Interpret:** What did it mean to the original audience? Context is crucial.\n- **Apply:** What does this mean for me today? How should I live differently?\n\n### 3. Start with a Plan\nRandom Bible reading can be valuable, but a structured plan helps you cover more ground. Consider:\n- A read-through-the-Bible-in-a-year plan (about 4 chapters per day)\n- A topical study (e.g., studying everything the Bible says about prayer)\n- A book study (reading through one book carefully, chapter by chapter)\n\n## Tools That Help\n\n- **A good Bible translation:** ESV, NIV, or CSB for study; NLT for readability\n- **A journal:** Writing down observations and questions helps you process what you read\n- **A concordance or Bible app:** Allows you to search for words and themes\n- **A Bible commentary:** Helps you understand historical and cultural context\n\n## Building the Habit\n\nConsistency matters more than quantity. Even 10–15 minutes of focused Bible reading each day will yield profound results over time. Many find mornings — before the day's demands crowd in — to be the best time. Others prefer evenings for reflection.\n\nFind a time, protect it, and show up. The results will follow.\n\n## Where to Start Reading\n\nIf you are new to Scripture, start with the **Gospel of John**, then read **Romans**, then the **Psalms**. This will give you the core of the Christian message, the theology of salvation, and a rich prayer book."
+    },
+    {
+      "id": 2,
+      "title": "How to Read the Psalms",
+      "slug": "how-to-read-the-psalms",
+      "content": "# How to Read the Psalms\n\nThe book of Psalms is unlike any other part of the Bible. It is a collection of 150 poems and songs that span the full range of human experience — from soaring praise to raw lament, from deep gratitude to anguished questions. It is the Bible's prayer book.\n\n## What Are the Psalms?\n\nThe word 'psalm' comes from the Greek word for a song sung to a stringed instrument. The Psalms were the hymn book of ancient Israel, used in worship at the Temple. They were written over many centuries, with contributions from King David (73 psalms attributed to him), Solomon, Moses, Asaph, and others.\n\nJesus quoted the Psalms more than any other book. They shaped His prayer life, His understanding of His own mission (Psalm 22 is quoted at the cross), and His worship.\n\n## Types of Psalms\n\nUnderstanding the different types of psalms helps you read them well:\n\n- **Praise Psalms:** Celebrating who God is (Psalm 8, 100, 145, 150)\n- **Lament Psalms:** Crying out to God in pain and confusion (Psalm 22, 42, 88). These are the largest category.\n- **Thanksgiving Psalms:** Gratitude for what God has done (Psalm 18, 30, 116)\n- **Wisdom Psalms:** Instruction on how to live (Psalm 1, 37, 119)\n- **Royal Psalms:** About the king of Israel and, ultimately, the Messiah (Psalm 2, 22, 110)\n\n## How to Read a Psalm Well\n\n### 1. Read it slowly — out loud if possible\nThe Psalms are poetry meant to be heard. Reading aloud helps you feel the rhythm, the emotion, and the structure.\n\n### 2. Notice the movement\nMany psalms follow a pattern: a cry of distress → a turning to God → renewed trust and praise. Even when the psalmist is in agony, he turns toward God.\n\n### 3. Let the psalms give you language\nOne of the greatest gifts of the Psalms is that they teach us how to pray. They give us words for every emotion — anger, grief, joy, confusion, wonder.\n\n### 4. Look for Christ\nMany Psalms are Messianic — they point to Jesus, sometimes in stunning detail (Psalm 22, 110). Read them with eyes for how they anticipate and illuminate Jesus.\n\n## A Suggested Practice\n\nRead one Psalm a day as part of your daily quiet time. If you follow the traditional five-Psalms-a-day practice (reading Psalm 1 + 31 + 61 + 91 + 121 together, then 2 + 32 + 62 + 92 + 122, etc.), you will complete the entire Psalter every month."
+    },
+    {
+      "id": 3,
+      "title": "Understanding the Gospel of John",
+      "slug": "understanding-gospel-of-john",
+      "content": "# Understanding the Gospel of John\n\nOf the four Gospels, John stands apart. Written later than Matthew, Mark, and Luke (likely AD 90–95), it has a distinct theological depth and a beautiful simplicity of language. John himself tells us his purpose: 'These are written so that you may believe that Jesus is the Christ, the Son of God, and that by believing you may have life in his name' (John 20:31).\n\n## Why Start with John?\n\nJohn is widely recommended as the first book for new Bible readers because:\n- It clearly states its purpose (belief in Jesus leading to life)\n- It is written in some of the simplest Greek in the New Testament\n- It addresses universal questions: Who is Jesus? What is truth? How can I have eternal life?\n- It contains some of the most beloved passages in all of Scripture\n\n## Key Themes\n\n### Light and Darkness\nJohn opens by describing Jesus as the Light that shines in the darkness (1:4–5). Throughout the Gospel, coming to Jesus is pictured as coming to the light; rejecting Him is remaining in darkness.\n\n### The 'I AM' Statements\nJohn records seven profound 'I AM' statements of Jesus — each revealing an aspect of who He is:\n1. 'I am the bread of life' (6:35)\n2. 'I am the light of the world' (8:12)\n3. 'I am the door' (10:9)\n4. 'I am the good shepherd' (10:11)\n5. 'I am the resurrection and the life' (11:25)\n6. 'I am the way, and the truth, and the life' (14:6)\n7. 'I am the true vine' (15:1)\n\n### Signs and Miracles\nJohn records seven 'signs' (miracles) that reveal Jesus' glory and elicit belief. These include turning water into wine (2:1–11), healing the blind man (9:1–12), and raising Lazarus (11:1–44).\n\n### The Holy Spirit (The Helper/Paraclete)\nIn chapters 14–16, Jesus gives His most extended teaching on the Holy Spirit, promising that the Spirit will come, teach, convict, and guide believers into all truth.\n\n## Reading Plan for John\n\nJohn has 21 chapters. Reading one chapter per day takes three weeks. Some key chapters to pay special attention to:\n- Chapter 1: The prologue and Jesus' identity\n- Chapter 3: Nicodemus and the new birth\n- Chapter 11: Lazarus and the resurrection\n- Chapters 14–17: The Upper Room Discourse\n- Chapters 18–20: The crucifixion and resurrection"
+    },
+    {
+      "id": 4,
+      "title": "Praying Through Scripture (Lectio Divina)",
+      "slug": "praying-through-scripture",
+      "content": "# Praying Through Scripture (Lectio Divina)\n\nLectio Divina — Latin for 'sacred reading' — is an ancient practice of prayerfully engaging with Scripture. It is not Bible study in the academic sense; it is a slow, meditative encounter with God's Word as prayer.\n\nThe practice dates back to the early church fathers and was developed by St. Benedict in the 6th century. It has four movements, often described with Latin terms:\n\n## The Four Movements\n\n### 1. Lectio (Read)\nChoose a short passage of Scripture — even just 3–5 verses. Read it slowly, perhaps twice. Pay attention to any word or phrase that catches your attention or stirs something in you.\n\nDon't rush. The goal is not to cover ground but to let the text soak in. Ask: *What word or phrase stands out to me?*\n\n### 2. Meditatio (Meditate)\nRepeat the word or phrase that stood out. Turn it over in your mind. Let it interact with your thoughts, memories, and current circumstances. This is the 'ruminating' that Psalm 1:2 describes — meditating on God's law day and night.\n\nThe word 'meditate' in Hebrew (hagah) means to mutter or murmur — to repeat something quietly to yourself. Ask: *How does this connect to my life right now?*\n\n### 3. Oratio (Pray)\nRespond to what you have read and meditated on. Let the text become your prayer. If the passage is about God's love, pray about places you need to receive or give love. If it is about forgiveness, pray honestly about what needs to be forgiven.\n\nThis is not a performance — it is honest conversation with God. Ask: *What is God inviting me to say or do in response?*\n\n### 4. Contemplatio (Contemplate)\nRest in God's presence. Let go of words and simply be still before Him. This is sometimes called 'resting in the Word.' It does not have to be long — even 2–3 minutes of quiet openness to God.\n\nPsalm 46:10 says, 'Be still, and know that I am God.' This movement practices that stillness.\n\n## A Practical Example\n\nTry this practice with Psalm 23:1 — 'The LORD is my shepherd; I shall not want.'\n\n- **Lectio:** Read it slowly twice. What word stands out? Perhaps 'shepherd' or 'want.'\n- **Meditatio:** Sit with that word. What does it mean for God to be *your* shepherd? What are you 'wanting' today?\n- **Oratio:** Talk to God honestly about what you need. Thank Him for His provision.\n- **Contemplatio:** Rest quietly, letting His care settle over you.\n\nLectio Divina can be practiced in as little as 15 minutes. Over time, it forms habits of listening, stillness, and prayerful attentiveness to Scripture."
+    },
+    {
+      "id": 5,
+      "title": "The Sermon on the Mount: A Study Guide",
+      "slug": "sermon-on-the-mount-study-guide",
+      "content": "# The Sermon on the Mount: A Study Guide\n\nThe Sermon on the Mount (Matthew 5–7) is the most famous teaching in human history. In three chapters, Jesus lays out the character, ethics, and priorities of the Kingdom of God. It is demanding, revolutionary, and deeply challenging — and it begins not with commands but with blessings.\n\n## Overview\n\n**Matthew 5:1–12 — The Beatitudes**\nJesus opens with a series of paradoxical blessings: 'Blessed are the poor in spirit... blessed are those who mourn... blessed are the meek.' The Kingdom belongs to those the world overlooks.\n\n**Matthew 5:13–16 — Salt and Light**\nFollowers of Jesus are called to be preserving salt and illuminating light in the world — not hidden, but visible.\n\n**Matthew 5:17–48 — A Higher Righteousness**\nJesus repeatedly says 'You have heard it said... but I say to you,' raising the standard beyond external behavior to the heart. Murder begins with anger; adultery begins with lust. The goal: 'Be perfect, as your heavenly Father is perfect.'\n\n**Matthew 6:1–18 — Giving, Prayer, and Fasting**\nThese three practices are the pillars of Jewish piety. Jesus does not abolish them — He purifies the motivation. Do them for God, not for human approval.\n\n**Matthew 6:19–34 — Treasure, Worry, and Priorities**\nThe famous passage on not worrying is here. Jesus diagnoses worry as a divided heart (serving two masters) and calls us to single-minded trust in God: 'Seek first the kingdom of God and his righteousness, and all these things will be added to you.'\n\n**Matthew 7:1–29 — Judgment, Asking, and Building**\nThe sermon closes with warnings about judging others, the invitation to ask God for what we need, the narrow and wide gates, and the parable of wise and foolish builders. The only safe foundation is Jesus' words — put into practice.\n\n## Study Questions\n\n1. Which Beatitude challenges you most? Why?\n2. In Matthew 5:21–48, Jesus intensifies six Old Testament commands. What is He revealing about the nature of sin?\n3. How does Matthew 6:19–24 describe the problem of money and possessions?\n4. What does Jesus mean by 'seek first the kingdom of God' (6:33)?\n5. The sermon ends with a test: hearing these words and doing them. What is one thing you can put into practice this week?\n\n## Memory Verses\n\n- Matthew 5:3 — 'Blessed are the poor in spirit'\n- Matthew 6:9–13 — The Lord's Prayer\n- Matthew 6:33 — 'Seek first the kingdom'\n- Matthew 7:7 — 'Ask, and it will be given to you'"
+    }
+  ],
+  "bibleExplanations": [
+    {
+      "book": "genesis",
+      "chapter": 1,
+      "overview": "Genesis 1 opens the entire Bible with a majestic, poetic account of creation. In six days, God forms the universe, fills it with life, and declares it 'very good.' The chapter establishes foundational truths: God is the creator and sustainer of all things, creation is ordered and purposeful, and humanity bears the unique dignity of being made in God's image.",
+      "context": "Written by Moses, Genesis 1 was addressed to the Israelites who had just been delivered from Egypt. It was a counter-narrative to Egyptian and Babylonian creation myths, which depicted creation as the result of divine conflict. Here, creation flows effortlessly from God's spoken word — He speaks, and it is so. This establishes God's absolute sovereignty and goodness from the very first verse.",
+      "application": "Genesis 1 invites us to see the world as God's creation — not something random or meaningless, but intentionally made and pronounced good. Every sunrise, every natural wonder, every human face bears the mark of a Creator. As image-bearers of God (v. 26–27), we are called to reflect His creativity, care, and stewardship in how we treat the earth and one another."
+    },
+    {
+      "book": "psalms",
+      "chapter": 23,
+      "overview": "Psalm 23 is perhaps the most beloved passage in the entire Bible. In six verses, David paints a picture of God as a caring shepherd, guiding, providing for, and protecting His sheep. The psalm moves from the green pastures of daily provision to the valley of deep shadow and finally to the Lord's own table — a place of security even in the presence of enemies.",
+      "context": "David wrote this psalm from his own experience — he had been a shepherd before he was a king. He knew the relationship between shepherd and sheep intimately: the shepherd's constant attention, the paths to water and rest, the dangers of predators and dark ravines. He draws on all of this to describe God's care for His people. Jesus later called Himself the Good Shepherd (John 10), making this psalm even richer in its Messianic depth.",
+      "application": "Psalm 23 is a psalm for dark valleys, not just peaceful pastures. Verse 4 does not say 'if I walk through the valley of the shadow of death' — it says 'even though.' Darkness is not a sign that God has left; His rod and staff are present precisely in the hard places. Read this psalm slowly when you are afraid, grieving, or uncertain. Let its promises ground you in God's constant, shepherding presence."
+    },
+    {
+      "book": "john",
+      "chapter": 3,
+      "overview": "John 3 contains one of the most famous verses in the Bible (v. 16) and one of the most puzzling conversations — Jesus' late-night dialogue with Nicodemus, a respected religious leader who comes seeking truth. Jesus tells him he must be 'born again' to see the kingdom of God. The chapter also includes John the Baptist's final testimony about Jesus.",
+      "context": "Nicodemus was a Pharisee and a member of the Sanhedrin — the Jewish ruling council. That he comes to Jesus at night may indicate caution or secrecy, or simply that rabbis debated into the night. His confusion about being 'born again' (or 'born from above' — the Greek allows both readings) reveals the gap between religious achievement and spiritual transformation. Jesus uses the metaphor of wind — invisible but undeniable in its effects — to describe the Spirit's work of rebirth.",
+      "application": "John 3 confronts us with the most fundamental question: have you been born of the Spirit? Moral improvement, religious activity, or social respectability cannot substitute for the new birth Jesus describes. It is received, not achieved — a gift of God's love (v. 16) to those who believe. If you have never surrendered your life to Jesus, this chapter is an invitation."
+    },
+    {
+      "book": "romans",
+      "chapter": 8,
+      "overview": "Romans 8 is often called the 'Mount Everest' of the New Testament. It begins with the triumphant declaration 'There is therefore now no condemnation for those who are in Christ Jesus' and ends with the soaring conviction that nothing in all creation can separate us from the love of God in Christ. In between, Paul traces the Spirit-filled life, the groaning of creation, God's sovereign purposes, and the unbreakable love of God.",
+      "context": "Romans 8 is the climax of Paul's argument that began in Romans 1. He has shown humanity's universal sinfulness (1–3), justification by faith alone (3–5), the struggle with sin (7), and now the life of freedom in the Spirit. The chapter addresses the concrete situation of believers in Rome — facing persecution, uncertainty, and the groaning of a fallen world — and answers with a theology of unshakeable hope.",
+      "application": "Romans 8 is a chapter to return to in every season of life. When you feel condemned, begin at verse 1. When you struggle with sin, read verses 5–17. When life is suffering and confusion, meditate on verses 18–25 and 26–27 (the Spirit intercedes for us). When you are afraid of being abandoned, anchor yourself in verses 35–39. Nothing — absolutely nothing — can separate you from the love of God."
+    },
+    {
+      "book": "matthew",
+      "chapter": 5,
+      "overview": "Matthew 5 is the opening chapter of the Sermon on the Mount, Jesus' most extended block of teaching. It begins with the Beatitudes — eight paradoxical blessings describing the character of Kingdom citizens — and moves through Jesus' declarations about salt and light, His relationship to the Old Testament law, and six intensifications of Old Testament commands that reveal the radical nature of Kingdom ethics.",
+      "context": "Jesus delivers this sermon on a hillside in Galilee, with crowds gathered from across the region. Matthew intentionally presents Jesus as a new Moses: like Moses who gave the law from Mount Sinai, Jesus teaches from a mountain and interprets that law. But where Moses said 'God commands,' Jesus says 'I say to you' — an astonishing authority that his audience noticed (7:28–29).",
+      "application": "The Beatitudes subvert every human value system. The blessed are not the powerful, the wealthy, or the celebrated — they are the poor in spirit, the mourning, the meek, and the persecuted. Which beatitude challenges you most? Let this chapter expose the gap between the world's values and the Kingdom's values, and ask God to form in you the character Jesus describes here."
+    },
+    {
+      "book": "1corinthians",
+      "chapter": 13,
+      "overview": "First Corinthians 13 is the Bible's great love chapter — perhaps the most beautiful description of love ever written. Set between Paul's teaching on spiritual gifts, it argues that without love, every spiritual gift — tongues, prophecy, knowledge, faith, generosity, even martyrdom — counts for nothing. Love is described in 15 active characteristics, and Paul concludes that love is the greatest of all virtues.",
+      "context": "The church in Corinth was gifted but divided. They were arguing about which spiritual gifts were most important, and some were using their gifts for self-promotion. Paul does not dismiss spiritual gifts — he sandwiches this chapter between his teaching on them (chapters 12 and 14). But he insists that gifts without love are meaningless. This chapter was meant to humble a congregation that had confused spiritual gift with spiritual maturity.",
+      "application": "Read verses 4–7 slowly and replace the word 'love' with your own name: '[Your name] is patient, [your name] is kind...' This is both convicting and aspirational. These verses are not describing merely human love — they describe God's love poured into us. The love Paul describes is not a feeling but a choice, practiced in the mundane moments of daily life. Ask God to grow this kind of love in you."
+    }
+  ]
+}

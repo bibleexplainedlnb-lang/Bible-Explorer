@@ -1,0 +1,122 @@
+You are upgrading the admin panel into a full CMS (content management system).
+
+IMPORTANT:
+- Do NOT break existing features
+- Extend current Articles section
+- Keep UI simple
+
+-------------------------------------
+🚨 GOAL
+-------------------------------------
+
+Allow editing and upgrading existing articles (including old ones created before admin panel).
+
+-------------------------------------
+✅ STEP 1: LOAD ALL ARTICLES
+-------------------------------------
+
+In Admin → Articles tab:
+
+Fetch ALL articles from database (Supabase):
+
+- id
+- title
+- slug
+- content
+- status
+
+Ensure:
+- Old articles (pre-admin) also appear
+
+-------------------------------------
+✅ STEP 2: ADD EDIT BUTTON
+-------------------------------------
+
+For each article row:
+
+Add button:
+
+[Edit]
+
+On click:
+→ Open editor view
+
+-------------------------------------
+✅ STEP 3: CREATE EDITOR VIEW
+-------------------------------------
+
+Editor should include:
+
+- Title input
+- Content textarea (full HTML)
+- Category (read-only or editable)
+- Status dropdown (draft/published)
+
+Buttons:
+- Save Draft
+- Publish
+- Upgrade with AI (NEW)
+
+-------------------------------------
+✅ STEP 4: ADD "UPGRADE WITH AI" BUTTON
+-------------------------------------
+
+This is key feature.
+
+On click:
+
+1. Take existing content
+2. Send to OpenRouter
+
+Prompt:
+
+"Improve and restructure this article:
+- Add SEO structure
+- Add internal linking
+- Add 'What This Means for You'
+- Add 'How to Apply This'
+- Improve readability
+- Keep meaning same"
+
+3. Replace content in editor (NOT auto-save)
+
+-------------------------------------
+✅ STEP 5: SAVE FUNCTION
+-------------------------------------
+
+On Save / Publish:
+
+Update existing row:
+
+UPDATE articles
+SET content = new_content,
+    updated_at = now(),
+    status = 'draft/published'
+WHERE id = article_id;
+
+-------------------------------------
+✅ STEP 6: SAFETY
+-------------------------------------
+
+- Do NOT create new article
+- Only UPDATE existing one
+- Keep slug unchanged
+
+-------------------------------------
+✅ STEP 7: OPTIONAL (VERY USEFUL)
+-------------------------------------
+
+Add badge:
+
+- "Old Article" (no updated_at or older than X days)
+
+-------------------------------------
+✅ EXPECTED RESULT
+-------------------------------------
+
+Admin panel now allows:
+
+✔ View all articles  
+✔ Edit existing articles  
+✔ Upgrade old content  
+✔ Save without creating duplicates  

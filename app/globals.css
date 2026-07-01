@@ -1,0 +1,254 @@
+@import "tailwindcss";
+
+@theme {
+  --color-parchment: #faf7f2;
+  --color-ink: #1a1208;
+  --color-gold: #b8860b;
+  --color-gold-light: #d4a017;
+  --color-navy: #1e2d4a;
+  --color-navy-light: #2c4270;
+  --color-stone: #8b7355;
+  --color-cream: #f5f0e8;
+  --color-muted: #6b5c45;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
+
+body {
+  background-color: var(--color-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+}
+
+.prose-bible p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.prose-bible strong {
+  color: var(--color-navy);
+}
+
+/* dangerouslySetInnerHTML prose content */
+.prose-content h1 {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1e2d4a;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+.prose-content h2 {
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c4270;
+  margin: 2rem 0 0.875rem 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8dfc8;
+}
+
+.prose-content h3 {
+  font-family: Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #1e2d4a;
+  margin: 1.5rem 0 0.5rem 0;
+}
+
+.prose-content p {
+  margin: 0 0 1rem 0;
+  line-height: 1.85;
+  color: #2a2015;
+  font-size: 1rem;
+}
+
+.prose-content ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: #2a2015;
+}
+
+.prose-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: #2a2015;
+}
+
+.prose-content li {
+  margin-bottom: 0.375rem;
+  line-height: 1.7;
+}
+
+.prose-content strong {
+  color: #1e2d4a;
+  font-weight: 600;
+}
+
+/* Inline links injected by SEO enrichment */
+.prose-content a {
+  color: #b8860b;
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.35);
+  text-underline-offset: 2px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.prose-content a:hover {
+  color: #2c4270;
+  text-decoration-color: rgba(44, 66, 112, 0.4);
+}
+
+/* Bible verse blockquotes */
+.prose-content blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  background: #faf7ee;
+  border-left: 4px solid #b8860b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: #3a2e1a;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  position: relative;
+}
+.prose-content blockquote p {
+  margin: 0;
+  color: #3a2e1a;
+}
+
+/* Know More paragraph */
+.prose-content .know-more-block,
+.prose-content p.know-more-block {
+  background: #f0f4fb;
+  border-left: 3px solid #2c4270;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  margin: 1.25rem 0;
+  font-size: 0.94rem;
+}
+
+/* Bible verse reference links → /bible/ internal pages */
+.prose-content a.verse-ref {
+  color: #b8860b;
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.5);
+  text-underline-offset: 2px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.prose-content a.verse-ref:hover {
+  color: #7b5c0a;
+  text-decoration-color: rgba(123, 92, 10, 0.7);
+}
+
+/* Related / Read More h3 sections */
+.prose-content h3 {
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1e2d4a;
+  margin: 2rem 0 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8dfc8;
+}
+.prose-content h3 + ul {
+  list-style: none;
+  padding-left: 0;
+}
+.prose-content h3 + ul li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f0ece3;
+}
+.prose-content h3 + ul li:last-child {
+  border-bottom: none;
+}
+.prose-content h3 + ul li a::before {
+  content: '→ ';
+  color: #b8860b;
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
+/* Internal article-to-article links */
+.prose-content a.article-link,
+.internal-link {
+  color: #2c4270;
+  text-decoration: underline;
+  text-decoration-color: rgba(44, 66, 112, 0.35);
+  text-underline-offset: 2px;
+  font-weight: 500;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.prose-content a.article-link:hover,
+.internal-link:hover {
+  color: #b8860b;
+  text-decoration-color: rgba(184, 134, 11, 0.4);
+}
+
+/* Read-more CTA blocks */
+.read-more {
+  margin: 0.75rem 0;
+  padding: 0.875rem 1.125rem;
+  background: #fffdf7;
+  border-left: 3px solid #b8860b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.read-more:hover {
+  background: #f5f0e8;
+  border-color: #2c4270;
+}
+.read-more a {
+  color: #2c4270;
+  text-decoration: none;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: block;
+}
+.read-more a:hover {
+  color: #b8860b;
+}
+.read-more a span.cta-label {
+  font-weight: 600;
+  color: #b8860b;
+}
+
+.verse-text {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.9;
+}
+
+.passage-card div {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.passage-card:hover div {
+  box-shadow: 0 4px 16px rgba(30, 45, 74, 0.12);
+  transform: translateY(-2px);
+}
+
+.bible-sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .bible-sidebar {
+    display: block;
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.bible-mobile-nav {
+  display: block;
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .bible-mobile-nav {
+    display: none;
+  }
+}

@@ -1,0 +1,198 @@
+Upgrade system with strict category control, article tracking, and pillar assignment.
+
+---
+
+========================
+
+1. CATEGORY LOCK SYSTEM
+   ========================
+
+Allowed categories ONLY:
+
+* guides
+* questions
+* topics
+* bible-verses
+* bible-characters
+
+RULES:
+
+* Do NOT allow new categories
+* Replace any input with dropdown
+* Reject invalid category
+
+---
+
+========================
+2. MENU SYSTEM
+==============
+
+Add dynamic menu:
+
+/guides
+/questions
+/topics
+/bible-verses
+/bible-characters
+
+Always visible in header.
+
+---
+
+========================
+3. ARTICLE CREATION TRACKING
+============================
+
+When article is generated:
+
+* Update topics.article_created = true
+
+---
+
+ADMIN PANEL:
+
+* Show topics like:
+
+✔ Fear (Created)
+⬜ Love (Not Created)
+
+---
+
+* Disable already created topics by default
+
+* Add toggle:
+  [ ] Show Created Topics
+
+---
+
+========================
+4. PREVENT DUPLICATE CREATION
+=============================
+
+Before generating article:
+
+* Check if topic.article_created = true
+
+IF TRUE:
+
+Show warning:
+
+"Article already exists. Do you want to regenerate?"
+
+* Allow override if user confirms
+
+---
+
+========================
+5. PILLAR SYSTEM (MANUAL + AI)
+==============================
+
+A. Manual:
+
+* Add checkbox in topic:
+  [ ] Is Pillar Topic
+
+---
+
+B. For EXISTING ARTICLES:
+
+Add button:
+
+"Assign Pillar"
+
+---
+
+C. AI SUGGESTION SYSTEM
+
+When clicking "Suggest Pillar":
+
+* Analyze article title + content
+
+* Suggest best matching topic from database
+
+Example:
+
+Input: "Life of David"
+Suggestion: "David"
+
+---
+
+D. UI:
+
+* Show:
+
+Topic: David
+Pillar: ✔ Yes / No
+
+---
+
+========================
+6. AUTO PILLAR LOGIC (SMART)
+============================
+
+Rules for suggestion:
+
+* If topic is broad → suggest pillar
+* If article contains entity → match topic
+* If already pillar exists → suggest linking
+
+---
+
+========================
+7. TOPIC SELECTOR IMPROVEMENT
+=============================
+
+Replace dropdown with:
+
+Tabs:
+
+[Questions] [Guides] [Topics] [Bible Verses] [Bible Characters]
+
+Inside each tab:
+
+* Show topics
+* Show status (Created / Not Created)
+* Show pillar badge
+
+---
+
+Sorting:
+
+* Pillar topics first
+* Then normal
+
+---
+
+========================
+8. DATABASE SYNC
+================
+
+On article create:
+
+* update topics.article_created = true
+
+On pillar assign:
+
+* update topics.is_pillar = true
+
+---
+
+========================
+9. FINAL RULES
+==============
+
+* No duplicate topics
+* No duplicate articles
+* No random categories
+* Only DB-driven system
+
+---
+
+GOAL:
+
+* Clean admin workflow
+* No duplicate content
+* Easy pillar control
+* AI-assisted organization
+
+---

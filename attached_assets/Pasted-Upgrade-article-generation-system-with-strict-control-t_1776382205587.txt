@@ -1,0 +1,201 @@
+Upgrade article generation system with strict control, tracking, and SEO-safe logic.
+
+---
+
+========================
+
+1. PRE-GENERATION CHECK
+   ========================
+
+Before generating article:
+
+Check:
+
+SELECT article_created FROM topics WHERE id = selected_topic_id;
+
+---
+
+IF article_created = true:
+
+Show popup:
+
+"Article already exists. Do you want to regenerate?"
+
+Buttons:
+[Regenerate] [Cancel]
+
+---
+
+========================
+2. GENERATION FLOW
+==================
+
+When user clicks "Generate Article":
+
+1. Get selected topic
+2. Get category from topics.category
+3. Generate article based on topic + category intent
+
+---
+
+========================
+3. CATEGORY-SPECIFIC STRUCTURE
+==============================
+
+Apply structure based on category:
+
+---
+
+QUESTIONS:
+
+* Direct answer first
+* Then explanation
+* Then examples
+* Then related questions
+
+---
+
+GUIDES:
+
+* Step-by-step format
+* Practical instructions
+* Real-life application
+
+---
+
+TOPICS:
+
+* Definition
+* Meaning in Bible
+* Key teachings
+* Practical life usage
+
+---
+
+BIBLE VERSES:
+
+* Title format: "Bible Verses About {topic}"
+* Include 20–40 verses (KJV style)
+* Explanation per verse
+* Context + life application
+
+IMPORTANT:
+
+* Only verse-based content allowed
+* Do NOT generate "how to" or guide content here
+
+---
+
+BIBLE CHARACTERS:
+
+* Title format: "Who Was {topic} in the Bible?"
+* Life story
+* Key events
+* Lessons
+* Spiritual meaning
+
+---
+
+========================
+4. AUTO DATABASE UPDATE
+=======================
+
+After article created:
+
+UPDATE topics
+SET article_created = true
+WHERE id = selected_topic_id;
+
+---
+
+========================
+5. AUTHOR SYSTEM (FINAL)
+========================
+
+Set default:
+
+author_name = "BVI Team"
+author_slug = "bvi-team"
+
+---
+
+========================
+6. SLUG GENERATION
+==================
+
+Rules:
+
+* lowercase
+* hyphen-separated
+* remove special characters
+
+Examples:
+
+"How to Overcome Fear" → how-to-overcome-fear
+"Bible Verses About Love" → bible-verses-about-love
+
+---
+
+========================
+7. DUPLICATE PREVENTION
+=======================
+
+Before saving:
+
+SELECT * FROM articles WHERE slug = generated_slug;
+
+IF exists:
+
+* append number:
+
+love → love-2
+
+---
+
+========================
+8. CLEAN HTML OUTPUT
+====================
+
+Ensure:
+
+* proper headings (h2, h3)
+* paragraphs
+* bullet points
+* readable formatting
+* no broken HTML
+
+---
+
+========================
+9. PILLAR CONNECTION
+====================
+
+If topic.is_pillar = true:
+
+* mark article as pillar internally
+* prioritize in UI
+
+---
+
+========================
+10. READY FOR INTERLINKING
+==========================
+
+After generation:
+
+* ensure keywords naturally present
+* content ready for linking
+* do NOT insert links yet (handled separately)
+
+---
+
+========================
+GOAL
+====
+
+* No duplicate articles
+* Clean structure
+* Category-safe content
+* Fully controlled generation system
+
+---

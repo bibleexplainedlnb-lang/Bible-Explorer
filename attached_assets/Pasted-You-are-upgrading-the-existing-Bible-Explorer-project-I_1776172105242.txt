@@ -1,0 +1,126 @@
+You are upgrading the existing Bible Explorer project.
+
+IMPORTANT RULES:
+- Do NOT break existing features
+- Update existing SEO logic if present
+- Do NOT duplicate metadata functions
+- Keep everything consistent with trailing slash
+
+-------------------------------------
+🚨 GOAL
+-------------------------------------
+
+Add canonical URLs and index optimization for SEO.
+
+-------------------------------------
+✅ STEP 1: ADD CANONICAL TAG (GLOBAL)
+-------------------------------------
+
+Find layout file:
+- app/layout.tsx OR app/layout.js
+
+Inside <head>, add dynamic canonical support.
+
+If metadata system exists → extend it
+Else → add manually
+
+Each page must include:
+
+<link rel="canonical" href="FULL_URL_WITH_TRAILING_SLASH" />
+
+-------------------------------------
+✅ STEP 2: DYNAMIC CANONICAL PER PAGE
+-------------------------------------
+
+For article pages:
+
+File example:
+app/bible-verses/[slug]/page.tsx
+
+Add:
+
+const url = `https://bibleverseinsights.com/bible-verses/${slug}/`;
+
+Then in metadata:
+
+export async function generateMetadata({ params }) {
+  return {
+    title: article.title,
+    description: article.meta_description,
+    alternates: {
+      canonical: url,
+    },
+  };
+}
+
+IMPORTANT:
+- Always include trailing slash
+- Use correct domain
+
+-------------------------------------
+✅ STEP 3: ADD ROBOTS META TAG
+-------------------------------------
+
+Default ALL pages:
+
+<meta name="robots" content="index, follow" />
+
+-------------------------------------
+✅ STEP 4: NOINDEX FOR ADMIN + SYSTEM PAGES
+-------------------------------------
+
+Apply:
+
+<meta name="robots" content="noindex, nofollow" />
+
+To:
+- /admin
+- /login
+- any internal tools
+
+-------------------------------------
+✅ STEP 5: PREVENT DUPLICATES
+-------------------------------------
+
+Ensure:
+
+- Only ONE canonical per page
+- No alternate versions (no slash vs slash conflict)
+- Middleware redirect already ensures consistency
+
+-------------------------------------
+✅ STEP 6: OPTIONAL (STRONG SEO BOOST)
+-------------------------------------
+
+Add OpenGraph:
+
+openGraph: {
+  title,
+  description,
+  url,
+  type: "article",
+}
+
+-------------------------------------
+✅ STEP 7: VERIFY
+-------------------------------------
+
+After implementation:
+
+View page source →
+
+Check:
+
+1. Canonical exists
+2. Correct URL
+3. Ends with /
+4. Robots tag correct
+
+-------------------------------------
+✅ EXPECTED RESULT
+-------------------------------------
+
+- Google sees ONE version of each page
+- No duplicate indexing
+- Stronger rankings
+- Clean SEO structure

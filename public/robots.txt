@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://bibleverseinsights.com/sitemap.xml
+Sitemap: https://bibleverseinsights.com/sitemap-recent.xml

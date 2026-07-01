@@ -1,0 +1,200 @@
+You are upgrading the existing Bible Explorer project.
+
+IMPORTANT RULES:
+- Do NOT break existing working features
+- If logic already exists → IMPROVE it
+- If missing → ADD it
+- Always check before duplicating
+- Keep code clean and modular
+
+-------------------------------------
+🚨 CORE PROBLEM TO FIX
+-------------------------------------
+
+Currently, articles are generated and saved directly from AI output.
+
+THIS IS WRONG.
+
+Fix the pipeline so that:
+
+AI → enrichContent() → final HTML → save to DB
+
+-------------------------------------
+✅ STEP 1: FIX GENERATION PIPELINE
+-------------------------------------
+
+In BOTH routes:
+
+1. /api/admin/generate
+2. /api/admin/bulk-generate
+
+FIND current logic where AI content is returned.
+
+IF code looks like:
+const content = aiResponse;
+
+👉 REPLACE IT WITH:
+
+const enriched = await enrichContent({
+  content: aiResponse,
+  topic,
+  category,
+  publishedArticles
+});
+
+const content = enriched.html;
+
+IMPORTANT:
+- Replace existing logic (do NOT duplicate)
+- Ensure enrichContent is always called before saving
+
+-------------------------------------
+✅ STEP 2: CREATE / FIX enrichContent()
+-------------------------------------
+
+File: /lib/enrichContent.js (or similar)
+
+If exists → IMPROVE
+If not → CREATE
+
+Function must:
+
+1. Split content into paragraphs
+
+2. Inject "Know more" link:
+   - After paragraph 1 OR 2
+   - Use relevant article slug
+   - Format:
+     <p><strong>Know more:</strong> <a href="/slug">Title</a></p>
+
+3. Inject inline links:
+   - 3 to 5 links
+   - Contextual placement
+   - Use synonym anchors (avoid repeating same keyword)
+
+4. Add Bible verse integration:
+   - Insert 2–4 relevant verses naturally inside content
+   - Format:
+     <blockquote>"Verse..." (Book Chapter:Verse)</blockquote>
+
+5. Ensure structure sections exist:
+   - "What This Means for You"
+   - "How to Apply This"
+
+6. Append at bottom:
+
+--- Related Articles ---
+- 2–3 articles from SAME topic
+
+--- Read More ---
+- 3 articles minimum
+- At least 1 from DIFFERENT category
+
+Format:
+<h3>Related Articles</h3>
+<ul>...</ul>
+
+<h3>Read More</h3>
+<ul>...</ul>
+
+7. Prevent duplication:
+   - No same slug repeated
+   - No same anchor repeated
+
+8. Return:
+{
+  html,
+  usedSlugs
+}
+
+-------------------------------------
+✅ STEP 3: FIX INLINE LINK ENGINE
+-------------------------------------
+
+Ensure injectInlineLinks():
+
+- Uses publishedArticles
+- Avoid linking same article
+- Avoid duplicate slug usage
+- Use varied anchor text (synonyms)
+
+-------------------------------------
+✅ STEP 4: FIX DATABASE ERROR
+-------------------------------------
+
+Error:
+"no unique or exclusion constraint matching ON CONFLICT"
+
+Fix in Supabase:
+
+ALTER TABLE content_ideas
+ADD CONSTRAINT unique_title UNIQUE (title);
+
+Also ensure:
+- upsert works correctly
+
+-------------------------------------
+✅ STEP 5: IMPROVE AI PROMPT
+-------------------------------------
+
+Update system prompt used in generator:
+
+MANDATORY RULES:
+
+- Start with real-life scenario or emotional hook
+- NEVER start with definition
+- Use conversational tone (you/we)
+- Vary sentence length
+
+STRUCTURE:
+
+1. Intro (hook)
+2. Explanation (with Bible references)
+3. Insert "Know more" after paragraph 1 or 2
+4. Mid content with natural internal links
+5. Section: What This Means for You
+6. Section: How to Apply This (practical steps)
+7. End naturally (no "In conclusion")
+
+SEO RULES:
+
+- Use main keyword 3–4 times
+- Use synonyms for variation
+- Avoid repetition
+- Content length:
+   - guides/teachings: 1300–1500 words
+   - others: 1000–1100 words
+
+-------------------------------------
+✅ STEP 6: SAFETY CHECKS
+-------------------------------------
+
+Before finishing:
+
+- Ensure no duplicate functions created
+- Ensure API still works
+- Ensure admin UI unchanged
+- Ensure generation works without crash
+
+-------------------------------------
+✅ FINAL RESULT EXPECTED
+-------------------------------------
+
+Generated article MUST include:
+
+✔ Hook intro  
+✔ Bible references  
+✔ Know more (top)  
+✔ Inline links  
+✔ Practical sections  
+✔ Related Articles  
+✔ Read More  
+✔ No duplicate links  
+✔ Clean SEO structure  
+
+-------------------------------------
+
+After implementation:
+- Run build
+- Fix any errors
+- Ensure generation works end-to-end

@@ -1,0 +1,25 @@
+kind = "web"
+previewPath = "/"
+title = "Bible Explorer"
+version = "1.0.0"
+id = "artifacts/bible-explorer"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 3000
+
+[services.development]
+run = "npm run dev"
+
+[services.production]
+build = [ "sh", "-c", "cd /home/runner/workspace && npm run build" ]
+run = "cd /home/runner/workspace && npm run start"
+
+[services.env]
+BASE_PATH = "/"

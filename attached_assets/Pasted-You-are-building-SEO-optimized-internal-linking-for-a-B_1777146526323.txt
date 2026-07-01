@@ -1,0 +1,137 @@
+You are building SEO-optimized internal linking for a Bible content website.
+
+## GOAL:
+
+Maximize internal linking WITHOUT restriction, while keeping relevance, readability, and structure clean.
+
+---
+
+## CORE RULES:
+
+### 1. PILLAR → CHILD (HIGHEST PRIORITY)
+
+* If article is about a main topic (e.g., Love)
+* Then include ALL relevant child pages inside content:
+
+  * Love in Marriage
+  * Unconditional Love
+  * Love and Forgiveness
+  * Love and Patience
+  * Love and Kindness
+  * etc.
+
+✔ Add naturally:
+
+* Intro section
+* Mid content (after 1st or 2nd paragraph)
+* End section
+
+---
+
+### 2. MID-CONTENT LINKING (MANDATORY)
+
+* Insert links BETWEEN paragraphs (not inside long sentences)
+* Max 1–2 links per paragraph block
+* Anchor text = natural phrase (NOT forced keyword stuffing)
+
+---
+
+### 3. WITHIN CONTENT (CONTROLLED)
+
+* Allow linking inside sentences BUT:
+  ❌ No long anchor text
+  ❌ No full sentence linking
+  ✔ Max 3–5 words anchor
+
+Example:
+✔ "Bible verses about love and forgiveness"
+❌ "If you are struggling with emotional pain and need guidance then read this article about..."
+
+---
+
+### 4. BOTTOM SECTION (STRUCTURED)
+
+Add:
+
+#### 🔹 Related Verses
+
+* Same topic (child pages first)
+* Then pillar
+* Then category
+
+#### 🔹 Explore More
+
+* 1–2 links from closely related category
+
+Example:
+
+* Love → link to Faith / Forgiveness
+* Children → link to Parenting / Wisdom
+
+---
+
+### 5. CATEGORY LEVEL LINKING
+
+* Add 2–3 links from same category
+* Add 1–2 links from close relevant category
+
+---
+
+### 6. NO LINKING RESTRICTION
+
+* Add as many links as naturally possible
+* Prioritize:
+
+  1. Child pages
+  2. Same topic
+  3. Same category
+  4. Related category
+
+---
+
+### 7. ANCHOR TEXT CONTROL (VERY IMPORTANT)
+
+❌ Avoid:
+
+* Long sentences as links
+* Random words
+* Forced keywords
+
+✔ Use:
+
+* Clean phrases (2–5 words)
+* Natural reading flow
+
+---
+
+### 8. ADMIN INTERLINKING LIMIT REMOVE
+
+* Do NOT limit to 16 links
+* Add all relevant links
+* System should not restrict count
+
+---
+
+## OUTPUT FORMAT:
+
+* Clean HTML
+* Proper paragraph spacing
+* Links distributed across:
+  ✔ intro
+  ✔ mid
+  ✔ bottom
+
+---
+
+## FINAL GOAL:
+
+* Maximum internal linking
+* No spam
+* No awkward sentences
+* Strong topical authority
+
+---
+
+## BONUS RULE:
+
+If pillar exists → ALWAYS push child links strongly inside content.

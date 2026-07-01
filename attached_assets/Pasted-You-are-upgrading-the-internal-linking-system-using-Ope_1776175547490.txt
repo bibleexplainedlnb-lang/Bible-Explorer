@@ -1,0 +1,139 @@
+You are upgrading the internal linking system using OpenRouter AI.
+
+IMPORTANT RULES:
+- Use ONLY callOpenRouter() for AI tasks
+- DO NOT use Replit AI
+- DO NOT remove existing keyword linking
+- ENHANCE the system with contextual linking
+
+-------------------------------------
+🚨 GOAL
+-------------------------------------
+
+Create a hybrid internal linking system:
+
+1. Single keyword links (existing)
+2. Contextual phrase links (AI-powered)
+3. Smart injection when keyword missing
+
+-------------------------------------
+✅ STEP 1: KEEP EXISTING KEYWORD LINKS
+-------------------------------------
+
+- Preserve exact keyword linking
+- Example:
+  "anxiety" → /bible-verses/anxiety/
+
+-------------------------------------
+✅ STEP 2: PRIORITY LINK TARGETING
+-------------------------------------
+
+When linking a keyword:
+
+Priority:
+
+1. Guides category (preferred)
+2. Topics
+3. Questions
+
+BUT:
+
+- Do NOT force guides always
+- Choose based on context of sentence
+
+-------------------------------------
+✅ STEP 3: CONTEXTUAL EXPANSION (AI)
+-------------------------------------
+
+If keyword exists in sentence:
+
+Use callOpenRouter() to expand anchor text naturally.
+
+Input:
+- sentence
+- keyword
+
+Output:
+- 2–5 word natural phrase
+
+Example:
+
+Input:
+"feeling anxiety and fear"
+
+Output:
+"feeling anxiety and fear about the future"
+
+Wrap ONLY the phrase in <a>
+
+-------------------------------------
+✅ STEP 4: IF KEYWORD NOT FOUND (CRITICAL)
+-------------------------------------
+
+DO NOT use static templates.
+
+Instead:
+
+Call OpenRouter:
+
+Prompt:
+
+"Write one natural, human sentence that includes the phrase '{keyword}' in a meaningful emotional/spiritual context. Keep it conversational and relevant."
+
+Then:
+
+- Insert this sentence after paragraph 1 or 2
+- Extract a phrase (2–5 words) from it
+- Wrap that phrase with internal link
+
+Example output:
+
+"You may not notice it at first, but many people struggle with anxiety and fear when they feel distant from God."
+
+Anchor:
+"struggle with anxiety and fear"
+
+-------------------------------------
+✅ STEP 5: LINK LIMITS
+-------------------------------------
+
+- Max 5 internal links per article
+- Mix:
+  - 2 keyword links
+  - 3 contextual links
+- No duplicate URLs
+
+-------------------------------------
+✅ STEP 6: ANCHOR QUALITY RULE
+-------------------------------------
+
+Anchors must:
+- Be natural phrases
+- Not just 1 word (for contextual links)
+- Fit inside sentence
+
+-------------------------------------
+✅ STEP 7: TRAILING SLASH
+-------------------------------------
+
+ALL links must end with:
+
+/slug/
+
+-------------------------------------
+✅ STEP 8: OUTPUT FORMAT
+-------------------------------------
+
+Return:
+- Updated HTML content
+- Clean <a href="..."> tags
+- No broken structure
+
+-------------------------------------
+✅ EXPECTED RESULT
+-------------------------------------
+
+- Human-like linking
+- Contextual anchors
+- Better semantic SEO
+- No forced keyword stuffing
