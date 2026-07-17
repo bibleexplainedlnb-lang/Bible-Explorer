@@ -1,0 +1,266 @@
+STOP IMPLEMENTATION.
+
+Do NOT implement anything yet.
+
+Do NOT write code.
+Do NOT modify the database.
+Do NOT create another CMS.
+Do NOT create another dashboard.
+Do NOT redesign the existing admin.
+
+I want to lock the architecture BEFORE any further implementation.
+
+========================================================
+PROJECT GOAL
+========================================================
+
+The existing English CMS is the ONLY CMS for this project.
+
+I do NOT want a second CMS.
+
+I do NOT want duplicate dashboards.
+
+I do NOT want separate article management systems.
+
+The goal is to extend the existing English CMS so it supports multiple languages while keeping the exact same workflow, UI, UX and architecture.
+
+The multilingual system must extend the existing CMS, not replace or duplicate it.
+
+========================================================
+STEP 1 — COMPLETE ENGLISH CMS AUDIT
+========================================================
+
+First perform a COMPLETE TECHNICAL AUDIT of the existing English CMS.
+
+The English implementation is now the MASTER BLUEPRINT.
+
+Document EVERYTHING currently implemented.
+
+Include:
+
+1. Dashboard
+2. Topics
+3. Articles
+4. Generate
+5. Bulk Generate
+6. SEO
+7. URLs
+8. Internal Linking
+9. Related Reading
+10. Explore More
+11. Bible Verse Linking
+12. Related Articles
+13. Search
+14. Filters
+15. Pagination
+16. Statistics
+17. Category System
+18. Slug Generation
+19. Metadata Generation
+20. Canonicals
+21. Open Graph
+22. Schema
+23. Sitemap Generation
+24. Publishing Workflow
+25. Draft Workflow
+26. Every AI Prompt
+27. Every Article Template
+28. Every Article Section
+29. Database Schema
+30. Relationships between Topics, Articles, Categories and URLs
+
+Do NOT skip anything.
+
+========================================================
+STEP 2 — ARTICLE BLUEPRINT
+========================================================
+
+Document the complete English article structure.
+
+For example:
+
+- H1
+- Introduction
+- Quick Answer
+- Bible Verses
+- Biblical Meaning
+- Detailed Explanation
+- Practical Application
+- Key Takeaways
+- FAQs
+- Related Reading
+- Explore More
+- Bottom CTA
+- Internal Links
+- Schema
+
+Explain how every section is generated.
+
+========================================================
+STEP 3 — INTERNAL LINKING BLUEPRINT
+========================================================
+
+Explain exactly how the English internal linking works.
+
+Include:
+
+- Contextual links
+- Related Reading
+- Explore More
+- Bottom links
+- Topic clusters
+- Bible verse links
+- Related Articles
+
+Explain the complete logic.
+
+========================================================
+STEP 4 — SEO BLUEPRINT
+========================================================
+
+Explain the complete English SEO system.
+
+Include:
+
+- Title
+- Meta Description
+- Slug
+- Canonical
+- Open Graph
+- Twitter
+- Schema
+- Breadcrumb
+- XML Sitemap
+- Robots
+- RSS
+
+========================================================
+STEP 5 — DATABASE BLUEPRINT
+========================================================
+
+Explain:
+
+- Tables
+- Relationships
+- Constraints
+- Indexes
+- Language handling
+- Current data flow
+
+========================================================
+STEP 6 — MULTILINGUAL IMPLEMENTATION PLAN
+========================================================
+
+After the audit, explain exactly how the EXISTING CMS should be extended.
+
+The English CMS must remain the ONLY CMS.
+
+I want ONE CMS with a language switcher.
+
+Example:
+
+English
+German
+Spanish
+Italian
+French
+
+When a language is selected, the SAME CMS should display ONLY that language's data.
+
+Everything should behave exactly like English:
+
+- Dashboard
+- Topics
+- Articles
+- Generate
+- Bulk Generate
+- SEO
+- URLs
+- Statistics
+- Publishing
+- Drafts
+- Review
+
+The UI and workflow must remain identical.
+
+Only the language and data should change.
+
+========================================================
+TOPIC GENERATION
+========================================================
+
+The AI Database Assistant is ONLY responsible for managing Supabase.
+
+It should:
+
+- Research search intent for the selected language
+- Generate ORIGINAL native topics
+- Generate native slugs
+- Assign categories
+- Detect duplicates
+- Insert directly into Supabase
+
+DO NOT translate English topics.
+
+Generate topics based on native search intent for each language.
+
+========================================================
+ARTICLE GENERATION
+========================================================
+
+The CMS should continue generating articles exactly as the English CMS does.
+
+Every language must use the SAME article framework.
+
+The content must NOT be translated.
+
+The AI should write fresh, native-language content.
+
+Same structure.
+
+Same UX.
+
+Same formatting.
+
+Same quality.
+
+Different language.
+
+========================================================
+INTERNAL LINKING
+========================================================
+
+Each language must only link to content in the same language.
+
+German → German
+
+Spanish → Spanish
+
+Italian → Italian
+
+French → French
+
+Never mix languages.
+
+========================================================
+IMPORTANT
+========================================================
+
+Do NOT implement anything yet.
+
+Do NOT start coding.
+
+Do NOT modify the database.
+
+First produce the COMPLETE audit and the COMPLETE implementation plan.
+
+After I approve the blueprint, we will implement it phase by phase.
+
+Also estimate:
+
+- Number of implementation phases
+- Estimated time for each phase
+- Risks for each phase
+- How English will remain completely untouched during implementation
+
+This audit will become the master blueprint for the multilingual system.
